@@ -43,6 +43,12 @@ export interface TitleReward {
 
 export type AchievementReward = MasteryReward | CoinReward | ItemReward | TitleReward;
 
+export interface AchievementBit {
+  type: string;
+  id?: number;
+  text?: string;
+}
+
 export interface Achievement {
   id: number;
   name: string;
@@ -55,7 +61,7 @@ export interface Achievement {
   icon?: string;
   prerequisites?: number[];
   rewards?: AchievementReward[];
-  bits?: unknown;
+  bits?: AchievementBit[];
   point_cap?: number;
 }
 
@@ -83,6 +89,7 @@ export interface EnrichedAchievement extends Achievement {
   masteryRegion?: MasteryRegion;
   category?: string;
   categoryId?: number;
+  categoryOrder?: number;
 }
 
 export interface MasteryPointSummary {

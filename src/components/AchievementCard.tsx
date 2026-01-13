@@ -1,79 +1,22 @@
-import { CheckCircle2, Circle } from 'lucide-react';
-import type { EnrichedAchievement, MasteryRegion } from '../types/gw2';
-import { getRegionDisplayName } from '../utils/filters';
-import { Card, CardContent } from './ui/card';
+import { CheckCircle2, ChevronDown, ChevronUp, Circle } from 'lucide-react';
+import { useState } from 'react';
 import { cn } from '../lib/utils';
+import type { EnrichedAchievement } from '../types/gw2';
+import { Card, CardContent } from './ui/card';
 
 interface AchievementCardProps {
   achievement: EnrichedAchievement;
 }
 
-// Helper function to get region Tailwind classes
-function getRegionClasses(region: MasteryRegion): {
-  bgClass: string;
-  completedBgClass: string;
-  borderClass: string;
-  badgeClass: string;
-} {
-  const classMap: Record<
-    MasteryRegion,
-    { bgClass: string; completedBgClass: string; borderClass: string; badgeClass: string }
-  > = {
-    Tyria: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-blue-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-teal-800/40 to-blue-900/30',
-      borderClass: 'border-blue-600/50',
-      badgeClass: 'bg-blue-600',
-    },
-    Maguuma: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-green-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-emerald-700/45 to-green-900/30',
-      borderClass: 'border-green-600/50',
-      badgeClass: 'bg-green-600',
-    },
-    Desert: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-purple-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-teal-800/40 to-purple-900/30',
-      borderClass: 'border-purple-600/50',
-      badgeClass: 'bg-purple-600',
-    },
-    Tundra: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-cyan-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-teal-700/45 to-cyan-900/30',
-      borderClass: 'border-cyan-600/50',
-      badgeClass: 'bg-cyan-600',
-    },
-    Jade: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-emerald-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-green-700/45 to-emerald-900/30',
-      borderClass: 'border-emerald-500/50',
-      badgeClass: 'bg-emerald-500',
-    },
-    Sky: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-sky-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-teal-800/40 to-sky-900/30',
-      borderClass: 'border-sky-500/50',
-      badgeClass: 'bg-sky-500',
-    },
-    Wild: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-amber-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-lime-800/40 to-amber-900/30',
-      borderClass: 'border-amber-600/50',
-      badgeClass: 'bg-amber-600',
-    },
-    Magic: {
-      bgClass: 'bg-gradient-to-br from-slate-800 to-violet-900/30',
-      completedBgClass: 'bg-gradient-to-br from-slate-800 via-teal-800/40 to-violet-900/30',
-      borderClass: 'border-violet-600/50',
-      badgeClass: 'bg-violet-600',
-    },
-  };
-  return classMap[region];
-}
-
 export default function AchievementCard({ achievement }: AchievementCardProps) {
-  const { name, requirement, icon, progress, masteryRegion } = achievement;
+  const { name, requirement, icon, progress, bits } = achievement;
   const isCompleted = progress?.done || false;
+
+  // Check if achievement has multiple parts
+  const hasMultipleParts = bits && bits.length > 0;
+
+  // State to track if the parts list is expanded (default: collapsed)
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const getProgressPercentage = (): number => {
     if (!progress || !progress.max) return 0;
@@ -85,24 +28,20 @@ export default function AchievementCard({ achievement }: AchievementCardProps) {
     return text.replace(/<[^>]*>/g, '');
   };
 
-  const classes = masteryRegion
-    ? getRegionClasses(masteryRegion)
-    : {
-        bgClass: 'bg-slate-800',
-        completedBgClass: 'bg-gradient-to-br from-slate-800 via-teal-900/20 to-slate-800',
-        borderClass: 'border-slate-600',
-        badgeClass: 'bg-slate-600',
-      };
+  // Check if a bit is completed
+  const isBitCompleted = (index: number): boolean => {
+    if (!progress?.bits) return false;
+    return progress.bits.includes(index);
+  };
 
   return (
     <Card
       className={cn(
-        'w-80 h-36 flex flex-col border-2',
-        isCompleted ? classes.completedBgClass : classes.bgClass,
-        isCompleted ? 'border-green-500' : classes.borderClass
+        'w-full max-w-80 flex flex-col border-2 bg-slate-800 min-h-[138px] relative',
+        isCompleted ? 'border-green-500' : 'border-slate-600'
       )}
     >
-      <CardContent className="p-3 flex flex-col h-full">
+      <CardContent className="p-3 flex flex-col h-full min-h-0">
         {/* Header with icon and title */}
         <div className="flex items-start gap-2 mb-2">
           {icon && (
@@ -113,19 +52,9 @@ export default function AchievementCard({ achievement }: AchievementCardProps) {
             />
           )}
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-white text-sm leading-tight mb-1 line-clamp-1">
+            <h3 className="font-bold text-white text-sm leading-tight">
               {name}
             </h3>
-            {masteryRegion && (
-              <span
-                className={cn(
-                  'inline-block px-1.5 py-0.5 text-[10px] font-bold text-white/70 rounded',
-                  classes.badgeClass
-                )}
-              >
-                {getRegionDisplayName(masteryRegion)}
-              </span>
-            )}
           </div>
           {isCompleted && (
             <div className="flex-shrink-0">
@@ -135,9 +64,66 @@ export default function AchievementCard({ achievement }: AchievementCardProps) {
         </div>
 
         {/* Requirement (unlock criteria) */}
-        <p className="text-xs text-slate-300 mb-2 line-clamp-2 flex-grow">
+        <p
+          className={cn(
+            'text-xs text-slate-300 mb-2',
+            isCompleted && 'line-clamp-1'
+          )}
+        >
           {cleanDescription(requirement)}
         </p>
+
+        {/* Multi-part achievement objectives */}
+        {hasMultipleParts && (
+          <>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-300 transition-colors mb-2"
+            >
+              {isExpanded ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
+              <span className="font-medium">
+                {isExpanded ? 'Hide' : 'Show'} objectives ({bits.length})
+              </span>
+            </button>
+
+            {isExpanded && (
+              <div className="mb-2 flex-grow">
+                <ul className="space-y-1">
+                  {bits.map((bit, index) => {
+                    const bitCompleted = isBitCompleted(index);
+                    return (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-xs"
+                      >
+                        {bitCompleted ? (
+                          <CheckCircle2 className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <Circle className="w-3 h-3 text-slate-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        <span
+                          className={cn(
+                            bitCompleted
+                              ? 'text-slate-400 line-through'
+                              : 'text-slate-300'
+                          )}
+                        >
+                          {bit.text
+                            ? cleanDescription(bit.text)
+                            : `Part ${index + 1}`}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
 
         {/* Progress bar */}
         {progress && progress.max && progress.max > 1 && (
@@ -163,19 +149,12 @@ export default function AchievementCard({ achievement }: AchievementCardProps) {
         )}
 
         {/* Completion status for simple achievements */}
-        {(!progress || !progress.max || progress.max === 1) && (
-          <div className="mt-auto pt-1 border-t border-slate-700/50">
-            {isCompleted ? (
-              <div className="flex items-center gap-1.5 text-xs font-bold text-green-400">
-                <CheckCircle2 className="w-3 h-3" />
-                <span>Completed</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                <Circle className="w-3 h-3" />
-                <span>Not completed</span>
-              </div>
-            )}
+        {(!progress || !progress.max || progress.max === 1) && isCompleted && (
+          <div className="absolute bottom-3 left-3">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-green-400">
+              <CheckCircle2 className="w-3 h-3" />
+              <span>Completed</span>
+            </div>
           </div>
         )}
       </CardContent>

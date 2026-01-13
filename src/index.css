@@ -24,6 +24,16 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
     --radius: 0.5rem;
+
+    /* GW2 Expansion Colors */
+    --expansion-tyria: #383838;
+    --expansion-maguuma: #547516;
+    --expansion-desert: #6e1a36;
+    --expansion-tundra: #285169;
+    --expansion-jade: #247a7d;
+    --expansion-sky: #745b17;
+    --expansion-wild: #0d3d7b;
+    --expansion-magic: #c33b05;
   }
 }
 
@@ -32,4 +42,31 @@ body {
   min-height: 100vh;
   background-color: #0f172a;
   color: #e2e8f0;
+  overflow-y: scroll; /* Always show scrollbar to prevent layout shift */
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease-in-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.25s ease-in-out;
 }

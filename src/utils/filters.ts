@@ -55,7 +55,7 @@ export function groupByCategory(
 export function enrichAchievements(
   achievements: Achievement[],
   accountProgress: Map<number, AccountAchievement>,
-  categoryMap?: Map<number, { categoryId: number; categoryName: string; }>
+  categoryMap?: Map<number, { categoryId: number; categoryName: string; categoryOrder: number }>
 ): EnrichedAchievement[] {
   return achievements.map((achievement) => {
     const categoryInfo = categoryMap?.get(achievement.id);
@@ -65,6 +65,7 @@ export function enrichAchievements(
       masteryRegion: getMasteryRegion(achievement) as MasteryRegion,
       category: categoryInfo?.categoryName,
       categoryId: categoryInfo?.categoryId,
+      categoryOrder: categoryInfo?.categoryOrder,
     };
   });
 }

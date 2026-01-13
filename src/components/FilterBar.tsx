@@ -6,7 +6,6 @@ interface FilterBarProps {
   currentGoal: GoalType;
   onGoalChange: (goal: GoalType) => void;
   totalCount: number;
-  completedCount: number;
   incompleteCount: number;
 }
 

@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion';
 import { Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import AchievementList from './components/AchievementList';
@@ -28,10 +29,10 @@ import {
 import {
   clearApiKey,
   getApiKey,
+  getFilterSettings,
   getMasteryAchievementIds,
   getMasteryAchievementIdsTimestamp,
   saveApiKey,
-  getFilterSettings,
   saveFilterSettings,
 } from './utils/storage';
 
@@ -43,7 +44,7 @@ function App() {
     Map<number, AccountAchievement>
   >(new Map());
   const [categoryMap, setCategoryMap] = useState<
-    Map<number, { categoryId: number; categoryName: string }>
+    Map<number, { categoryId: number; categoryName: string; categoryOrder: number }>
   >(new Map());
   const [loading, setLoading] = useState<boolean>(false);
   const [buildingDatabase, setBuildingDatabase] = useState<boolean>(false);
@@ -222,13 +223,13 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 py-10 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 py-10 relative">
       {/* Setup Button - Absolute Top Left */}
       <Button
         onClick={() => setSetupModalOpen(true)}
         variant="outline"
         size="sm"
-        className="absolute top-4 left-4 z-10"
+        className="absolute top-4 left-4 z-10 mt-0 ml-0"
       >
         <Settings className="w-4 h-4" />
         Setup
@@ -236,7 +237,7 @@ function App() {
 
       <div className="max-w-[1800px] mx-auto">
         {/* Header */}
-        <header className="text-center mb-10">
+        <header className="text-center mb-10 px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
             GW2Mastery
           </h1>
@@ -264,14 +265,13 @@ function App() {
 
         {/* Filter Controls */}
         {achievements.length > 0 && (
-          <div className="mb-6 px-4">
+          <div className="mb-4 px-6">
             <FilterBar
               currentFilter={filter}
               onFilterChange={setFilter}
               currentGoal={goal}
               onGoalChange={setGoal}
               totalCount={totalCount}
-              completedCount={completedCount}
               incompleteCount={incompleteCount}
             />
           </div>
@@ -294,20 +294,23 @@ function App() {
 
         {/* Achievement list */}
         {!loading && achievements.length > 0 && (
-          <AchievementList
-            groupedAchievements={groupedAchievements}
-            allAchievements={achievements}
-            accountProgress={accountProgress}
-            categoryMap={categoryMap}
-            earnedPoints={masteryPoints.earned}
-            totalPoints={masteryPoints.total}
-            goal={goal}
-          />
+          <AnimatePresence mode="wait">
+            <AchievementList
+              groupedAchievements={groupedAchievements}
+              allAchievements={achievements}
+              accountProgress={accountProgress}
+              categoryMap={categoryMap}
+              earnedPoints={masteryPoints.earned}
+              totalPoints={masteryPoints.total}
+              goal={goal}
+              filter={filter}
+            />
+          </AnimatePresence>
         )}
 
         {/* Empty state when no achievements loaded */}
         {!loading && achievements.length === 0 && !error && (
-          <div className="text-center py-16">
+          <div className="text-center py-16 px-4 sm:px-6 lg:px-8">
             <div className="text-6xl mb-4">🎮</div>
             <h3 className="text-2xl font-bold text-slate-300 mb-2">
               Welcome to GW2Mastery

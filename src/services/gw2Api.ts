@@ -238,8 +238,8 @@ export function getMasteryRegion(achievement: Achievement): string | null {
 export function mapAchievementsToCategories(
   _achievements: Achievement[],
   categories: AchievementCategory[]
-): Map<number, { categoryId: number; categoryName: string }> {
-  const achievementToCategoryMap = new Map<number, { categoryId: number; categoryName: string }>();
+): Map<number, { categoryId: number; categoryName: string; categoryOrder: number }> {
+  const achievementToCategoryMap = new Map<number, { categoryId: number; categoryName: string; categoryOrder: number }>();
 
   // Create a map for quick lookup
   categories.forEach((category) => {
@@ -247,6 +247,7 @@ export function mapAchievementsToCategories(
       achievementToCategoryMap.set(achievementId, {
         categoryId: category.id,
         categoryName: category.name,
+        categoryOrder: category.order,
       });
     });
   });

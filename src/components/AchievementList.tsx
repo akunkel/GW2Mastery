@@ -1,32 +1,33 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import type { EnrichedAchievement, MasteryRegion, GoalType, Achievement, AccountAchievement } from '../types/gw2';
+import { motion } from 'framer-motion';
+import { ArrowLeft, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type {
+  AccountAchievement,
+  Achievement,
+  EnrichedAchievement,
+  FilterType,
+  GoalType,
+  MasteryRegion,
+} from '../types/gw2';
+import {
+  enrichAchievements,
+  getRegionDisplayName,
+  getRequiredCounts,
+  groupByRegionAndCategory,
+} from '../utils/filters';
+import { getRegionColor, REGION_ORDER } from '../utils/regionHelpers';
 import AchievementCard from './AchievementCard';
-import { getRegionDisplayName, getRequiredCounts, enrichAchievements, groupByRegionAndCategory } from '../utils/filters';
+import ExpansionCard from './ExpansionCard';
 
 interface AchievementListProps {
   groupedAchievements: Map<MasteryRegion, Map<string, EnrichedAchievement[]>>;
   allAchievements: Achievement[];
   accountProgress: Map<number, AccountAchievement>;
-  categoryMap: Map<number, { categoryId: number; categoryName: string }>;
+  categoryMap: Map<number, { categoryId: number; categoryName: string; categoryOrder: number }>;
   earnedPoints: number;
   totalPoints: number;
   goal: GoalType;
-}
-
-// Helper function to get region colors matching in-game appearance
-function getRegionColors(region: MasteryRegion): { bg: string; border: string; text: string } {
-  const colorMap: Record<MasteryRegion, { bg: string; border: string; text: string }> = {
-    'Tyria': { bg: 'bg-blue-900/40', border: 'border-blue-600', text: 'text-blue-300' },
-    'Maguuma': { bg: 'bg-green-900/40', border: 'border-green-600', text: 'text-green-300' },
-    'Desert': { bg: 'bg-purple-900/40', border: 'border-purple-600', text: 'text-purple-300' },
-    'Tundra': { bg: 'bg-cyan-900/40', border: 'border-cyan-600', text: 'text-cyan-300' },
-    'Jade': { bg: 'bg-emerald-900/40', border: 'border-emerald-500', text: 'text-emerald-300' },
-    'Sky': { bg: 'bg-sky-900/40', border: 'border-sky-500', text: 'text-sky-300' },
-    'Wild': { bg: 'bg-amber-900/40', border: 'border-amber-600', text: 'text-amber-300' },
-    'Magic': { bg: 'bg-violet-900/40', border: 'border-violet-600', text: 'text-violet-300' },
-  };
-  return colorMap[region];
+  filter: FilterType;
 }
 
 export default function AchievementList({
@@ -35,31 +36,107 @@ export default function AchievementList({
   accountProgress,
   categoryMap,
   goal,
+  filter,
 }: AchievementListProps) {
   const requiredCounts = getRequiredCounts();
 
   // Group ALL achievements by region for accurate counting
-  const allEnrichedAchievements = enrichAchievements(allAchievements, accountProgress, categoryMap);
-  const allGroupedAchievements = groupByRegionAndCategory(allEnrichedAchievements);
-  // State to track which regions are collapsed - start all collapsed
-  const [collapsedRegions, setCollapsedRegions] = useState<Set<MasteryRegion>>(() => {
-    return new Set(['Tyria', 'Maguuma', 'Desert', 'Tundra', 'Jade', 'Sky', 'Wild', 'Magic']);
-  });
+  const allEnrichedAchievements = enrichAchievements(
+    allAchievements,
+    accountProgress,
+    categoryMap
+  );
+  const allGroupedAchievements = groupByRegionAndCategory(
+    allEnrichedAchievements
+  );
+  // State to track selected expansion (null = showing expansion selection)
+  // Initialize from URL hash
+  const [selectedExpansion, setSelectedExpansion] =
+    useState<MasteryRegion | null>(() => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && REGION_ORDER.includes(hash as MasteryRegion)) {
+        return hash as MasteryRegion;
+      }
+      return null;
+    });
 
   // State to track which categories are collapsed - start all collapsed
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+    new Set()
+  );
 
-  const toggleRegion = (region: MasteryRegion) => {
-    setCollapsedRegions((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(region)) {
-        newSet.delete(region);
-      } else {
-        newSet.add(region);
-      }
-      return newSet;
-    });
+  // State to track if header is sticky
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  // Detect when header becomes sticky
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When the sentinel is not intersecting, the header is sticky
+        setIsHeaderSticky(!entry.isIntersecting);
+      },
+      { threshold: [1] }
+    );
+
+    // Create a sentinel element just above the sticky header
+    const sentinel = document.createElement('div');
+    sentinel.style.height = '1px';
+    sentinel.style.marginTop = '-1px';
+    header.parentElement?.insertBefore(sentinel, header);
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+      sentinel.remove();
+    };
+  }, [selectedExpansion]);
+
+  // Animation variants for page transitions
+  const pageVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
   };
+
+  const pageTransition = {
+    duration: 0.4,
+  };
+
+  // Handle browser navigation (back/forward buttons)
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && REGION_ORDER.includes(hash as MasteryRegion)) {
+        setSelectedExpansion(hash as MasteryRegion);
+      } else {
+        setSelectedExpansion(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // Update browser history when expansion is selected
+  const handleExpansionClick = (region: MasteryRegion) => {
+    setSelectedExpansion(region);
+    window.history.pushState({ expansion: region }, '', `#${region}`);
+  };
+
+  // Handle back button click - pop current page and return to root
+  const handleBackClick = useCallback(() => {
+    setSelectedExpansion(null);
+    // Go back in history to remove the expansion page from the stack
+    window.history.back();
+  }, []);
 
   const toggleCategory = (categoryKey: string) => {
     setCollapsedCategories((prev) => {
@@ -87,22 +164,80 @@ export default function AchievementList({
     );
   }
 
-  // Define the order of regions - show all regions even if empty
-  const regionOrder: MasteryRegion[] = [
-    'Tyria',
-    'Maguuma',
-    'Desert',
-    'Tundra',
-    'Jade',
-    'Sky',
-    'Wild',
-    'Magic',
-  ];
+  // If no expansion is selected, show expansion cards
+  if (selectedExpansion === null) {
+    return (
+      <motion.div
+        key="expansion-selection"
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="w-full px-4 sm:px-6 lg:px-8"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {REGION_ORDER.map((region) => {
+            const allCategoryMap = allGroupedAchievements.get(region);
+            let totalInRegion = 0;
+            let completedInRegion = 0;
 
+            if (allCategoryMap) {
+              allCategoryMap.forEach((achievements) => {
+                totalInRegion += achievements.length;
+                completedInRegion += achievements.filter(
+                  (a) => a.progress?.done
+                ).length;
+              });
+            }
+
+            // Skip regions with no achievements
+            if (totalInRegion === 0) {
+              return null;
+            }
+
+            const goalCount =
+              goal === 'required' ? requiredCounts[region] : totalInRegion;
+
+            // Skip completed regions if filter is set to hide completed
+            const isComplete = completedInRegion >= goalCount;
+            if (filter === 'incomplete' && isComplete) {
+              return null;
+            }
+
+            return (
+              <ExpansionCard
+                key={region}
+                region={region}
+                completed={completedInRegion}
+                total={goalCount}
+                isComplete={isComplete}
+                onClick={() => handleExpansionClick(region)}
+              />
+            );
+          })}
+        </div>
+      </motion.div>
+    );
+  }
+
+  // If an expansion is selected, show its achievement categories
   return (
-    <div className="w-full">
-      {/* Achievement groups - show all regions in order */}
-      {regionOrder.map((region) => {
+    <motion.div
+      key="achievement-details"
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+      transition={pageTransition}
+      className="w-full"
+    >
+      {/* Achievement groups - show selected region */}
+      {REGION_ORDER.map((region) => {
+        // Only show the selected expansion
+        if (region !== selectedExpansion) {
+          return null;
+        }
         const categoryMap = groupedAchievements.get(region);
 
         // Skip regions with no achievements
@@ -118,42 +253,65 @@ export default function AchievementList({
         if (allCategoryMap) {
           allCategoryMap.forEach((achievements) => {
             totalInRegion += achievements.length;
-            completedInRegion += achievements.filter((a) => a.progress?.done).length;
+            completedInRegion += achievements.filter(
+              (a) => a.progress?.done
+            ).length;
           });
         }
 
         // Use required count or total based on goal
-        const goalCount = goal === 'required' ? requiredCounts[region] : totalInRegion;
+        const goalCount =
+          goal === 'required' ? requiredCounts[region] : totalInRegion;
 
-        const colors = getRegionColors(region);
-        const isRegionCollapsed = collapsedRegions.has(region);
+        const isComplete = completedInRegion >= goalCount;
+        const regionColor = getRegionColor(region);
 
         return (
           <div key={region} className="mb-4">
-            <button
-              onClick={() => toggleRegion(region)}
-              className={`w-full flex items-center justify-between p-5 rounded-xl border-l-4 shadow-lg transition-all duration-200 hover:shadow-xl ${colors.bg} ${colors.border}`}
+            <div
+              ref={headerRef}
+              className={`sticky top-0 z-10 flex items-center justify-between px-4 shadow-md transition-all duration-300 ${
+                isHeaderSticky ? 'py-2' : 'py-3'
+              }`}
+              style={{
+                backgroundColor: regionColor,
+                color: '#ffffff',
+              }}
             >
-              <h3 className={`text-2xl md:text-3xl font-bold ${colors.text}`}>
-                {getRegionDisplayName(region)}
-              </h3>
-              <div className="flex items-center gap-4">
-                <span className={`${colors.text} font-bold text-lg`}>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBackClick}
+                  className="flex items-center justify-center w-10 h-10 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+                  aria-label="Back to expansions"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <h3 className="text-xl font-bold">
+                  {getRegionDisplayName(region)}
+                </h3>
+              </div>
+              <div className="flex items-center gap-3">
+                {isComplete && (
+                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                )}
+                <span className="font-bold text-base">
                   {completedInRegion} / {goalCount}
                 </span>
-                {isRegionCollapsed ? (
-                  <ChevronDown className={`w-6 h-6 ${colors.text}`} />
-                ) : (
-                  <ChevronUp className={`w-6 h-6 ${colors.text}`} />
-                )}
               </div>
-            </button>
+            </div>
 
-            {!isRegionCollapsed && (
-              <div className="mt-4 space-y-3">
-                {Array.from(categoryMap.entries()).map(([categoryName, achievements]) => {
+            <div className="mt-4 space-y-3">
+              {Array.from(categoryMap.entries())
+                .sort(([, achievementsA], [, achievementsB]) => {
+                  // Sort by category order (ascending)
+                  const orderA = achievementsA[0]?.categoryOrder ?? 999999;
+                  const orderB = achievementsB[0]?.categoryOrder ?? 999999;
+                  return orderA - orderB;
+                })
+                .map(([categoryName, achievements]) => {
                   const categoryKey = `${region}-${categoryName}`;
-                  const isCategoryCollapsed = collapsedCategories.has(categoryKey);
+                  const isCategoryCollapsed =
+                    collapsedCategories.has(categoryKey);
 
                   // Sort achievements: incomplete first, completed last
                   const sortedAchievements = [...achievements].sort((a, b) => {
@@ -168,14 +326,15 @@ export default function AchievementList({
                   });
 
                   // Get total count from ALL achievements (not just filtered)
-                  const allAchievementsInCategory = allCategoryMap?.get(categoryName) || [];
+                  const allAchievementsInCategory =
+                    allCategoryMap?.get(categoryName) || [];
                   const totalInCategory = allAchievementsInCategory.length;
                   const completedInCategory = allAchievementsInCategory.filter(
                     (a) => a.progress?.done
                   ).length;
 
                   return (
-                    <div key={categoryKey} className="ml-4">
+                    <div key={categoryKey} className="mx-4">
                       <button
                         onClick={() => toggleCategory(categoryKey)}
                         className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-colors"
@@ -196,7 +355,7 @@ export default function AchievementList({
                       </button>
 
                       {!isCategoryCollapsed && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 justify-items-center mt-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center items-start mt-3">
                           {sortedAchievements.map((achievement) => (
                             <AchievementCard
                               key={achievement.id}
@@ -207,12 +366,12 @@ export default function AchievementList({
                       )}
                     </div>
                   );
-                })}
-              </div>
-            )}
+                }
+              )}
+            </div>
           </div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
