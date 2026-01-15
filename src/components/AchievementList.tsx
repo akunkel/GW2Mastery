@@ -276,9 +276,8 @@ export default function AchievementList({
           <div key={region} className="mb-4">
             <div
               ref={headerRef}
-              className={`sticky top-0 z-10 flex items-center justify-between px-4 shadow-md transition-all duration-300 ${
-                isHeaderSticky ? 'py-2' : 'py-3'
-              }`}
+              className={`sticky top-0 z-10 flex items-center justify-between px-4 shadow-md transition-all duration-300 ${isHeaderSticky ? 'py-2' : 'py-3'
+                } ${isComplete ? 'border-y-2 border-green-500' : ''}`}
               style={{
                 backgroundColor: regionColor,
                 color: '#ffffff',
@@ -380,7 +379,7 @@ export default function AchievementList({
                     </div>
                   );
                 }
-              )}
+                )}
             </div>
           </div>
         );

@@ -1,40 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import DatabaseSection from './DatabaseSection';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
-interface SetupModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onApiKeySubmit: (key: string, remember: boolean) => void;
-  onClearKey: () => void;
-  onBuildDatabase: () => Promise<void>;
-  isLoading: boolean;
-  buildingDatabase: boolean;
-  error: string | null;
-  databaseError: string | null;
-  hasStoredKey: boolean;
-  storedApiKey: string | null;
-  databaseTimestamp: number | null;
-  loadingProgress: { current: number; total: number } | null;
-  hasAchievements: boolean;
-}
+export default function SetupModal() {
+  const {
+    setupModalOpen: open,
+    setSetupModalOpen: onOpenChange,
+    handleApiKeySubmit: onApiKeySubmit,
+    handleClearKey: onClearKey,
+    handleBuildDatabase: onBuildDatabase,
+    loading: isLoading,
+    buildingDatabase,
+    error,
+    databaseError,
+    hasStoredKey,
+    apiKey: storedApiKey,
+    databaseTimestamp,
+    loadingProgress,
+    achievements,
+  } = useAppStore();
 
-export default function SetupModal({
-  open,
-  onOpenChange,
-  onApiKeySubmit,
-  onClearKey,
-  onBuildDatabase,
-  isLoading,
-  buildingDatabase,
-  error,
-  databaseError,
-  hasStoredKey,
-  storedApiKey,
-  databaseTimestamp,
-  loadingProgress,
-  hasAchievements,
-}: SetupModalProps) {
+  const hasAchievements = achievements.length > 0;
+
   const [localApiKey, setLocalApiKey] = useState<string>('');
   const [justSubmitted, setJustSubmitted] = useState<boolean>(false);
   const wasLoadingRef = useRef<boolean>(false);
@@ -47,7 +35,8 @@ export default function SetupModal({
   const apiKey = localApiKey;
 
   // Show input as enabled if there's an error (allows retry)
-  const shouldShowClearButton = hasStoredKey && !error && !isLoading && !justSubmitted;
+  const shouldShowClearButton =
+    hasStoredKey && !error && !isLoading && !justSubmitted;
   const shouldDisableInput = isLoading || shouldShowClearButton;
 
   // Track loading state changes
@@ -151,7 +140,9 @@ export default function SetupModal({
               </div>
 
               {error && (
-                <p className="text-sm text-red-400 font-medium mb-2">✗ {error}</p>
+                <p className="text-sm text-red-400 font-medium mb-2">
+                  ✗ {error}
+                </p>
               )}
 
               {!shouldShowClearButton && (
@@ -184,3 +175,4 @@ export default function SetupModal({
     </Dialog>
   );
 }
+
