@@ -6,7 +6,11 @@ interface FilterBarProps {
   currentGoal: GoalType;
   onGoalChange: (goal: GoalType) => void;
   totalCount: number;
+  completedCount: number;
   incompleteCount: number;
+  showHidden: boolean;
+  onShowHiddenChange: (showHidden: boolean) => void;
+  hiddenCount: number;
 }
 
 export default function FilterBar({
@@ -15,37 +19,62 @@ export default function FilterBar({
   currentGoal,
   onGoalChange,
   totalCount,
+  completedCount,
   incompleteCount,
+  showHidden,
+  onShowHiddenChange,
+  hiddenCount,
 }: FilterBarProps) {
-  const hideCompleted = currentFilter === 'incomplete';
+  const showCompleted = currentFilter === 'all';
   const requiredOnly = currentGoal === 'required';
 
   const handleFilterCheckboxChange = () => {
-    onFilterChange(hideCompleted ? 'all' : 'incomplete');
+    onFilterChange(showCompleted ? 'incomplete' : 'all');
   };
 
   const handleGoalCheckboxChange = () => {
     onGoalChange(requiredOnly ? 'all' : 'required');
   };
 
+  const handleShowHiddenChange = () => {
+    onShowHiddenChange(!showHidden);
+  };
+
   return (
     <div className="flex items-center justify-between w-full">
-      {/* Hide completed checkbox */}
-      <div className="flex items-center gap-2">
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <input
-            type="checkbox"
-            checked={hideCompleted}
-            onChange={handleFilterCheckboxChange}
-            className="w-4 h-4 rounded border-2 border-slate-600 bg-slate-700 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all"
-          />
-          <span className="text-slate-300 text-sm font-medium group-hover:text-white transition-colors">
-            Hide completed
+      {/* Left side - Hide completed and show hidden checkboxes */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={showCompleted}
+              onChange={handleFilterCheckboxChange}
+              className="w-4 h-4 rounded border-2 border-slate-600 bg-slate-700 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all"
+            />
+            <span className="text-slate-300 text-sm font-medium group-hover:text-white transition-colors">
+              Show completed
+            </span>
+          </label>
+          <span className="text-slate-400 text-xs">
+            ({completedCount} completed)
           </span>
-        </label>
-        <span className="text-slate-400 text-xs">
-          ({hideCompleted ? incompleteCount : totalCount} shown)
-        </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={showHidden}
+              onChange={handleShowHiddenChange}
+              className="w-4 h-4 rounded border-2 border-slate-600 bg-slate-700 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all"
+            />
+            <span className="text-slate-300 text-sm font-medium group-hover:text-white transition-colors">
+              Show hidden
+            </span>
+          </label>
+          <span className="text-slate-400 text-xs">({hiddenCount} hidden)</span>
+        </div>
       </div>
 
       {/* Goal checkbox - pinned right */}

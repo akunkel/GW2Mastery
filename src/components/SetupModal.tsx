@@ -1,11 +1,5 @@
-import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from './ui/dialog';
+import { useEffect, useRef, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface SetupModalProps {
   open: boolean;
@@ -18,9 +12,9 @@ interface SetupModalProps {
   error: string | null;
   hasStoredKey: boolean;
   storedApiKey: string | null;
-  hasMasteryDatabase: boolean;
   databaseTimestamp: number | null;
   loadingProgress: { current: number; total: number } | null;
+  hasAchievements: boolean;
 }
 
 export default function SetupModal({
@@ -34,29 +28,56 @@ export default function SetupModal({
   error,
   hasStoredKey,
   storedApiKey,
-  hasMasteryDatabase,
   databaseTimestamp,
   loadingProgress,
+  hasAchievements,
 }: SetupModalProps) {
   const [apiKey, setApiKey] = useState<string>('');
-  const [remember, setRemember] = useState<boolean>(false);
+  const [justSubmitted, setJustSubmitted] = useState<boolean>(false);
+  const wasLoadingRef = useRef<boolean>(false);
 
-  // Prefill API key and check remember checkbox when stored key exists
+  // Prefill API key when stored key exists
   useEffect(() => {
     if (hasStoredKey && storedApiKey) {
       setApiKey(storedApiKey);
-      setRemember(true);
     } else {
       setApiKey('');
-      setRemember(false);
     }
   }, [hasStoredKey, storedApiKey]);
+
+  // Track loading state changes
+  useEffect(() => {
+    if (isLoading) {
+      wasLoadingRef.current = true;
+    }
+  }, [isLoading]);
+
+  // Close modal after successful API key submission and loading completes
+  useEffect(() => {
+    // Only close if we just submitted, were loading, and now loading is done
+    if (
+      justSubmitted &&
+      wasLoadingRef.current &&
+      !isLoading &&
+      !error &&
+      open
+    ) {
+      // Small delay to allow user to see the success state
+      const timer = setTimeout(() => {
+        onOpenChange(false);
+        setJustSubmitted(false);
+        wasLoadingRef.current = false;
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [justSubmitted, isLoading, error, open, onOpenChange]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (apiKey.trim()) {
-      onApiKeySubmit(apiKey.trim(), remember);
-      setApiKey('');
+      setJustSubmitted(true);
+      onApiKeySubmit(apiKey.trim(), true); // Always remember the API key
+      // Don't clear the API key - it will be managed by the useEffect
     }
   };
 
@@ -64,84 +85,35 @@ export default function SetupModal({
     await onBuildDatabase();
   };
 
+  // Prevent closing if achievements aren't loaded
+  const handleOpenChange = (newOpen: boolean) => {
+    // Only allow closing if achievements are loaded
+    if (!newOpen && !hasAchievements) {
+      return;
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        hideClose={!hasAchievements}
+      >
         <DialogHeader>
           <DialogTitle>Setup</DialogTitle>
-          <DialogDescription>
-            Configure your database and API key to track your achievements
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
-          {/* Database Section */}
-          <div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-3">
-              <div className="flex-1">
-                <h3 className="text-white font-semibold mb-1.5">Mastery Achievement Database</h3>
-                {hasMasteryDatabase && databaseTimestamp ? (
-                  <p className="text-sm text-green-400 font-medium">
-                    ✓ Built on {new Date(databaseTimestamp).toLocaleDateString()} at{' '}
-                    {new Date(databaseTimestamp).toLocaleTimeString()}
-                  </p>
-                ) : (
-                  <p className="text-sm text-amber-400 font-medium">
-                    ⚠️ Database not built. Click the button to build it.
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={handleBuildDatabase}
-                disabled={buildingDatabase}
-                className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-lg disabled:shadow-none whitespace-nowrap"
-              >
-                {buildingDatabase ? 'Building...' : hasMasteryDatabase ? 'Rebuild Database' : 'Build Database'}
-              </button>
-            </div>
-            {buildingDatabase && loadingProgress && (
-              <p className="text-xs text-blue-400 font-medium">
-                Building database ({loadingProgress.current} of {loadingProgress.total} batches)...
-              </p>
-            )}
-            {!hasMasteryDatabase && (
-              <p className="text-xs text-slate-400 leading-relaxed">
-                The database indexes all mastery point achievements (~8000 achievements).
-                This only needs to be done once and is saved in your browser.
-              </p>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-slate-700/50" />
-
+        <div className="space-y-4 mt-2">
           {/* API Key Section */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Guild Wars 2 API Key</h3>
+            <h3 className="text-white font-semibold mb-2">
+              Guild Wars 2 API Key
+            </h3>
 
-            {hasStoredKey && (
-              <div className="mb-4 p-4 bg-green-900/30 border border-green-700/50 rounded-lg flex items-center justify-between">
-                <span className="text-green-400 text-sm font-medium">✓ API key loaded from storage</span>
-                <button
-                  onClick={onClearKey}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 hover:shadow-lg"
-                >
-                  Clear Key
-                </button>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit}>
               <div>
-                <input
-                  type="text"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter your GW2 API key"
-                  className="w-full px-5 py-3.5 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading || hasStoredKey}
-                />
-                <p className="mt-2.5 text-xs text-slate-400 leading-relaxed">
+                <p className="mb-3 text-xs text-slate-400 leading-relaxed">
                   Generate an API key at{' '}
                   <a
                     href="https://account.arena.net/applications"
@@ -150,23 +122,29 @@ export default function SetupModal({
                     className="text-blue-400 hover:text-blue-300 underline font-medium"
                   >
                     account.arena.net/applications
-                  </a>
-                  {' '}(requires "account" and "progression" permissions)
+                  </a>{' '}
+                  (requires "account" and "progression" permissions)
                 </p>
-              </div>
-
-              <div className="flex items-center space-x-2.5">
-                <input
-                  type="checkbox"
-                  id="remember"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-blue-600 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading || hasStoredKey}
-                />
-                <label htmlFor="remember" className={`text-sm ${hasStoredKey ? 'text-slate-500' : 'text-slate-300'}`}>
-                  Remember API key (stored locally in browser)
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API key"
+                    className="flex-1 px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isLoading || hasStoredKey || justSubmitted}
+                  />
+                  {(hasStoredKey || justSubmitted) && (
+                    <button
+                      type="button"
+                      onClick={onClearKey}
+                      className="px-3 py-2 bg-red-800 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-lg whitespace-nowrap"
+                      disabled={isLoading}
+                    >
+                      Clear Key
+                    </button>
+                  )}
+                </div>
               </div>
 
               {error && (
@@ -176,22 +154,62 @@ export default function SetupModal({
               )}
 
               {!hasStoredKey && (
-                <button
-                  type="submit"
-                  disabled={isLoading || !apiKey.trim()}
-                  className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
-                >
-                  {isLoading ? 'Loading...' : 'Load Achievements'}
-                </button>
+                <div className="relative group">
+                  <button
+                    type="submit"
+                    disabled={isLoading || !apiKey.trim()}
+                    className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
+                  >
+                    {isLoading ? 'Loading...' : 'Load Achievements'}
+                  </button>
+                  {!isLoading && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-slate-700">
+                      Please build the achievement database first.
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                    </div>
+                  )}
+                </div>
               )}
             </form>
+          </div>
 
-            <div className="mt-4 p-4 bg-amber-900/20 border border-amber-700/50 rounded-lg">
-              <p className="text-xs text-amber-400 leading-relaxed">
-                ⚠️ Your API key is stored locally in your browser and never sent to any third-party servers.
-                Never share your API key with anyone.
-              </p>
+          {/* Divider */}
+          <div className="border-t border-slate-700/50" />
+
+          {/* Database Section */}
+          <div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-1">
+              <div className="flex-1">
+                <h3 className="text-white font-medium">Achievement Database</h3>
+                {databaseTimestamp ? (
+                  <p className="text-sm text-green-400 font-medium">
+                    ✓ Last built{' '}
+                    {new Date(databaseTimestamp).toLocaleDateString()}
+                  </p>
+                ) : (
+                  <p className="text-sm text-amber-400 font-medium">
+                    ⚠️ Database not built, click "Build Database" to start.
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleBuildDatabase}
+                disabled={buildingDatabase}
+                className="px-3 py-1 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 disabled:shadow-none whitespace-nowrap bg-slate-700 hover:bg-slate-600"
+              >
+                {buildingDatabase ? 'Rebuilding...' : 'Rebuild Database'}
+              </button>
             </div>
+            {buildingDatabase && loadingProgress && (
+              <p className="text-xs text-blue-400 font-medium mb-1">
+                Building database ({loadingProgress.current} of{' '}
+                {loadingProgress.total} batches)...
+              </p>
+            )}
+            <p className="text-xs text-slate-400 leading-relaxed">
+              If these achievements are stale, click "Rebuild Database" for the
+              newest data from the server.
+            </p>
           </div>
         </div>
       </DialogContent>

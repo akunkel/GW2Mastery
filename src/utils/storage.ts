@@ -1,10 +1,12 @@
 import type { Achievement } from '../types/gw2';
+import defaultMasteryIds from '../data/masteryAchievementIds.json';
 
 const API_KEY_STORAGE_KEY = 'gw2_api_key';
 const MASTERY_IDS_STORAGE_KEY = 'gw2_mastery_achievement_ids';
 const MASTERY_IDS_TIMESTAMP_KEY = 'gw2_mastery_achievement_ids_timestamp';
 const MASTERY_ACHIEVEMENTS_CACHE_KEY = 'gw2_mastery_achievements_cache';
 const FILTER_SETTINGS_KEY = 'gw2_filter_settings';
+const HIDDEN_ACHIEVEMENTS_KEY = 'gw2_hidden_achievements';
 
 /**
  * Saves the API key to localStorage
@@ -54,27 +56,38 @@ export function saveMasteryAchievementIds(ids: number[]): void {
 
 /**
  * Retrieves mastery achievement IDs from localStorage
+ * If not found in localStorage, returns the default IDs from the bundled JSON file
  */
 export function getMasteryAchievementIds(): number[] | null {
   try {
     const data = localStorage.getItem(MASTERY_IDS_STORAGE_KEY);
-    return data ? JSON.parse(data) : null;
+    if (data) {
+      return JSON.parse(data);
+    }
+    // Return default IDs from bundled JSON file if available
+    return defaultMasteryIds.length > 0 ? defaultMasteryIds : null;
   } catch (error) {
     console.error('Failed to retrieve mastery achievement IDs from localStorage:', error);
-    return null;
+    return defaultMasteryIds.length > 0 ? defaultMasteryIds : null;
   }
 }
 
 /**
  * Gets the timestamp when mastery achievement IDs were last updated
+ * Returns build time timestamp if using default bundled data
  */
 export function getMasteryAchievementIdsTimestamp(): number | null {
   try {
     const timestamp = localStorage.getItem(MASTERY_IDS_TIMESTAMP_KEY);
-    return timestamp ? parseInt(timestamp, 10) : null;
+    if (timestamp) {
+      return parseInt(timestamp, 10);
+    }
+    // If using default bundled data and no timestamp exists, return build time
+    // This will be updated when you paste the IDs from console
+    return defaultMasteryIds.length > 0 ? new Date('2026-01-14').getTime() : null;
   } catch (error) {
     console.error('Failed to retrieve mastery achievement IDs timestamp:', error);
-    return null;
+    return defaultMasteryIds.length > 0 ? new Date('2026-01-14').getTime() : null;
   }
 }
 
@@ -91,7 +104,7 @@ export function saveFilterSettings(hideCompleted: boolean, requiredOnly: boolean
 
 /**
  * Retrieves filter settings from localStorage
- * Defaults to { hideCompleted: true, requiredOnly: true } if not found
+ * Defaults to { hideCompleted: false, requiredOnly: true } if not found
  */
 export function getFilterSettings(): { hideCompleted: boolean; requiredOnly: boolean } {
   try {
@@ -99,11 +112,11 @@ export function getFilterSettings(): { hideCompleted: boolean; requiredOnly: boo
     if (data) {
       return JSON.parse(data);
     }
-    // Default to both true for new sessions
-    return { hideCompleted: true, requiredOnly: true };
+    // Default: show completed (false), required only (true)
+    return { hideCompleted: false, requiredOnly: true };
   } catch (error) {
     console.error('Failed to retrieve filter settings from localStorage:', error);
-    return { hideCompleted: true, requiredOnly: true };
+    return { hideCompleted: false, requiredOnly: true };
   }
 }
 
@@ -129,5 +142,29 @@ export function getMasteryAchievements(): Achievement[] | null {
   } catch (error) {
     console.error('Failed to retrieve mastery achievements from localStorage:', error);
     return null;
+  }
+}
+
+/**
+ * Saves hidden achievement IDs to localStorage
+ */
+export function saveHiddenAchievements(hiddenIds: Set<number>): void {
+  try {
+    localStorage.setItem(HIDDEN_ACHIEVEMENTS_KEY, JSON.stringify(Array.from(hiddenIds)));
+  } catch (error) {
+    console.error('Failed to save hidden achievements to localStorage:', error);
+  }
+}
+
+/**
+ * Retrieves hidden achievement IDs from localStorage
+ */
+export function getHiddenAchievements(): Set<number> {
+  try {
+    const data = localStorage.getItem(HIDDEN_ACHIEVEMENTS_KEY);
+    return data ? new Set(JSON.parse(data)) : new Set();
+  } catch (error) {
+    console.error('Failed to retrieve hidden achievements from localStorage:', error);
+    return new Set();
   }
 }

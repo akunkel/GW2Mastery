@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronDown, ChevronUp, Circle } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../lib/utils';
 import type { EnrichedAchievement } from '../types/gw2';
@@ -6,9 +6,15 @@ import { Card, CardContent } from './ui/card';
 
 interface AchievementCardProps {
   achievement: EnrichedAchievement;
+  isHidden?: boolean;
+  onToggleHidden?: (achievementId: number) => void;
 }
 
-export default function AchievementCard({ achievement }: AchievementCardProps) {
+export default function AchievementCard({
+  achievement,
+  isHidden = false,
+  onToggleHidden
+}: AchievementCardProps) {
   const { name, requirement, icon, progress, bits } = achievement;
   const isCompleted = progress?.done || false;
 
@@ -37,10 +43,29 @@ export default function AchievementCard({ achievement }: AchievementCardProps) {
   return (
     <Card
       className={cn(
-        'w-full max-w-80 flex flex-col border-2 bg-slate-800 min-h-[138px] relative',
-        isCompleted ? 'border-green-500' : 'border-slate-600'
+        'w-full max-w-80 flex flex-col border-2 bg-slate-800 min-h-[138px] relative group',
+        isCompleted ? 'border-green-500' : 'border-slate-600',
+        isHidden && 'opacity-50'
       )}
     >
+      {/* Hidden toggle button - appears on hover */}
+      {onToggleHidden && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleHidden(achievement.id);
+          }}
+          className="absolute top-2 right-2 z-20 p-1.5 rounded-md bg-slate-700/90 hover:bg-slate-600 transition-all opacity-0 group-hover:opacity-100"
+          aria-label={isHidden ? 'Show achievement' : 'Hide achievement'}
+        >
+          {isHidden ? (
+            <EyeOff className="w-4 h-4 text-slate-300" />
+          ) : (
+            <Eye className="w-4 h-4 text-slate-300" />
+          )}
+        </button>
+      )}
+
       <CardContent className="p-3 flex flex-col h-full min-h-0">
         {/* Header with icon and title */}
         <div className="flex items-start gap-2 mb-2">
@@ -52,9 +77,15 @@ export default function AchievementCard({ achievement }: AchievementCardProps) {
             />
           )}
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-white text-sm leading-tight">
+            <a
+              href={`https://wiki.guildwars2.com/wiki/${encodeURIComponent(name)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="font-bold text-white text-sm leading-tight hover:text-blue-400 transition-colors"
+            >
               {name}
-            </h3>
+            </a>
           </div>
           {isCompleted && (
             <div className="flex-shrink-0">

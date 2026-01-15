@@ -28,6 +28,9 @@ interface AchievementListProps {
   totalPoints: number;
   goal: GoalType;
   filter: FilterType;
+  hiddenAchievements: Set<number>;
+  showHidden: boolean;
+  onToggleHidden: (achievementId: number) => void;
 }
 
 export default function AchievementList({
@@ -37,6 +40,9 @@ export default function AchievementList({
   categoryMap,
   goal,
   filter,
+  hiddenAchievements,
+  showHidden,
+  onToggleHidden,
 }: AchievementListProps) {
   const requiredCounts = getRequiredCounts();
 
@@ -313,8 +319,13 @@ export default function AchievementList({
                   const isCategoryCollapsed =
                     collapsedCategories.has(categoryKey);
 
+                  // Filter hidden achievements if showHidden is false
+                  const visibleAchievements = showHidden
+                    ? achievements
+                    : achievements.filter((a) => !hiddenAchievements.has(a.id));
+
                   // Sort achievements: incomplete first, completed last
-                  const sortedAchievements = [...achievements].sort((a, b) => {
+                  const sortedAchievements = [...visibleAchievements].sort((a, b) => {
                     const aCompleted = a.progress?.done || false;
                     const bCompleted = b.progress?.done || false;
 
@@ -360,6 +371,8 @@ export default function AchievementList({
                             <AchievementCard
                               key={achievement.id}
                               achievement={achievement}
+                              isHidden={hiddenAchievements.has(achievement.id)}
+                              onToggleHidden={onToggleHidden}
                             />
                           ))}
                         </div>

@@ -1,5 +1,5 @@
-import type { Achievement, AccountAchievement, MasteryReward, AchievementCategory } from '../types/gw2';
-import { getMasteryAchievementIds, saveMasteryAchievementIds, getMasteryAchievements, saveMasteryAchievements } from '../utils/storage';
+import type { AccountAchievement, Achievement, AchievementCategory, MasteryReward } from '../types/gw2';
+import { getMasteryAchievementIds, getMasteryAchievements, saveMasteryAchievementIds, saveMasteryAchievements } from '../utils/storage';
 
 const BASE_URL = 'https://api.guildwars2.com/v2';
 const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (5/sec)
@@ -79,6 +79,12 @@ export async function buildMasteryAchievementIdsDatabase(
   // Save both IDs and full achievement details to localStorage
   saveMasteryAchievementIds(masteryIds);
   saveMasteryAchievements(masteryAchievements);
+
+  // Log the results for developers to use in source code.
+  // To update the default database, copy the JSON and paste it into src/data/masteryAchievementIds.json
+  console.log('=== Database Build Complete ===');
+  console.log(`Total mastery achievements: ${masteryIds.length}`);
+  console.log('\n' + JSON.stringify(masteryIds, null, 2));
 
   return masteryIds;
 }
@@ -238,8 +244,8 @@ export function getMasteryRegion(achievement: Achievement): string | null {
 export function mapAchievementsToCategories(
   _achievements: Achievement[],
   categories: AchievementCategory[]
-): Map<number, { categoryId: number; categoryName: string; categoryOrder: number }> {
-  const achievementToCategoryMap = new Map<number, { categoryId: number; categoryName: string; categoryOrder: number }>();
+): Map<number, { categoryId: number; categoryName: string; categoryOrder: number; }> {
+  const achievementToCategoryMap = new Map<number, { categoryId: number; categoryName: string; categoryOrder: number; }>();
 
   // Create a map for quick lookup
   categories.forEach((category) => {

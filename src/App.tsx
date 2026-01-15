@@ -30,10 +30,12 @@ import {
   clearApiKey,
   getApiKey,
   getFilterSettings,
+  getHiddenAchievements,
   getMasteryAchievementIds,
   getMasteryAchievementIdsTimestamp,
   saveApiKey,
   saveFilterSettings,
+  saveHiddenAchievements,
 } from './utils/storage';
 
 function App() {
@@ -44,7 +46,10 @@ function App() {
     Map<number, AccountAchievement>
   >(new Map());
   const [categoryMap, setCategoryMap] = useState<
-    Map<number, { categoryId: number; categoryName: string; categoryOrder: number }>
+    Map<
+      number,
+      { categoryId: number; categoryName: string; categoryOrder: number }
+    >
   >(new Map());
   const [loading, setLoading] = useState<boolean>(false);
   const [buildingDatabase, setBuildingDatabase] = useState<boolean>(false);
@@ -55,12 +60,15 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>('all');
   const [goal, setGoal] = useState<GoalType>('all');
-  const [hasMasteryDatabase, setHasMasteryDatabase] = useState<boolean>(false);
   const [databaseTimestamp, setDatabaseTimestamp] = useState<number | null>(
     null
   );
   const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [hiddenAchievements, setHiddenAchievements] = useState<Set<number>>(
+    new Set()
+  );
+  const [showHidden, setShowHidden] = useState<boolean>(false);
 
   // Check for stored API key, database, and filter settings on mount
   useEffect(() => {
@@ -68,9 +76,10 @@ function App() {
     const masteryIds = getMasteryAchievementIds();
     const timestamp = getMasteryAchievementIdsTimestamp();
     const filterSettings = getFilterSettings();
+    const hiddenIds = getHiddenAchievements();
 
-    setHasMasteryDatabase(!!masteryIds);
     setDatabaseTimestamp(timestamp);
+    setHiddenAchievements(hiddenIds);
 
     // Load filter settings from localStorage (defaults to both true)
     setFilter(filterSettings.hideCompleted ? 'incomplete' : 'all');
@@ -170,6 +179,19 @@ function App() {
     setError(null);
   };
 
+  const handleToggleHidden = (achievementId: number) => {
+    setHiddenAchievements((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(achievementId)) {
+        newSet.delete(achievementId);
+      } else {
+        newSet.add(achievementId);
+      }
+      saveHiddenAchievements(newSet);
+      return newSet;
+    });
+  };
+
   const handleBuildDatabase = async () => {
     setBuildingDatabase(true);
     setLoadingProgress(null);
@@ -181,7 +203,6 @@ function App() {
       });
 
       const timestamp = getMasteryAchievementIdsTimestamp();
-      setHasMasteryDatabase(true);
       setDatabaseTimestamp(timestamp);
     } catch (err) {
       const errorMessage =
@@ -242,7 +263,7 @@ function App() {
             GW2Mastery
           </h1>
           <p className="text-slate-400 text-lg md:text-xl">
-            Track your Mastery Point achievements
+            When all you want is the mastery points.
           </p>
         </header>
 
@@ -258,9 +279,9 @@ function App() {
           error={error}
           hasStoredKey={hasStoredKey}
           storedApiKey={storedApiKey}
-          hasMasteryDatabase={hasMasteryDatabase}
           databaseTimestamp={databaseTimestamp}
           loadingProgress={loadingProgress}
+          hasAchievements={achievements.length > 0}
         />
 
         {/* Filter Controls */}
@@ -272,7 +293,11 @@ function App() {
               currentGoal={goal}
               onGoalChange={setGoal}
               totalCount={totalCount}
+              completedCount={completedCount}
               incompleteCount={incompleteCount}
+              showHidden={showHidden}
+              onShowHiddenChange={setShowHidden}
+              hiddenCount={hiddenAchievements.size}
             />
           </div>
         )}
@@ -304,29 +329,11 @@ function App() {
               totalPoints={masteryPoints.total}
               goal={goal}
               filter={filter}
+              hiddenAchievements={hiddenAchievements}
+              showHidden={showHidden}
+              onToggleHidden={handleToggleHidden}
             />
           </AnimatePresence>
-        )}
-
-        {/* Empty state when no achievements loaded */}
-        {!loading && achievements.length === 0 && !error && (
-          <div className="text-center py-16 px-4 sm:px-6 lg:px-8">
-            <div className="text-6xl mb-4">🎮</div>
-            <h3 className="text-2xl font-bold text-slate-300 mb-2">
-              Welcome to GW2Mastery
-            </h3>
-            <p className="text-slate-400 mb-6">
-              Click the button below to get started
-            </p>
-            <Button
-              onClick={() => setSetupModalOpen(true)}
-              size="lg"
-              className="shadow-xl"
-            >
-              <Settings className="w-5 h-5" />
-              Open Setup
-            </Button>
-          </div>
         )}
       </div>
     </div>
