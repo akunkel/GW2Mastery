@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import DatabaseSection from './DatabaseSection';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface SetupModalProps {
@@ -10,6 +11,7 @@ interface SetupModalProps {
   isLoading: boolean;
   buildingDatabase: boolean;
   error: string | null;
+  databaseError: string | null;
   hasStoredKey: boolean;
   storedApiKey: string | null;
   databaseTimestamp: number | null;
@@ -26,24 +28,27 @@ export default function SetupModal({
   isLoading,
   buildingDatabase,
   error,
+  databaseError,
   hasStoredKey,
   storedApiKey,
   databaseTimestamp,
   loadingProgress,
   hasAchievements,
 }: SetupModalProps) {
-  const [apiKey, setApiKey] = useState<string>('');
+  const [localApiKey, setLocalApiKey] = useState<string>('');
   const [justSubmitted, setJustSubmitted] = useState<boolean>(false);
   const wasLoadingRef = useRef<boolean>(false);
 
-  // Prefill API key when stored key exists
+  // Sync local state with stored key when it changes
   useEffect(() => {
-    if (hasStoredKey && storedApiKey) {
-      setApiKey(storedApiKey);
-    } else {
-      setApiKey('');
-    }
-  }, [hasStoredKey, storedApiKey]);
+    setLocalApiKey(storedApiKey || '');
+  }, [storedApiKey]);
+
+  const apiKey = localApiKey;
+
+  // Show input as enabled if there's an error (allows retry)
+  const shouldShowClearButton = hasStoredKey && !error && !isLoading && !justSubmitted;
+  const shouldDisableInput = isLoading || shouldShowClearButton;
 
   // Track loading state changes
   useEffect(() => {
@@ -54,7 +59,7 @@ export default function SetupModal({
 
   // Close modal after successful API key submission and loading completes
   useEffect(() => {
-    // Only close if we just submitted, were loading, and now loading is done
+    // Only close if we just submitted, were loading, and now loading is done successfully
     if (
       justSubmitted &&
       wasLoadingRef.current &&
@@ -62,13 +67,9 @@ export default function SetupModal({
       !error &&
       open
     ) {
-      // Small delay to allow user to see the success state
-      const timer = setTimeout(() => {
-        onOpenChange(false);
-        setJustSubmitted(false);
-        wasLoadingRef.current = false;
-      }, 500);
-      return () => clearTimeout(timer);
+      onOpenChange(false);
+      setJustSubmitted(false);
+      wasLoadingRef.current = false;
     }
   }, [justSubmitted, isLoading, error, open, onOpenChange]);
 
@@ -81,8 +82,10 @@ export default function SetupModal({
     }
   };
 
-  const handleBuildDatabase = async () => {
-    await onBuildDatabase();
+  const handleClearKey = () => {
+    setJustSubmitted(false);
+    setLocalApiKey('');
+    onClearKey();
   };
 
   // Prevent closing if achievements aren't loaded
@@ -129,15 +132,15 @@ export default function SetupModal({
                   <input
                     type="text"
                     value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    onChange={(e) => setLocalApiKey(e.target.value)}
                     placeholder="Enter your API key"
                     className="flex-1 px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={isLoading || hasStoredKey || justSubmitted}
+                    disabled={shouldDisableInput}
                   />
-                  {(hasStoredKey || justSubmitted) && (
+                  {shouldShowClearButton && (
                     <button
                       type="button"
-                      onClick={onClearKey}
+                      onClick={handleClearKey}
                       className="px-3 py-2 bg-red-800 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-lg whitespace-nowrap"
                       disabled={isLoading}
                     >
@@ -148,26 +151,18 @@ export default function SetupModal({
               </div>
 
               {error && (
-                <div className="p-4 bg-red-900/30 border border-red-700/50 rounded-lg">
-                  <p className="text-red-400 text-sm font-medium">{error}</p>
-                </div>
+                <p className="text-sm text-red-400 font-medium mb-2">✗ {error}</p>
               )}
 
-              {!hasStoredKey && (
+              {!shouldShowClearButton && (
                 <div className="relative group">
                   <button
                     type="submit"
                     disabled={isLoading || !apiKey.trim()}
                     className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
                   >
-                    {isLoading ? 'Loading...' : 'Load Achievements'}
+                    {isLoading ? 'Loading…' : 'Load Achievements'}
                   </button>
-                  {!isLoading && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-slate-700">
-                      Please build the achievement database first.
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                    </div>
-                  )}
                 </div>
               )}
             </form>
@@ -177,40 +172,13 @@ export default function SetupModal({
           <div className="border-t border-slate-700/50" />
 
           {/* Database Section */}
-          <div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-1">
-              <div className="flex-1">
-                <h3 className="text-white font-medium">Achievement Database</h3>
-                {databaseTimestamp ? (
-                  <p className="text-sm text-green-400 font-medium">
-                    ✓ Last built{' '}
-                    {new Date(databaseTimestamp).toLocaleDateString()}
-                  </p>
-                ) : (
-                  <p className="text-sm text-amber-400 font-medium">
-                    ⚠️ Database not built, click "Build Database" to start.
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={handleBuildDatabase}
-                disabled={buildingDatabase}
-                className="px-3 py-1 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 disabled:shadow-none whitespace-nowrap bg-slate-700 hover:bg-slate-600"
-              >
-                {buildingDatabase ? 'Rebuilding...' : 'Rebuild Database'}
-              </button>
-            </div>
-            {buildingDatabase && loadingProgress && (
-              <p className="text-xs text-blue-400 font-medium mb-1">
-                Building database ({loadingProgress.current} of{' '}
-                {loadingProgress.total} batches)...
-              </p>
-            )}
-            <p className="text-xs text-slate-400 leading-relaxed">
-              If these achievements are stale, click "Rebuild Database" for the
-              newest data from the server.
-            </p>
-          </div>
+          <DatabaseSection
+            databaseTimestamp={databaseTimestamp}
+            buildingDatabase={buildingDatabase}
+            onBuildDatabase={onBuildDatabase}
+            loadingProgress={loadingProgress}
+            error={databaseError}
+          />
         </div>
       </DialogContent>
     </Dialog>

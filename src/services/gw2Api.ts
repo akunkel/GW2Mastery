@@ -93,9 +93,7 @@ export async function buildMasteryAchievementIdsDatabase(
  * Fetches ALL mastery point achievements from the database
  * Requires mastery achievement IDs database to be built first
  */
-export async function fetchMasteryAchievements(
-  _accountAchievements: AccountAchievement[]
-): Promise<Achievement[]> {
+export async function fetchMasteryAchievements(): Promise<Achievement[]> {
   // Try to get from cache first
   const cachedAchievements = getMasteryAchievements();
   if (cachedAchievements && cachedAchievements.length > 0) {

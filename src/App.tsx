@@ -58,6 +58,7 @@ function App() {
     total: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [databaseError, setDatabaseError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>('all');
   const [goal, setGoal] = useState<GoalType>('all');
   const [databaseTimestamp, setDatabaseTimestamp] = useState<number | null>(
@@ -133,7 +134,7 @@ function App() {
       // Fetch categories and achievements concurrently
       const [categories, masteryAchievements] = await Promise.all([
         fetchAchievementCategories(),
-        fetchMasteryAchievements(accountData),
+        fetchMasteryAchievements(),
       ]);
 
       // Map achievements to their categories
@@ -195,7 +196,7 @@ function App() {
   const handleBuildDatabase = async () => {
     setBuildingDatabase(true);
     setLoadingProgress(null);
-    setError(null);
+    setDatabaseError(null);
 
     try {
       await buildMasteryAchievementIdsDatabase((current, total) => {
@@ -207,7 +208,7 @@ function App() {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to build database';
-      setError(errorMessage);
+      setDatabaseError(errorMessage);
       console.error('Error building database:', err);
     } finally {
       setBuildingDatabase(false);
@@ -277,6 +278,7 @@ function App() {
           isLoading={loading}
           buildingDatabase={buildingDatabase}
           error={error}
+          databaseError={databaseError}
           hasStoredKey={hasStoredKey}
           storedApiKey={storedApiKey}
           databaseTimestamp={databaseTimestamp}
@@ -310,15 +312,15 @@ function App() {
             message={
               buildingDatabase
                 ? loadingProgress
-                  ? `Building database (${loadingProgress.current} of ${loadingProgress.total} batches)...`
-                  : 'Starting database build...'
-                : 'Loading your achievements...'
+                  ? `Building database (${loadingProgress.current} of ${loadingProgress.total} batches)…`
+                  : 'Starting database build…'
+                : 'Loading your achievements…'
             }
           />
         )}
 
         {/* Achievement list */}
-        {!loading && achievements.length > 0 && (
+        {!loading && !buildingDatabase && achievements.length > 0 && (
           <AnimatePresence mode="wait">
             <AchievementList
               groupedAchievements={groupedAchievements}
