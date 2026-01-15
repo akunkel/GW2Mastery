@@ -86,8 +86,8 @@ function App() {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
             GW2Mastery
           </h1>
-          <p className="text-slate-400 text-lg md:text-xl">
-            When all you want is the mastery points.
+          <p className="text-slate-400 lg:text-lg md:text-base text-sm">
+            Just the mastery points, please.
           </p>
         </header>
 
