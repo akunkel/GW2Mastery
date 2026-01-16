@@ -97,6 +97,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             hiddenAchievements: hiddenIds,
             filter: filterSettings.hideCompleted ? 'incomplete' : 'all',
             goal: filterSettings.requiredOnly ? 'required' : 'all',
+            showHidden: filterSettings.showHidden,
             isInitialized: true,
         });
 
@@ -123,7 +124,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (isInitialized) {
             const hideCompleted = filter === 'incomplete';
             const requiredOnly = goal === 'required';
-            saveFilterSettings(hideCompleted, requiredOnly);
+            const { showHidden } = get();
+            saveFilterSettings(hideCompleted, requiredOnly, showHidden);
         }
     },
 
@@ -133,11 +135,20 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (isInitialized) {
             const hideCompleted = filter === 'incomplete';
             const requiredOnly = goal === 'required';
-            saveFilterSettings(hideCompleted, requiredOnly);
+            const { showHidden } = get();
+            saveFilterSettings(hideCompleted, requiredOnly, showHidden);
         }
     },
 
-    setShowHidden: (show) => set({ showHidden: show }),
+    setShowHidden: (show) => {
+        set({ showHidden: show });
+        const { isInitialized, filter, goal } = get();
+        if (isInitialized) {
+            const hideCompleted = filter === 'incomplete';
+            const requiredOnly = goal === 'required';
+            saveFilterSettings(hideCompleted, requiredOnly, show);
+        }
+    },
 
     loadAchievements: async (key: string) => {
         set({ loading: true, loadingProgress: null, error: null });

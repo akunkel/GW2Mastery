@@ -94,9 +94,17 @@ export function getMasteryAchievementIdsTimestamp(): number | null {
 /**
  * Saves filter settings to localStorage
  */
-export function saveFilterSettings(hideCompleted: boolean, requiredOnly: boolean): void {
+export function saveFilterSettings(
+  hideCompleted: boolean,
+  requiredOnly: boolean,
+  showHidden: boolean
+): void {
   try {
-    localStorage.setItem(FILTER_SETTINGS_KEY, JSON.stringify({ hideCompleted, requiredOnly }));
+    console.log('Saving filter settings:', { hideCompleted, requiredOnly, showHidden });
+    localStorage.setItem(
+      FILTER_SETTINGS_KEY,
+      JSON.stringify({ hideCompleted, requiredOnly, showHidden })
+    );
   } catch (error) {
     console.error('Failed to save filter settings to localStorage:', error);
   }
@@ -104,19 +112,34 @@ export function saveFilterSettings(hideCompleted: boolean, requiredOnly: boolean
 
 /**
  * Retrieves filter settings from localStorage
- * Defaults to { hideCompleted: false, requiredOnly: true } if not found
+ * Defaults to { hideCompleted: false, requiredOnly: true, showHidden: false } if not found
  */
-export function getFilterSettings(): { hideCompleted: boolean; requiredOnly: boolean } {
+export function getFilterSettings(): {
+  hideCompleted: boolean;
+  requiredOnly: boolean;
+  showHidden: boolean;
+} {
   try {
     const data = localStorage.getItem(FILTER_SETTINGS_KEY);
+    console.log('Reading filter settings:', data);
     if (data) {
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      const settings = {
+        hideCompleted: parsed.hideCompleted ?? false,
+        requiredOnly: parsed.requiredOnly ?? true,
+        showHidden: parsed.showHidden ?? false,
+      };
+      console.log('Parsed settings:', settings);
+      return settings;
     }
-    // Default: show completed (false), required only (true)
-    return { hideCompleted: false, requiredOnly: true };
+    // Default: show completed (false), required only (true), show hidden (false)
+    return { hideCompleted: false, requiredOnly: true, showHidden: false };
   } catch (error) {
-    console.error('Failed to retrieve filter settings from localStorage:', error);
-    return { hideCompleted: false, requiredOnly: true };
+    console.error(
+      'Failed to retrieve filter settings from localStorage:',
+      error
+    );
+    return { hideCompleted: false, requiredOnly: true, showHidden: false };
   }
 }
 
