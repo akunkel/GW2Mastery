@@ -2,7 +2,7 @@ import { CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff } from 'lucid
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import type { EnrichedAchievement } from '../../types/gw2';
-import { Card, CardContent } from '../../components/ui/card';
+import { Card, CardContent } from '../ui/card';
 
 interface AchievementCardProps {
   achievement: EnrichedAchievement;

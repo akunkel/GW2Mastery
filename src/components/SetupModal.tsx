@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import DatabaseSection from './DatabaseSection';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
@@ -24,11 +24,11 @@ export default function SetupModal() {
   const hasAchievements = achievements.length > 0;
 
   const [localApiKey, setLocalApiKey] = useState<string>('');
-  const [justSubmitted, setJustSubmitted] = useState<boolean>(false);
-  const wasLoadingRef = useRef<boolean>(false);
+
 
   // Sync local state with stored key when it changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setLocalApiKey(storedApiKey || '');
   }, [storedApiKey]);
 
@@ -36,43 +36,23 @@ export default function SetupModal() {
 
   // Show input as enabled if there's an error (allows retry)
   const shouldShowClearButton =
-    hasStoredKey && !error && !isLoading && !justSubmitted;
+    hasStoredKey && !error && !isLoading;
   const shouldDisableInput = isLoading || shouldShowClearButton;
 
-  // Track loading state changes
-  useEffect(() => {
-    if (isLoading) {
-      wasLoadingRef.current = true;
-    }
-  }, [isLoading]);
-
-  // Close modal after successful API key submission and loading completes
-  useEffect(() => {
-    // Only close if we just submitted, were loading, and now loading is done successfully
-    if (
-      justSubmitted &&
-      wasLoadingRef.current &&
-      !isLoading &&
-      !error &&
-      open
-    ) {
-      onOpenChange(false);
-      setJustSubmitted(false);
-      wasLoadingRef.current = false;
-    }
-  }, [justSubmitted, isLoading, error, open, onOpenChange]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (apiKey.trim()) {
-      setJustSubmitted(true);
-      onApiKeySubmit(apiKey.trim(), true); // Always remember the API key
-      // Don't clear the API key - it will be managed by the useEffect
+      await onApiKeySubmit(apiKey.trim(), true);
+      // Check for error in the store state after await
+      const currentError = useAppStore.getState().error;
+      if (!currentError) {
+        onOpenChange(false);
+      }
     }
   };
 
   const handleClearKey = () => {
-    setJustSubmitted(false);
+
     setLocalApiKey('');
     onClearKey();
   };

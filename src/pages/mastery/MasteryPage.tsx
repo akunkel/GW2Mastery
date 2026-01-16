@@ -1,13 +1,17 @@
 import { AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import AchievementList, { type AchievementGroup } from '../../components/common/AchievementList';
 import { useAppStore } from '../../store/useAppStore';
+
 import {
-    calculateTotalMasteryPoints,
     enrichAchievements,
     filterByCompletion,
+    getRegionDisplayName,
+    getRequiredCounts,
     groupByRegionAndCategory,
 } from '../../utils/filters';
-import AchievementList from './AchievementList';
+import { getRegionColor, getRegionImage, REGION_ORDER } from '../../utils/regionHelpers';
 import FilterBar from './FilterBar';
 
 export default function MasteryPage() {
@@ -48,6 +52,10 @@ export default function MasteryPage() {
 
     const groupedAchievements = groupByRegionAndCategory(enrichedAchievements);
 
+    // Also group ALL enriched achievements for accurate toal counts
+    const allEnriched = enrichAchievements(achievements, accountProgress, categoryMap);
+    const allGrouped = groupByRegionAndCategory(allEnriched);
+
     // Calculate counts for filter bar
     const totalCount = achievements.length;
     const completedCount = achievements.filter(
@@ -55,11 +63,76 @@ export default function MasteryPage() {
     ).length;
     const incompleteCount = totalCount - completedCount;
 
-    // Calculate mastery points
-    const masteryPoints = calculateTotalMasteryPoints(
-        achievements,
-        accountProgress
-    );
+
+
+    // Get required counts for mastery logic
+    const requiredCounts = getRequiredCounts();
+
+    // Build generic groups from Mastery Regions
+    const groups: AchievementGroup[] = REGION_ORDER.map(region => {
+        // Get categories for this region
+        const regionCategories = groupedAchievements.get(region) || new Map();
+
+        // Calculate totals using ALL achievements (unfiltered)
+        const allRegionCategories = allGrouped.get(region);
+        let totalInRegion = 0;
+        let completedInRegion = 0;
+
+        if (allRegionCategories) {
+            allRegionCategories.forEach((achievements) => {
+                totalInRegion += achievements.length;
+                completedInRegion += achievements.filter(
+                    (a) => a.progress?.done
+                ).length;
+            });
+        }
+
+        const goalCount = goal === 'required' ? requiredCounts[region] : totalInRegion;
+        const isComplete = completedInRegion >= goalCount;
+
+        return {
+            id: region,
+            title: getRegionDisplayName(region),
+            color: getRegionColor(region),
+            image: getRegionImage(region),
+            totalCount: goalCount,
+            completedCount: completedInRegion,
+            isComplete,
+            categories: regionCategories,
+            categoryOrder: REGION_ORDER.indexOf(region) // Just use index for stability
+        };
+    }).filter(g => {
+        // Same filtering logic as before for the "ExpansionCard" list
+        if (filter === 'incomplete' && g.isComplete) return false;
+        return true;
+    });
+
+    // Handle selection state via URL hash
+    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {
+        const hash = window.location.hash.replace('#', '');
+        return hash || null;
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const hash = window.location.hash.replace('#', '');
+            setSelectedGroupId(hash || null);
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const handleSelectionChange = (id: string | null) => {
+        setSelectedGroupId(id);
+        if (id) {
+            window.history.pushState({ expansion: id }, '', `#${id}`);
+        } else {
+            // Go back if clearing selection, or push empty hash?
+            // Previous behavior was back() or pushState to remove hash? 
+            // Let's just reset hash for now to keep it simple
+            window.history.pushState(null, '', window.location.pathname);
+        }
+    };
 
     return (
         <>
@@ -106,13 +179,9 @@ export default function MasteryPage() {
             {!loading && !buildingDatabase && achievements.length > 0 && (
                 <AnimatePresence mode="wait">
                     <AchievementList
-                        groupedAchievements={groupedAchievements}
-                        allAchievements={achievements}
-                        accountProgress={accountProgress}
-                        categoryMap={categoryMap}
-                        earnedPoints={masteryPoints.earned}
-                        totalPoints={masteryPoints.total}
-                        goal={goal}
+                        groups={groups}
+                        selectedId={selectedGroupId}
+                        onSelectionChange={handleSelectionChange}
                         filter={filter}
                         hiddenAchievements={hiddenAchievements}
                         showHidden={showHidden}

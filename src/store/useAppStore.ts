@@ -59,7 +59,7 @@ interface AppState {
     setGoal: (goal: GoalType) => void;
     setShowHidden: (show: boolean) => void;
     loadAchievements: (key: string) => Promise<void>;
-    handleApiKeySubmit: (key: string, remember: boolean) => void;
+    handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
     handleClearKey: () => void;
     handleToggleHidden: (achievementId: number) => void;
     handleBuildDatabase: () => Promise<void>;
@@ -196,7 +196,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
     },
 
-    handleApiKeySubmit: (key: string, remember: boolean) => {
+    handleApiKeySubmit: async (key: string, remember: boolean) => {
         if (remember) {
             saveApiKey(key);
             set({ hasStoredKey: true, apiKey: key });
@@ -205,7 +205,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             set({ hasStoredKey: false, apiKey: null });
         }
 
-        get().loadAchievements(key);
+        await get().loadAchievements(key);
     },
 
     handleClearKey: () => {
