@@ -8,14 +8,14 @@ import type {
   FilterType,
   GoalType,
   MasteryRegion,
-} from '../types/gw2';
+} from '../../types/gw2';
 import {
   enrichAchievements,
   getRegionDisplayName,
   getRequiredCounts,
   groupByRegionAndCategory,
-} from '../utils/filters';
-import { getRegionColor, REGION_ORDER } from '../utils/regionHelpers';
+} from '../../utils/filters';
+import { getRegionColor, REGION_ORDER } from '../../utils/regionHelpers';
 import AchievementCard from './AchievementCard';
 import ExpansionCard from './ExpansionCard';
 

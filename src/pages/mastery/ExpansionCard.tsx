@@ -1,7 +1,9 @@
 import { CheckCircle2 } from 'lucide-react';
-import type { MasteryRegion } from '../types/gw2';
-import { getRegionDisplayName } from '../utils/filters';
-import { getRegionColor, getRegionImage } from '../utils/regionHelpers';
+
+
+import type { MasteryRegion } from '../../types/gw2';
+import { getRegionDisplayName } from '../../utils/filters';
+import { getRegionColor, getRegionImage } from '../../utils/regionHelpers';
 
 interface ExpansionCardProps {
   region: MasteryRegion;
@@ -24,9 +26,8 @@ export default function ExpansionCard({
   return (
     <button
       onClick={onClick}
-      className={`w-full p-4 rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 relative overflow-hidden flex items-center gap-4 text-left border-2 ${
-        isComplete ? 'border-green-500' : 'border-transparent'
-      }`}
+      className={`w-full p-4 rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 relative overflow-hidden flex items-center gap-4 text-left border-2 ${isComplete ? 'border-green-500' : 'border-transparent'
+        }`}
     >
       {/* Background with opacity */}
       <div

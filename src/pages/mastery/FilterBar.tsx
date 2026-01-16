@@ -1,4 +1,4 @@
-import type { FilterType, GoalType } from '../types/gw2';
+import type { FilterType, GoalType } from '../../types/gw2';
 
 interface FilterBarProps {
   currentFilter: FilterType;
