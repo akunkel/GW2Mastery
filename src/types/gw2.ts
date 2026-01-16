@@ -14,42 +14,22 @@ export type FilterType = 'all' | 'incomplete';
 
 export type GoalType = 'all' | 'required';
 
-export interface AchievementTier {
-  count: number;
-  points: number;
+// Output optimized structure only
+export interface RawAchievementReward {
+  type: string;
+  id?: number;
+  count?: number;
+  region?: MasteryRegion;
 }
 
-export interface MasteryReward {
-  type: 'Mastery';
-  id: number;
-  region: MasteryRegion;
-}
-
-export interface CoinReward {
-  type: 'Coins';
-  count: number;
-}
-
-export interface ItemReward {
-  type: 'Item';
-  id: number;
-  count: number;
-}
-
-export interface TitleReward {
-  type: 'Title';
-  id: number;
-}
-
-export type AchievementReward = MasteryReward | CoinReward | ItemReward | TitleReward;
-
-export interface AchievementBit {
+export interface RawAchievementBit {
   type: string;
   id?: number;
   text?: string;
 }
 
-export interface Achievement {
+// Raw API response type (internal use for build process)
+export interface RawAchievement {
   id: number;
   name: string;
   description: string;
@@ -57,12 +37,27 @@ export interface Achievement {
   locked_text?: string;
   type: string;
   flags: string[];
-  tiers: AchievementTier[];
+  tiers: unknown[];
   icon?: string;
   prerequisites?: number[];
-  rewards?: AchievementReward[];
-  bits?: AchievementBit[];
+  rewards?: RawAchievementReward[];
+  bits?: RawAchievementBit[];
   point_cap?: number;
+}
+
+export interface Achievement {
+  id: number;
+  name: string;
+  requirement: string;
+  icon?: string;
+  masteryRegion?: MasteryRegion | null;
+  bits?: { text?: string }[];
+  rewards?: never; // Ensure we don't accidentally use the old rewards structure
+}
+
+export interface AchievementDatabase {
+  timestamp: number;
+  achievements: Achievement[];
 }
 
 export interface AchievementCategory {

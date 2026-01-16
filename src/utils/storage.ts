@@ -1,10 +1,4 @@
-import type { Achievement } from '../types/gw2';
-import defaultAchievementIds from '../data/achievementIds.json';
-
 const API_KEY_STORAGE_KEY = 'gw2_api_key';
-const ACHIEVEMENT_IDS_STORAGE_KEY = 'gw2_achievement_ids';
-const ACHIEVEMENT_IDS_TIMESTAMP_KEY = 'gw2_achievement_ids_timestamp';
-const ACHIEVEMENTS_CACHE_KEY = 'gw2_achievements_cache';
 const FILTER_SETTINGS_KEY = 'gw2_filter_settings';
 const HIDDEN_ACHIEVEMENTS_KEY = 'gw2_hidden_achievements';
 
@@ -39,55 +33,6 @@ export function clearApiKey(): void {
     localStorage.removeItem(API_KEY_STORAGE_KEY);
   } catch (error) {
     console.error('Failed to clear API key from localStorage:', error);
-  }
-}
-
-/**
- * Saves achievement IDs to localStorage
- */
-export function saveAchievementIds(ids: number[]): void {
-  try {
-    localStorage.setItem(ACHIEVEMENT_IDS_STORAGE_KEY, JSON.stringify(ids));
-    localStorage.setItem(ACHIEVEMENT_IDS_TIMESTAMP_KEY, Date.now().toString());
-  } catch (error) {
-    console.error('Failed to save achievement IDs to localStorage:', error);
-  }
-}
-
-/**
- * Retrieves achievement IDs from localStorage
- * If not found in localStorage, returns the default IDs from the bundled JSON file
- */
-export function getAchievementIds(): number[] | null {
-  try {
-    const data = localStorage.getItem(ACHIEVEMENT_IDS_STORAGE_KEY);
-    if (data) {
-      return JSON.parse(data);
-    }
-    // Return default IDs from bundled JSON file if available
-    return defaultAchievementIds.length > 0 ? defaultAchievementIds : null;
-  } catch (error) {
-    console.error('Failed to retrieve achievement IDs from localStorage:', error);
-    return defaultAchievementIds.length > 0 ? defaultAchievementIds : null;
-  }
-}
-
-/**
- * Gets the timestamp when achievement IDs were last updated
- * Returns build time timestamp if using default bundled data
- */
-export function getAchievementIdsTimestamp(): number | null {
-  try {
-    const timestamp = localStorage.getItem(ACHIEVEMENT_IDS_TIMESTAMP_KEY);
-    if (timestamp) {
-      return parseInt(timestamp, 10);
-    }
-    // If using default bundled data and no timestamp exists, return build time
-    // This will be updated when you paste the IDs from console
-    return defaultAchievementIds.length > 0 ? new Date('2026-01-14').getTime() : null;
-  } catch (error) {
-    console.error('Failed to retrieve achievement IDs timestamp:', error);
-    return defaultAchievementIds.length > 0 ? new Date('2026-01-14').getTime() : null;
   }
 }
 
@@ -143,30 +88,35 @@ export function getFilterSettings(): {
   }
 }
 
+const ACHIEVEMENT_DB_KEY = 'gw2_achievement_db_v1';
+
+import type { AchievementDatabase } from '../types/gw2';
+
 /**
- * Saves full achievement details to localStorage
+ * Saves the full achievement database to localStorage
  */
-export function saveAchievements(achievements: Achievement[]): void {
+export function saveAchievementDatabase(db: AchievementDatabase): void {
   try {
-    localStorage.setItem(ACHIEVEMENTS_CACHE_KEY, JSON.stringify(achievements));
-    localStorage.setItem(ACHIEVEMENT_IDS_TIMESTAMP_KEY, Date.now().toString());
+    localStorage.setItem(ACHIEVEMENT_DB_KEY, JSON.stringify(db));
   } catch (error) {
-    console.error('Failed to save achievements to localStorage:', error);
+    console.error('Failed to save achievement database to localStorage:', error);
   }
 }
 
 /**
- * Retrieves full achievement details from localStorage
+ * Retrieves the full achievement database from localStorage
  */
-export function getAchievements(): Achievement[] | null {
+export function getAchievementDatabase(): AchievementDatabase | null {
   try {
-    const data = localStorage.getItem(ACHIEVEMENTS_CACHE_KEY);
+    const data = localStorage.getItem(ACHIEVEMENT_DB_KEY);
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    console.error('Failed to retrieve achievements from localStorage:', error);
+    console.error('Failed to retrieve achievement database from localStorage:', error);
     return null;
   }
 }
+
+
 
 /**
  * Saves hidden achievement IDs to localStorage

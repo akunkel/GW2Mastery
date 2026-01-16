@@ -33,9 +33,7 @@ export default function MasteryPage() {
     } = useAppStore();
 
     // Filter for mastery achievements only
-    const achievements = allAchievements.filter((a) =>
-        a.rewards?.some((r) => r.type === 'Mastery')
-    );
+    const achievements = allAchievements.filter((a) => a.masteryRegion);
 
     // Calculate filtered and grouped achievements
     const filteredAchievements = filterByCompletion(

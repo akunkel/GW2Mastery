@@ -1,5 +1,22 @@
-import type { AccountAchievement, Achievement, AchievementCategory, MasteryReward } from '../types/gw2';
-import { getAchievementIds, getAchievements, saveAchievementIds, saveAchievements } from '../utils/storage';
+import type { AccountAchievement, Achievement, AchievementCategory, RawAchievement, AchievementDatabase } from '../types/gw2';
+import achievementDb from '../data/achievementDb.json';
+import { getAchievementDatabase, saveAchievementDatabase } from '../utils/storage';
+
+/**
+ * Returns the status of the achievement database (timestamps)
+ */
+export function getDatabaseStatus() {
+  const localDb = getAchievementDatabase();
+  const bundledDb = achievementDb as unknown as AchievementDatabase;
+  const localTs = localDb?.timestamp || 0;
+  const bundledTs = bundledDb?.timestamp || 0;
+
+  return {
+    localTs,
+    bundledTs,
+    activeTs: Math.max(localTs, bundledTs)
+  };
+}
 
 const BASE_URL = 'https://api.guildwars2.com/v2';
 const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (5/sec)
@@ -55,15 +72,42 @@ export async function buildAchievementDatabase(
         if (!response.ok) {
           throw new Error(`Failed to fetch achievements batch: ${response.statusText}`);
         }
-        return (await response.json()) as Achievement[];
+        return (await response.json()) as RawAchievement[];
       })
     );
 
     // Process results
     results.forEach((batchData) => {
-      batchData.forEach((achievement) => {
-        ids.push(achievement.id);
-        achievements.push(achievement);
+      batchData.forEach((raw) => {
+        ids.push(raw.id);
+
+        // Optimize: Map raw API data to our optimized structure
+        // Optimize: Map raw API data to our optimized structure
+        const optimized: Achievement = {
+          id: raw.id,
+          name: raw.name,
+          requirement: raw.requirement,
+        };
+
+        if (raw.icon) {
+          optimized.icon = raw.icon;
+        }
+
+        const region = raw.rewards?.find((r) => r.type === 'Mastery')?.region;
+        if (region) {
+          optimized.masteryRegion = region;
+        }
+
+        if (raw.bits && raw.bits.length > 0) {
+          optimized.bits = raw.bits.map((b) => {
+            // Create clean bit object
+            const bit: { text?: string } = {};
+            if (b.text) bit.text = b.text;
+            return bit;
+          });
+        }
+
+        achievements.push(optimized);
       });
     });
 
@@ -74,76 +118,63 @@ export async function buildAchievementDatabase(
     }
   }
 
-  // Save both IDs and full achievement details to localStorage
-  saveAchievementIds(ids);
-  saveAchievements(achievements);
+  // Create database object with timestamp
+  const db: AchievementDatabase = {
+    timestamp: Date.now(),
+    achievements,
+  };
 
-  // Log the results for developers to use in source code.
-  // To update the default database, copy the JSON and paste it into src/data/achievementIds.json
+  // Save to localStorage for immediate use
+  saveAchievementDatabase(db);
+
+  // Log the results for developers
   console.log('=== Database Build Complete ===');
-  console.log(`Total achievements: ${ids.length}`);
-  console.log('\n' + JSON.stringify(ids, null, 2));
+  console.log(`Total achievements: ${achievements.length}`);
+  console.log('Timestamp:', new Date(db.timestamp).toISOString());
+  console.log('Copy the following JSON content into src/data/achievementDb.json:');
+  console.log('\n' + JSON.stringify(db));
 
   return ids;
 }
 
 /**
  * Fetches ALL achievements from the database
- * Requires achievement database to be built first
+ * Returns static bundled data or local storage, whichever is newer
  */
 export async function fetchAchievements(): Promise<Achievement[]> {
-  // Try to get from cache first
-  const cachedAchievements = getAchievements();
-  if (cachedAchievements && cachedAchievements.length > 0) {
-    console.log(`Loaded ${cachedAchievements.length} achievements from cache (instant)`);
-    return cachedAchievements;
+  // 1. Get local storage version
+  const localDb = getAchievementDatabase();
+
+  // 2. Get bundled version
+  // We handle the potential type mismatch if the JSON is empty stub
+  const bundledDb = achievementDb as unknown as AchievementDatabase;
+
+  // 3. Compare timestamps
+  let activeDb: AchievementDatabase;
+
+  const localTs = localDb?.timestamp || 0;
+  const bundledTs = bundledDb?.timestamp || 0;
+
+  console.log('fetchAchievements Debug:', {
+    localTs,
+    bundledTs,
+    bundledHasAch: bundledDb?.achievements?.length,
+    activeStr: localTs > bundledTs ? 'local' : (bundledTs > 0 ? 'bundled' : 'none')
+  });
+
+  if (localTs > bundledTs) {
+    console.log(`Using local database (Timestamp: ${new Date(localTs).toISOString()})`);
+    activeDb = localDb!;
+  } else if (bundledTs > 0) {
+    console.log(`Using bundled database (Timestamp: ${new Date(bundledTs).toISOString()})`);
+    activeDb = bundledDb;
+  } else {
+    // Both are empty/invalid
+    console.warn('No valid achievement database found.');
+    return [];
   }
 
-  // Fall back to fetching from API if cache is empty
-  const achievementIdsArray = getAchievementIds();
-
-  if (!achievementIdsArray) {
-    throw new Error('Achievement database not found. Please click "Build Database" first.');
-  }
-
-  console.log(`Fetching all ${achievementIdsArray.length} achievements from API`);
-
-  // Create batches of achievement IDs
-  const batchSize = 200;
-  const batches: number[][] = [];
-  for (let i = 0; i < achievementIdsArray.length; i += batchSize) {
-    batches.push(achievementIdsArray.slice(i, i + batchSize));
-  }
-
-  const achievements: Achievement[] = [];
-
-  // Process batches in parallel groups to stay under rate limits
-  for (let i = 0; i < batches.length; i += PARALLEL_REQUESTS) {
-    const parallelBatches = batches.slice(i, i + PARALLEL_REQUESTS);
-
-    // Fetch multiple batches in parallel
-    const results = await Promise.all(
-      parallelBatches.map(async (batchIds) => {
-        const response = await fetch(`${BASE_URL}/achievements?ids=${batchIds.join(',')}`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch achievement details: ${response.statusText}`);
-        }
-        return (await response.json()) as Achievement[];
-      })
-    );
-
-    // Collect results
-    results.forEach((batchData) => {
-      achievements.push(...batchData);
-    });
-  }
-
-  console.log(`Loaded ${achievements.length} total achievements from API`);
-
-  // Save to cache for next time
-  saveAchievements(achievements);
-
-  return achievements;
+  return activeDb.achievements;
 }
 
 /**
@@ -225,13 +256,7 @@ export async function fetchAchievementCategories(): Promise<AchievementCategory[
  * Gets the mastery region for an achievement
  */
 export function getMasteryRegion(achievement: Achievement): string | null {
-  if (!achievement.rewards) return null;
-
-  const masteryReward = achievement.rewards.find(
-    (reward) => reward.type === 'Mastery'
-  ) as MasteryReward | undefined;
-
-  return masteryReward?.region || null;
+  return achievement.masteryRegion || null;
 }
 
 /**

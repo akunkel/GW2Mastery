@@ -1,38 +1,45 @@
 # Achievement Database
 
-This directory contains the default achievement IDs that are bundled with the application.
+This directory contains the bundled achievement data for the application.
 
 ## Updating the Database
 
-When Guild Wars 2 adds new achievements, you need to update the `achievementIds.json` file:
+When Guild Wars 2 adds new achievements or you want to refresh the data:
 
 1. Open the application in development mode
 2. Open the browser console (F12)
 3. Go to Setup and click "Build Database"
 4. Wait for the build to complete
-5. The console will display the updated JSON array
-6. Copy the entire JSON array from the console
-7. Paste it into `src/data/achievementIds.json`
-8. Update the timestamp in `src/utils/storage.ts` (line with `new Date('2026-01-14')`) to the current date
-9. Commit and deploy the changes
+5. The console will display the full minified JSON object
+6. Copy the entire JSON output
+7. Paste it into `src/data/achievementDb.json`
+8. Commit and deploy the changes
 
 ## File Format
 
-The `achievementIds.json` file should contain a JSON array of achievement IDs:
+The `achievementDb.json` file contains a timestamped object with the achievement data:
 
 ```json
-[
-  1234,
-  5678,
-  9012,
-  ...
-]
+{
+  "timestamp": 1234567890,
+  "achievements": [
+    {
+      "id": 1234,
+      "name": "Achievement Name",
+      "requirement": "Do something",
+      "icon": "https://...",
+      "masteryRegion": "Maguuma",
+      "bits": [{ "text": "Step 1" }]
+    },
+    ...
+  ]
+}
 ```
 
 ## Benefits
 
-By bundling the default database:
-- Users don't need to build the database on first load
-- Reduces API calls to the GW2 API
-- Faster initial load time
-- Users can still rebuild if they want the latest data
+By bundling the full database:
+- Zero initial API calls for achievement details
+- Instant load times
+- Reduced API rate limiting issues
+- Validated data structure at build time

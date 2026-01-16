@@ -3,6 +3,7 @@ import {
     buildAchievementDatabase,
     fetchAccountAchievements,
     fetchAchievementCategories,
+    getDatabaseStatus,
     fetchAchievements,
     mapAchievementsToCategories,
     validateApiKey,
@@ -18,8 +19,6 @@ import {
     getApiKey,
     getFilterSettings,
     getHiddenAchievements,
-    getAchievementIds,
-    getAchievementIdsTimestamp,
     saveApiKey,
     saveFilterSettings,
     saveHiddenAchievements,
@@ -88,12 +87,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     // Actions
     initialize: () => {
         const storedKey = getApiKey();
-        const timestamp = getAchievementIdsTimestamp();
         const filterSettings = getFilterSettings();
         const hiddenIds = getHiddenAchievements();
 
+        const { activeTs } = getDatabaseStatus();
+
         set({
-            databaseTimestamp: timestamp,
+            databaseTimestamp: activeTs > 0 ? activeTs : null,
             hiddenAchievements: hiddenIds,
             filter: filterSettings.hideCompleted ? 'incomplete' : 'all',
             goal: filterSettings.requiredOnly ? 'required' : 'all',
@@ -107,10 +107,7 @@ export const useAppStore = create<AppState>((set, get) => ({
                 apiKey: storedKey
             });
 
-            const achievementIds = getAchievementIds();
-            if (achievementIds) {
-                get().loadAchievements(storedKey);
-            }
+            get().loadAchievements(storedKey);
         } else {
             set({ setupModalOpen: true });
         }
@@ -239,9 +236,8 @@ export const useAppStore = create<AppState>((set, get) => ({
             await buildAchievementDatabase((current, total) => {
                 set({ loadingProgress: { current, total } });
             });
-
-            const timestamp = getAchievementIdsTimestamp();
-            set({ databaseTimestamp: timestamp });
+            // Timestamp is no longer relevant for static data build output
+            set({ databaseTimestamp: Date.now() });
         } catch (err) {
             const errorMessage =
                 err instanceof Error ? err.message : 'Failed to build database';
