@@ -48,8 +48,8 @@ export default function AchievementCard({
         isHidden && 'opacity-50'
       )}
     >
-      {/* Hidden toggle button - appears on hover */}
-      {onToggleHidden && (
+      {/* Hidden toggle button - only show if NOT completed and handler exists */}
+      {!isCompleted && onToggleHidden && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -82,7 +82,7 @@ export default function AchievementCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="font-bold text-white text-sm leading-tight hover:text-blue-400 transition-colors"
+              className="font-bold text-white text-sm leading-tight hover:text-blue-400 group-hover:underline transition-colors"
             >
               {name}
             </a>
@@ -98,7 +98,7 @@ export default function AchievementCard({
         <p
           className={cn(
             'text-xs text-slate-300 mb-2',
-            isCompleted && 'line-clamp-1'
+            isCompleted && 'line-clamp-3'
           )}
         >
           {cleanDescription(requirement)}

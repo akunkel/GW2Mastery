@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type {
   AccountAchievement,
   Achievement,
@@ -71,36 +71,7 @@ export default function AchievementList({
     new Set()
   );
 
-  // State to track if header is sticky
-  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
-  const headerRef = useRef<HTMLDivElement>(null);
 
-  // Detect when header becomes sticky
-  useEffect(() => {
-    const header = headerRef.current;
-    if (!header) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // When the sentinel is not intersecting, the header is sticky
-        setIsHeaderSticky(!entry.isIntersecting);
-      },
-      { threshold: [1] }
-    );
-
-    // Create a sentinel element just above the sticky header
-    const sentinel = document.createElement('div');
-    sentinel.style.height = '1px';
-    sentinel.style.marginTop = '-1px';
-    header.parentElement?.insertBefore(sentinel, header);
-
-    observer.observe(sentinel);
-
-    return () => {
-      observer.disconnect();
-      sentinel.remove();
-    };
-  }, [selectedExpansion]);
 
   // Animation variants for page transitions
   const pageVariants = {
@@ -112,6 +83,11 @@ export default function AchievementList({
   const pageTransition = {
     duration: 0.4,
   };
+
+  // Scroll to top when expansion changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedExpansion]);
 
   // Handle browser navigation (back/forward buttons)
   useEffect(() => {
@@ -275,9 +251,8 @@ export default function AchievementList({
         return (
           <div key={region} className="mb-4">
             <div
-              ref={headerRef}
-              className={`sticky top-0 z-10 flex items-center justify-between px-4 shadow-md transition-all duration-300 ${isHeaderSticky ? 'py-2' : 'py-3'
-                } ${isComplete ? 'border-y-2 border-green-500' : ''}`}
+              className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 shadow-md ${isComplete ? 'border-y-2 border-green-500' : ''
+                }`}
               style={{
                 backgroundColor: regionColor,
                 color: '#ffffff',
@@ -321,7 +296,14 @@ export default function AchievementList({
                   // Filter hidden achievements if showHidden is false
                   const visibleAchievements = showHidden
                     ? achievements
-                    : achievements.filter((a) => !hiddenAchievements.has(a.id));
+                    : achievements.filter((a) => {
+                      const isCompleted = a.progress?.done || false;
+                      const isHidden = hiddenAchievements.has(a.id);
+                      // If it's completed, it's never hidden
+                      if (isCompleted) return true;
+                      // Otherwise respect hidden status
+                      return !isHidden;
+                    });
 
                   // Sort achievements: incomplete first, completed last
                   const sortedAchievements = [...visibleAchievements].sort((a, b) => {
@@ -370,7 +352,10 @@ export default function AchievementList({
                             <AchievementCard
                               key={achievement.id}
                               achievement={achievement}
-                              isHidden={hiddenAchievements.has(achievement.id)}
+                              isHidden={
+                                hiddenAchievements.has(achievement.id) &&
+                                !achievement.progress?.done
+                              }
                               onToggleHidden={onToggleHidden}
                             />
                           ))}

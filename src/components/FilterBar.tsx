@@ -39,9 +39,9 @@ export default function FilterBar({
   };
 
   return (
-    <div className="flex items-center justify-between w-full">
+    <div className="flex items-end justify-between w-full">
       {/* Left side - Hide completed and show hidden checkboxes */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-2 cursor-pointer group">
             <input

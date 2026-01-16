@@ -107,7 +107,13 @@ function App() {
               incompleteCount={incompleteCount}
               showHidden={showHidden}
               onShowHiddenChange={setShowHidden}
-              hiddenCount={hiddenAchievements.size}
+              hiddenCount={
+                Array.from(hiddenAchievements).filter((id) => {
+                  const ach = achievements.find((a) => a.id === id);
+                  const progress = accountProgress.get(id);
+                  return ach && (!progress || !progress.done);
+                }).length
+              }
             />
           </div>
         )}
