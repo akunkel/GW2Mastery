@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import {
-    buildMasteryAchievementIdsDatabase,
+    buildAchievementDatabase,
     fetchAccountAchievements,
     fetchAchievementCategories,
-    fetchMasteryAchievements,
+    fetchAchievements,
     mapAchievementsToCategories,
     validateApiKey,
 } from '../services/gw2Api';
@@ -18,8 +18,8 @@ import {
     getApiKey,
     getFilterSettings,
     getHiddenAchievements,
-    getMasteryAchievementIds,
-    getMasteryAchievementIdsTimestamp,
+    getAchievementIds,
+    getAchievementIdsTimestamp,
     saveApiKey,
     saveFilterSettings,
     saveHiddenAchievements,
@@ -88,7 +88,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     // Actions
     initialize: () => {
         const storedKey = getApiKey();
-        const timestamp = getMasteryAchievementIdsTimestamp();
+        const timestamp = getAchievementIdsTimestamp();
         const filterSettings = getFilterSettings();
         const hiddenIds = getHiddenAchievements();
 
@@ -107,8 +107,8 @@ export const useAppStore = create<AppState>((set, get) => ({
                 apiKey: storedKey
             });
 
-            const masteryIds = getMasteryAchievementIds();
-            if (masteryIds) {
+            const achievementIds = getAchievementIds();
+            if (achievementIds) {
                 get().loadAchievements(storedKey);
             }
         } else {
@@ -170,19 +170,19 @@ export const useAppStore = create<AppState>((set, get) => ({
             });
 
             // Fetch categories and achievements concurrently
-            const [categories, masteryAchievements] = await Promise.all([
+            const [categories, allAchievements] = await Promise.all([
                 fetchAchievementCategories(),
-                fetchMasteryAchievements(),
+                fetchAchievements(),
             ]);
 
             // Map achievements to their categories
             const achCategoryMap = mapAchievementsToCategories(
-                masteryAchievements,
+                allAchievements,
                 categories
             );
 
             set({
-                achievements: masteryAchievements,
+                achievements: allAchievements,
                 accountProgress: progressMap,
                 categoryMap: achCategoryMap,
             });
@@ -236,11 +236,11 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ buildingDatabase: true, loadingProgress: null, databaseError: null });
 
         try {
-            await buildMasteryAchievementIdsDatabase((current, total) => {
+            await buildAchievementDatabase((current, total) => {
                 set({ loadingProgress: { current, total } });
             });
 
-            const timestamp = getMasteryAchievementIdsTimestamp();
+            const timestamp = getAchievementIdsTimestamp();
             set({ databaseTimestamp: timestamp });
         } catch (err) {
             const errorMessage =

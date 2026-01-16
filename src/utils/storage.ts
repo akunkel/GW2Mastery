@@ -1,10 +1,10 @@
 import type { Achievement } from '../types/gw2';
-import defaultMasteryIds from '../data/masteryAchievementIds.json';
+import defaultAchievementIds from '../data/achievementIds.json';
 
 const API_KEY_STORAGE_KEY = 'gw2_api_key';
-const MASTERY_IDS_STORAGE_KEY = 'gw2_mastery_achievement_ids';
-const MASTERY_IDS_TIMESTAMP_KEY = 'gw2_mastery_achievement_ids_timestamp';
-const MASTERY_ACHIEVEMENTS_CACHE_KEY = 'gw2_mastery_achievements_cache';
+const ACHIEVEMENT_IDS_STORAGE_KEY = 'gw2_achievement_ids';
+const ACHIEVEMENT_IDS_TIMESTAMP_KEY = 'gw2_achievement_ids_timestamp';
+const ACHIEVEMENTS_CACHE_KEY = 'gw2_achievements_cache';
 const FILTER_SETTINGS_KEY = 'gw2_filter_settings';
 const HIDDEN_ACHIEVEMENTS_KEY = 'gw2_hidden_achievements';
 
@@ -43,51 +43,51 @@ export function clearApiKey(): void {
 }
 
 /**
- * Saves mastery achievement IDs to localStorage
+ * Saves achievement IDs to localStorage
  */
-export function saveMasteryAchievementIds(ids: number[]): void {
+export function saveAchievementIds(ids: number[]): void {
   try {
-    localStorage.setItem(MASTERY_IDS_STORAGE_KEY, JSON.stringify(ids));
-    localStorage.setItem(MASTERY_IDS_TIMESTAMP_KEY, Date.now().toString());
+    localStorage.setItem(ACHIEVEMENT_IDS_STORAGE_KEY, JSON.stringify(ids));
+    localStorage.setItem(ACHIEVEMENT_IDS_TIMESTAMP_KEY, Date.now().toString());
   } catch (error) {
-    console.error('Failed to save mastery achievement IDs to localStorage:', error);
+    console.error('Failed to save achievement IDs to localStorage:', error);
   }
 }
 
 /**
- * Retrieves mastery achievement IDs from localStorage
+ * Retrieves achievement IDs from localStorage
  * If not found in localStorage, returns the default IDs from the bundled JSON file
  */
-export function getMasteryAchievementIds(): number[] | null {
+export function getAchievementIds(): number[] | null {
   try {
-    const data = localStorage.getItem(MASTERY_IDS_STORAGE_KEY);
+    const data = localStorage.getItem(ACHIEVEMENT_IDS_STORAGE_KEY);
     if (data) {
       return JSON.parse(data);
     }
     // Return default IDs from bundled JSON file if available
-    return defaultMasteryIds.length > 0 ? defaultMasteryIds : null;
+    return defaultAchievementIds.length > 0 ? defaultAchievementIds : null;
   } catch (error) {
-    console.error('Failed to retrieve mastery achievement IDs from localStorage:', error);
-    return defaultMasteryIds.length > 0 ? defaultMasteryIds : null;
+    console.error('Failed to retrieve achievement IDs from localStorage:', error);
+    return defaultAchievementIds.length > 0 ? defaultAchievementIds : null;
   }
 }
 
 /**
- * Gets the timestamp when mastery achievement IDs were last updated
+ * Gets the timestamp when achievement IDs were last updated
  * Returns build time timestamp if using default bundled data
  */
-export function getMasteryAchievementIdsTimestamp(): number | null {
+export function getAchievementIdsTimestamp(): number | null {
   try {
-    const timestamp = localStorage.getItem(MASTERY_IDS_TIMESTAMP_KEY);
+    const timestamp = localStorage.getItem(ACHIEVEMENT_IDS_TIMESTAMP_KEY);
     if (timestamp) {
       return parseInt(timestamp, 10);
     }
     // If using default bundled data and no timestamp exists, return build time
     // This will be updated when you paste the IDs from console
-    return defaultMasteryIds.length > 0 ? new Date('2026-01-14').getTime() : null;
+    return defaultAchievementIds.length > 0 ? new Date('2026-01-14').getTime() : null;
   } catch (error) {
-    console.error('Failed to retrieve mastery achievement IDs timestamp:', error);
-    return defaultMasteryIds.length > 0 ? new Date('2026-01-14').getTime() : null;
+    console.error('Failed to retrieve achievement IDs timestamp:', error);
+    return defaultAchievementIds.length > 0 ? new Date('2026-01-14').getTime() : null;
   }
 }
 
@@ -144,26 +144,26 @@ export function getFilterSettings(): {
 }
 
 /**
- * Saves full mastery achievement details to localStorage
+ * Saves full achievement details to localStorage
  */
-export function saveMasteryAchievements(achievements: Achievement[]): void {
+export function saveAchievements(achievements: Achievement[]): void {
   try {
-    localStorage.setItem(MASTERY_ACHIEVEMENTS_CACHE_KEY, JSON.stringify(achievements));
-    localStorage.setItem(MASTERY_IDS_TIMESTAMP_KEY, Date.now().toString());
+    localStorage.setItem(ACHIEVEMENTS_CACHE_KEY, JSON.stringify(achievements));
+    localStorage.setItem(ACHIEVEMENT_IDS_TIMESTAMP_KEY, Date.now().toString());
   } catch (error) {
-    console.error('Failed to save mastery achievements to localStorage:', error);
+    console.error('Failed to save achievements to localStorage:', error);
   }
 }
 
 /**
- * Retrieves full mastery achievement details from localStorage
+ * Retrieves full achievement details from localStorage
  */
-export function getMasteryAchievements(): Achievement[] | null {
+export function getAchievements(): Achievement[] | null {
   try {
-    const data = localStorage.getItem(MASTERY_ACHIEVEMENTS_CACHE_KEY);
+    const data = localStorage.getItem(ACHIEVEMENTS_CACHE_KEY);
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    console.error('Failed to retrieve mastery achievements from localStorage:', error);
+    console.error('Failed to retrieve achievements from localStorage:', error);
     return null;
   }
 }

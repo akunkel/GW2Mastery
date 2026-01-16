@@ -1,5 +1,5 @@
 import type { AccountAchievement, Achievement, AchievementCategory, MasteryReward } from '../types/gw2';
-import { getMasteryAchievementIds, getMasteryAchievements, saveMasteryAchievementIds, saveMasteryAchievements } from '../utils/storage';
+import { getAchievementIds, getAchievements, saveAchievementIds, saveAchievements } from '../utils/storage';
 
 const BASE_URL = 'https://api.guildwars2.com/v2';
 const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (5/sec)
@@ -20,10 +20,10 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
 }
 
 /**
- * Builds the mastery achievement IDs database by fetching all achievements
+ * Builds the achievement database by fetching all achievements
  * This should be called manually via the "Build Database" button
  */
-export async function buildMasteryAchievementIdsDatabase(
+export async function buildAchievementDatabase(
   onProgress?: (current: number, total: number) => void
 ): Promise<number[]> {
   // Get all achievement IDs
@@ -41,8 +41,8 @@ export async function buildMasteryAchievementIdsDatabase(
   }
 
   const totalBatches = batches.length;
-  const masteryIds: number[] = [];
-  const masteryAchievements: Achievement[] = [];
+  const ids: number[] = [];
+  const achievements: Achievement[] = [];
 
   // Process batches in parallel groups to stay under rate limits
   for (let i = 0; i < batches.length; i += PARALLEL_REQUESTS) {
@@ -59,13 +59,11 @@ export async function buildMasteryAchievementIdsDatabase(
       })
     );
 
-    // Process results and filter for mastery achievements
+    // Process results
     results.forEach((batchData) => {
       batchData.forEach((achievement) => {
-        if (achievement.rewards?.some((r) => r.type === 'Mastery')) {
-          masteryIds.push(achievement.id);
-          masteryAchievements.push(achievement);
-        }
+        ids.push(achievement.id);
+        achievements.push(achievement);
       });
     });
 
@@ -77,44 +75,44 @@ export async function buildMasteryAchievementIdsDatabase(
   }
 
   // Save both IDs and full achievement details to localStorage
-  saveMasteryAchievementIds(masteryIds);
-  saveMasteryAchievements(masteryAchievements);
+  saveAchievementIds(ids);
+  saveAchievements(achievements);
 
   // Log the results for developers to use in source code.
-  // To update the default database, copy the JSON and paste it into src/data/masteryAchievementIds.json
+  // To update the default database, copy the JSON and paste it into src/data/achievementIds.json
   console.log('=== Database Build Complete ===');
-  console.log(`Total mastery achievements: ${masteryIds.length}`);
-  console.log('\n' + JSON.stringify(masteryIds, null, 2));
+  console.log(`Total achievements: ${ids.length}`);
+  console.log('\n' + JSON.stringify(ids, null, 2));
 
-  return masteryIds;
+  return ids;
 }
 
 /**
- * Fetches ALL mastery point achievements from the database
- * Requires mastery achievement IDs database to be built first
+ * Fetches ALL achievements from the database
+ * Requires achievement database to be built first
  */
-export async function fetchMasteryAchievements(): Promise<Achievement[]> {
+export async function fetchAchievements(): Promise<Achievement[]> {
   // Try to get from cache first
-  const cachedAchievements = getMasteryAchievements();
+  const cachedAchievements = getAchievements();
   if (cachedAchievements && cachedAchievements.length > 0) {
-    console.log(`Loaded ${cachedAchievements.length} mastery achievements from cache (instant)`);
+    console.log(`Loaded ${cachedAchievements.length} achievements from cache (instant)`);
     return cachedAchievements;
   }
 
   // Fall back to fetching from API if cache is empty
-  const masteryIdsArray = getMasteryAchievementIds();
+  const achievementIdsArray = getAchievementIds();
 
-  if (!masteryIdsArray) {
-    throw new Error('Mastery achievement database not found. Please click "Build Database" first.');
+  if (!achievementIdsArray) {
+    throw new Error('Achievement database not found. Please click "Build Database" first.');
   }
 
-  console.log(`Fetching all ${masteryIdsArray.length} mastery achievements from API`);
+  console.log(`Fetching all ${achievementIdsArray.length} achievements from API`);
 
   // Create batches of achievement IDs
   const batchSize = 200;
   const batches: number[][] = [];
-  for (let i = 0; i < masteryIdsArray.length; i += batchSize) {
-    batches.push(masteryIdsArray.slice(i, i + batchSize));
+  for (let i = 0; i < achievementIdsArray.length; i += batchSize) {
+    batches.push(achievementIdsArray.slice(i, i + batchSize));
   }
 
   const achievements: Achievement[] = [];
@@ -140,10 +138,10 @@ export async function fetchMasteryAchievements(): Promise<Achievement[]> {
     });
   }
 
-  console.log(`Loaded ${achievements.length} total mastery achievements from API`);
+  console.log(`Loaded ${achievements.length} total achievements from API`);
 
   // Save to cache for next time
-  saveMasteryAchievements(achievements);
+  saveAchievements(achievements);
 
   return achievements;
 }

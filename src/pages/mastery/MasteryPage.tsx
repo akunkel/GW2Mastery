@@ -12,7 +12,7 @@ import FilterBar from './FilterBar';
 
 export default function MasteryPage() {
     const {
-        achievements,
+        achievements: allAchievements,
         accountProgress,
         categoryMap,
         loading,
@@ -27,6 +27,11 @@ export default function MasteryPage() {
         setShowHidden,
         handleToggleHidden,
     } = useAppStore();
+
+    // Filter for mastery achievements only
+    const achievements = allAchievements.filter((a) =>
+        a.rewards?.some((r) => r.type === 'Mastery')
+    );
 
     // Calculate filtered and grouped achievements
     const filteredAchievements = filterByCompletion(

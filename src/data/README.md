@@ -1,10 +1,10 @@
-# Mastery Achievement Database
+# Achievement Database
 
-This directory contains the default mastery achievement IDs that are bundled with the application.
+This directory contains the default achievement IDs that are bundled with the application.
 
 ## Updating the Database
 
-When Guild Wars 2 adds new mastery achievements, you need to update the `masteryAchievementIds.json` file:
+When Guild Wars 2 adds new achievements, you need to update the `achievementIds.json` file:
 
 1. Open the application in development mode
 2. Open the browser console (F12)
@@ -12,13 +12,13 @@ When Guild Wars 2 adds new mastery achievements, you need to update the `mastery
 4. Wait for the build to complete
 5. The console will display the updated JSON array
 6. Copy the entire JSON array from the console
-7. Paste it into `src/data/masteryAchievementIds.json`
+7. Paste it into `src/data/achievementIds.json`
 8. Update the timestamp in `src/utils/storage.ts` (line with `new Date('2026-01-14')`) to the current date
 9. Commit and deploy the changes
 
 ## File Format
 
-The `masteryAchievementIds.json` file should contain a JSON array of achievement IDs:
+The `achievementIds.json` file should contain a JSON array of achievement IDs:
 
 ```json
 [
