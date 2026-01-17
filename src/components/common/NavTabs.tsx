@@ -13,7 +13,7 @@ export default function NavTabs({ className, itemClassName, activeClassName }: N
 
     const tabs = [
         { name: 'Mastery', path: '/' },
-        // Future tabs can go here
+        { name: 'Exploration', path: '/exploration' },
     ];
 
     return (

@@ -7,7 +7,6 @@ interface ApiKeyFormProps {
     hasStoredKey: boolean;
     onApiKeySubmit: (key: string) => Promise<void>;
     onClearKey: () => void;
-    onBrowseMode: () => void;
 }
 
 export default function ApiKeyForm({
@@ -17,7 +16,6 @@ export default function ApiKeyForm({
     hasStoredKey,
     onApiKeySubmit,
     onClearKey,
-    onBrowseMode,
 }: ApiKeyFormProps) {
     const [apiKey, setApiKey] = useState(initialKey || '');
 
@@ -80,27 +78,14 @@ export default function ApiKeyForm({
                 {error && <p className="text-sm text-red-400 font-medium mb-2">✗ {error}</p>}
 
                 {!shouldShowClearButton && (
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="relative group">
-                            <button
-                                type="submit"
-                                disabled={loading || !apiKey.trim()}
-                                className="w-full px-4 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
-                            >
-                                {loading ? 'Loading…' : 'Set API Key'}
-                            </button>
-                        </div>
-
-                        <div className="relative group">
-                            <button
-                                type="button"
-                                onClick={onBrowseMode}
-                                disabled={loading}
-                                className="w-full px-4 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-lg transition-all duration-200 hover:text-white border border-slate-700"
-                            >
-                                No Thanks
-                            </button>
-                        </div>
+                    <div className="relative group mt-3">
+                        <button
+                            type="submit"
+                            disabled={loading || !apiKey.trim()}
+                            className="w-full px-4 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
+                        >
+                            {loading ? 'Loading…' : 'Set API Key'}
+                        </button>
                     </div>
                 )}
             </form>

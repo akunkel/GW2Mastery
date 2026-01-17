@@ -28,12 +28,12 @@ export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
                 </div>
 
                 {/* Center: Tabs (Desktop Only) */}
-                <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 h-full">
+                {/* <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 h-full">
                     <NavTabs
                         className="gap-8 h-full"
                         itemClassName="px-2 h-full"
-                    />
-                </div>
+                    />``
+                </div> */}
 
                 {/* Right: Setup Button */}
                 <div className="flex-shrink-0">

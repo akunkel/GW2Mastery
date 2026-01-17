@@ -5,13 +5,15 @@ import {
     fetchAchievementCategories,
     getDatabaseStatus,
     getDbAchievements,
-    mapAchievementsToCategories,
-    validateApiKey,
 } from '../services/gw2Api';
 import type {
     AccountAchievement,
     Achievement,
     AchievementCategory,
+    AchievementGroup,
+    EnrichedAchievement,
+    EnrichedCategory,
+    EnrichedGroup,
     FilterType,
     GoalType,
 } from '../types/gw2';
@@ -24,15 +26,21 @@ import {
     saveFilterSettings,
     saveHiddenAchievements,
 } from '../utils/storage';
+import { buildEnrichedHierarchy } from '../utils/filters';
 
 interface AppState {
     // Data State
     achievements: Achievement[];
+
+    // Enriched Data (Single Source of Truth)
+    enrichedGroups: EnrichedGroup[];
+    enrichedGroupMap: Map<string, EnrichedGroup>;
+    enrichedCategoryMap: Map<number, EnrichedCategory>;
+    enrichedAchievementMap: Map<number, EnrichedAchievement>;
+
     accountProgress: Map<number, AccountAchievement>;
-    categoryMap: Map<
-        number,
-        { categoryId: number; categoryName: string; categoryOrder: number }
-    >;
+    groups: AchievementGroup[];
+    categories: AchievementCategory[];
 
     // UI State
     loading: boolean;
@@ -55,11 +63,10 @@ interface AppState {
     // Actions
     initialize: () => void;
     setSetupModalOpen: (open: boolean) => void;
-    enableBrowseMode: () => void;
     setFilter: (filter: FilterType) => void;
     setGoal: (goal: GoalType) => void;
     setShowHidden: (show: boolean) => void;
-    loadAchievements: (key: string | null) => Promise<void>;
+    initializeAchievementDatabase: () => Promise<void>;
     handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
     handleClearKey: () => void;
     handleToggleHidden: (achievementId: number) => void;
@@ -70,8 +77,13 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
     // Initial State
     achievements: [],
+    categories: [],
+    enrichedGroups: [],
+    enrichedGroupMap: new Map(),
+    enrichedCategoryMap: new Map(),
+    enrichedAchievementMap: new Map(),
     accountProgress: new Map(),
-    categoryMap: new Map(),
+    groups: [],
     loading: false,
     buildingDatabase: false,
     loadingProgress: null,
@@ -104,30 +116,20 @@ export const useAppStore = create<AppState>((set, get) => ({
             isInitialized: true,
         });
 
-        if (storedKey) {
-            set({
-                hasStoredKey: true,
-                apiKey: storedKey
-            });
-        } else {
-            set({ setupModalOpen: true });
-        }
-
-        // Always load achievements (browse mode by default if no key)
-        get().loadAchievements(storedKey || null);
+        get().initializeAchievementDatabase().then(() => {
+            if (storedKey) {
+                set({
+                    hasStoredKey: true,
+                    apiKey: storedKey
+                });
+                get().refreshAccountProgress();
+            } else {
+                set({ setupModalOpen: true });
+            }
+        });
     },
 
     setSetupModalOpen: (open) => set({ setupModalOpen: open }),
-
-    enableBrowseMode: () => {
-        clearApiKey();
-        set({
-            hasStoredKey: false,
-            apiKey: null,
-            setupModalOpen: false
-        });
-        get().loadAchievements(null);
-    },
 
     setFilter: (filter) => {
         set({ filter });
@@ -161,28 +163,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
     },
 
-    loadAchievements: async (key: string | null) => {
+    initializeAchievementDatabase: async () => {
         set({ loading: true, loadingProgress: null, error: null });
 
         try {
-            // Validate API key if present
-            if (key) {
-                const isValid = await validateApiKey(key);
-                if (!isValid) {
-                    throw new Error('Invalid API key or insufficient permissions');
-                }
-            }
-
-            // Fetch account progress only if key is provided
-            const progressMap = new Map<number, AccountAchievement>();
-
-            if (key) {
-                const accountData = await fetchAccountAchievements(key);
-                accountData.forEach((progress) => {
-                    progressMap.set(progress.id, progress);
-                });
-            }
-
             // Fetch DB (legacy or v2)
             const db = await getDbAchievements();
 
@@ -202,16 +186,32 @@ export const useAppStore = create<AppState>((set, get) => ({
                 categories = await fetchAchievementCategories();
             }
 
-            // Map achievements to their categories
-            const achCategoryMap = mapAchievementsToCategories(
+            // Build full hierarchy logic
+
+            const {
+                groups: eGroups,
+                groupMap: eGroupMap,
+                categoryMap: eCategoryMap,
+                achievementMap: eAchievementMap
+            } = buildEnrichedHierarchy(
                 allAchievements,
-                categories
+                categories,
+                db?.groups || [],
+                new Map() // No progress yet
             );
+
+
 
             set({
                 achievements: allAchievements,
-                accountProgress: progressMap,
-                categoryMap: achCategoryMap,
+                categories: categories,
+                groups: db?.groups || [],
+
+                enrichedGroups: eGroups,
+                enrichedGroupMap: eGroupMap,
+                enrichedCategoryMap: eCategoryMap,
+                enrichedAchievementMap: eAchievementMap,
+
             });
         } catch (err) {
             const errorMessage =
@@ -232,7 +232,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             set({ hasStoredKey: false, apiKey: null });
         }
 
-        await get().loadAchievements(key);
+        await get().refreshAccountProgress();
     },
 
     handleClearKey: () => {
@@ -240,7 +240,6 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({
             hasStoredKey: false,
             apiKey: null,
-            // Don't clear achievements, just the progress
             accountProgress: new Map(),
             error: null,
         });
@@ -293,7 +292,31 @@ export const useAppStore = create<AppState>((set, get) => ({
                 progressMap.set(progress.id, progress);
             });
 
-            set({ accountProgress: progressMap });
+            // Re-build hierarchy with new progress
+            const { achievements, groups, categories } = get();
+
+            const {
+                groups: eGroups,
+                groupMap: eGroupMap,
+                categoryMap: eCategoryMap,
+                achievementMap: eAchievementMap
+            } = buildEnrichedHierarchy(
+                achievements,
+                categories,
+                groups,
+                progressMap
+            );
+
+
+
+            set({
+                accountProgress: progressMap,
+                enrichedGroups: eGroups,
+                enrichedGroupMap: eGroupMap,
+                enrichedCategoryMap: eCategoryMap,
+                enrichedAchievementMap: eAchievementMap,
+
+            });
         } catch (err) {
             const errorMessage =
                 err instanceof Error ? err.message : 'Failed to refresh progress';

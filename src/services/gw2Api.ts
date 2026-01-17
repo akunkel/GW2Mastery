@@ -1,36 +1,8 @@
-import type { AccountAchievement, Achievement, AchievementCategory, AchievementDatabase, MasteryRegion } from '../types/gw2';
+import type { AccountAchievement, Achievement, AchievementCategory, AchievementGroup, AchievementDatabase, MasteryRegion, RawAchievement } from '../types/gw2';
 import achievementDb from '../data/achievementDb.json';
 import { getAchievementDatabase, saveAchievementDatabase } from '../utils/storage';
 
-// Raw API response types (internal use for build process)
-interface RawAchievementReward {
-  type: string;
-  id?: number;
-  count?: number;
-  region?: string; // Raw API region string (e.g., "Maguuma")
-}
 
-interface RawAchievementBit {
-  type: string;
-  id?: number;
-  text?: string;
-}
-
-interface RawAchievement {
-  id: number;
-  name: string;
-  description: string;
-  requirement: string;
-  locked_text?: string;
-  type: string;
-  flags: string[];
-  tiers: unknown[];
-  icon?: string;
-  prerequisites?: number[];
-  rewards?: RawAchievementReward[];
-  bits?: RawAchievementBit[];
-  point_cap?: number;
-}
 
 /**
  * Returns the status of the achievement database (timestamps)
@@ -51,20 +23,7 @@ export function getDatabaseStatus() {
 const BASE_URL = 'https://api.guildwars2.com/v2';
 const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (5/sec)
 
-/**
- * Validates an API key by attempting to fetch account achievements
- */
-export async function validateApiKey(apiKey: string): Promise<boolean> {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/account/achievements?access_token=${apiKey}`
-    );
-    return response.ok;
-  } catch (error) {
-    console.error('API key validation failed:', error);
-    return false;
-  }
-}
+
 
 /**
  * Builds the achievement database by fetching all achievements
@@ -158,11 +117,29 @@ export async function buildAchievementDatabase(
   const categories = await categoriesPromise;
   // console.log(categories);
 
+  // 4. Fetch all groups
+  // console.log('Fetching groups...');
+  const groupsResponse = await fetch('https://api.guildwars2.com/v2/achievements/groups?ids=all');
+  if (!groupsResponse.ok) throw new Error('Failed to fetch groups');
+  const groupsRaw = await groupsResponse.json();
+
+  // Validate groups
+  const groups = groupsRaw.map((g: AchievementGroup) => ({
+    id: g.id,
+    name: g.name,
+    description: g.description,
+    order: g.order,
+    categories: g.categories
+  }));
+
+  console.log(`Processed ${achievements.length} achievements, ${categories.length} categories, ${groups.length} groups.`);
+
   // Create database object with timestamp
   const db: AchievementDatabase = {
     timestamp: Date.now(),
     achievements,
     categories,
+    groups
   };
 
   // Save to localStorage for immediate use
@@ -290,25 +267,4 @@ export function getMasteryRegion(achievement: Achievement): string | null {
   return achievement.masteryRegion || null;
 }
 
-/**
- * Maps achievements to their categories
- */
-export function mapAchievementsToCategories(
-  _achievements: Achievement[],
-  categories: AchievementCategory[]
-): Map<number, { categoryId: number; categoryName: string; categoryOrder: number; }> {
-  const achievementToCategoryMap = new Map<number, { categoryId: number; categoryName: string; categoryOrder: number; }>();
 
-  // Create a map for quick lookup
-  categories.forEach((category) => {
-    category.achievements.forEach((achievementId) => {
-      achievementToCategoryMap.set(achievementId, {
-        categoryId: category.id,
-        categoryName: category.name,
-        categoryOrder: category.order,
-      });
-    });
-  });
-
-  return achievementToCategoryMap;
-}

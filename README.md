@@ -43,12 +43,10 @@ The built files will be in the `dist/` directory, ready for deployment to any st
 
 ## How to Use
 
-1. **Build the Achievement Database** (First Time Only)
-   - Click the "Build Database" button
-   - This indexes all ~8,000 GW2 achievements to find mastery point achievements
-   - Takes ~30 seconds with a progress bar
-   - **Saved in your browser** - only needs to be done once!
-   - Click "Rebuild Database" anytime to refresh if new achievements are added
+1. **Database Initialization**
+   - The app comes with a **bundled database** for instant start.
+   - You only need to use "Build Database" if you want to update to the absolute latest data from the API manually.
+   - The build process indexes all ~8,000 GW2 achievements to find mastery points and saves it locally.
 
 2. **Generate an API Key**
    - Go to https://account.arena.net/applications
@@ -75,7 +73,7 @@ The built files will be in the `dist/` directory, ready for deployment to any st
 
 ## Technology Stack
 
-- React 18 with TypeScript
+- React 19 with TypeScript
 - Vite for fast development and optimized builds
 - Tailwind CSS for styling
 - Guild Wars 2 API v2
@@ -90,11 +88,10 @@ The built files will be in the `dist/` directory, ready for deployment to any st
 
 The app uses a smart two-phase approach:
 
-**Phase 1: Build Database (Manual, One-Time)**
-- Fetches all ~8,000 GW2 achievements to identify mastery point achievements
-- Stores mastery achievement IDs in localStorage
-- Progress bar shows real-time progress (~40 batches)
-- Only needs to be done once per browser
+**Phase 1: Database (Hybrid Strategy)**
+- Uses **bundled JSON data** for instant load times (zero overhead).
+- Optional: Can rebuild locally to update data without redeploying.
+- Stores optimized data in localStorage for subsequent visits.
 
 **Phase 2: Load Your Achievements (Fast!)**
 - Fetches only YOUR account's achievements

@@ -10,7 +10,6 @@ export default function SetupModal() {
     handleApiKeySubmit: onApiKeySubmit,
     handleClearKey: onClearKey,
     handleBuildDatabase: onBuildDatabase,
-    enableBrowseMode: onBrowseMode,
     loading: isLoading,
     buildingDatabase,
     error,
@@ -58,7 +57,6 @@ export default function SetupModal() {
               }
             }}
             onClearKey={onClearKey}
-            onBrowseMode={onBrowseMode}
           />
 
           {/* Divider */}

@@ -3,26 +3,22 @@ import { ArrowLeft, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '../../lib/utils';
 import type {
-    EnrichedAchievement,
     FilterType,
 } from '../../types/gw2';
 import AchievementCard from './AchievementCard';
 import RegionCard from './RegionCard';
 
-export interface AchievementGroup {
-    id: string;
-    title: string;
-    color: string;
+import type { EnrichedGroup } from '../../types/gw2';
+
+export interface UIAchievementGroup extends EnrichedGroup {
+    title?: string; // Optional override for display
     image?: string;
-    totalCount: number;
-    completedCount: number;
-    isComplete: boolean;
-    categories: Map<string, EnrichedAchievement[]>;
-    categoryOrder: number; // For sorting groups if needed
+    color?: string;
+    isComplete?: boolean;
 }
 
 interface AchievementListProps {
-    groups: AchievementGroup[];
+    groups: UIAchievementGroup[];
     selectedId?: string | null;
     onSelectionChange?: (id: string | null) => void;
 
@@ -118,19 +114,17 @@ export default function AchievementList({
                         // Assuming parent filters groups passed in, or we just show them.
                         // If filter === 'incomplete' and group is complete, maybe hide?
                         // Generally better if parent handles data filtering, but we can do simple check here.
-                        if (filter === 'incomplete' && group.isComplete) {
-                            return null;
-                        }
+                        const isComplete = group.isComplete ?? (group.totalCount > 0 && group.completedCount >= group.totalCount);
 
                         return (
                             <div key={group.id} className="flex-none w-[360px] h-[130px]">
                                 <RegionCard
-                                    title={group.title}
+                                    title={group.title || group.name}
                                     image={group.image}
-                                    color={group.color}
+                                    color={group.color || '#1e293b'}
                                     completed={group.completedCount}
                                     total={group.totalCount}
-                                    isComplete={group.isComplete}
+                                    isComplete={isComplete}
                                     onClick={() => handleGroupSelect(group.id)}
                                 />
                             </div>
@@ -143,6 +137,10 @@ export default function AchievementList({
 
     // Show details for selected group
     const selectedGroup = groups.find(g => g.id === currentSelectedId);
+
+    const isGroupComplete = selectedGroup
+        ? (selectedGroup.isComplete ?? (selectedGroup.totalCount > 0 && selectedGroup.completedCount >= selectedGroup.totalCount))
+        : false;
 
     if (!selectedGroup) {
         // Fallback if selection is invalid
@@ -162,7 +160,7 @@ export default function AchievementList({
             <div className="mb-4">
                 {/* Sticky Header */}
                 <div
-                    className={`sticky top-12 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md ${selectedGroup.isComplete ? 'border-b-2 border-green-500' : ''}`}
+                    className={`sticky top-12 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md ${isGroupComplete ? 'border-b-2 border-green-500' : ''}`}
                     style={{
                         backgroundColor: selectedGroup.color || '#1e293b', // Fallback color
                         color: '#ffffff',
@@ -177,11 +175,11 @@ export default function AchievementList({
                             <ArrowLeft className="w-6 h-6" />
                         </button>
                         <h3 className="text-xl font-bold">
-                            {selectedGroup.title}
+                            {selectedGroup.title || selectedGroup.name}
                         </h3>
                     </div>
                     <div className="flex items-center gap-3">
-                        {selectedGroup.isComplete && (
+                        {isGroupComplete && (
                             <CheckCircle2 className="w-5 h-5 text-green-400" />
                         )}
                         <span className="font-bold text-base">
@@ -192,97 +190,106 @@ export default function AchievementList({
 
                 {/* Categories List */}
                 <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
-                    {Array.from(selectedGroup.categories.entries())
-                        .sort(([, achievementsA], [, achievementsB]) => {
-                            // Sort by category order
-                            const orderA = achievementsA[0]?.categoryOrder ?? 999999;
-                            const orderB = achievementsB[0]?.categoryOrder ?? 999999;
-                            return orderA - orderB;
-                        })
-                        .map(([categoryName, achievements]) => {
-                            const categoryKey = `${selectedGroup.id}-${categoryName}`;
+                    {/* Categories List */}
+                    <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
+                        {selectedGroup.categories
+                            .map((category) => {
+                                const categoryName = category.name;
+                                const achievements = category.achievements;
+                                const categoryKey = `${selectedGroup.id}-${category.id}`;
 
-                            // Calculate filtered achievements for display
-                            const visibleAchievements = showHidden
-                                ? achievements
-                                : achievements.filter((a) => {
-                                    const isCompleted = a.progress?.done || false;
-                                    const isHidden = hiddenAchievements.has(a.id);
-                                    if (isCompleted) return true;
-                                    return !isHidden;
-                                });
+                                // Calculate filtered achievements for display
+                                // ... existing logic ...
+                                // Actually, if we use filterEnrichedHierarchy, the achievements are ALREADY filtered in the group structure?
+                                // "User: ...helper method... to filter it down...".
+                                // If `groups` passed in are already filtered, we don't need to re-filter here?
+                                // Yes, `AchievementList` shouldn't do business logic filtering if the parent did it.
+                                // BUT `AchievementList` has `filter` prop. 
+                                // The `AchievementCard` does the final "hide if incomplete" check.
+                                // The `filterEnrichedHierarchy` does pre-filtering.
 
-                            const sortedAchievements = [...visibleAchievements].sort((a, b) => {
-                                const aCompleted = a.progress?.done || false;
-                                const bCompleted = b.progress?.done || false;
-                                if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
-                                return 0;
-                            });
+                                // Let's assume `achievements` is the list we want to show (or filter further).
+                                // We still need to sort them.
 
-                            // Stats for the header (total in category, not filtered)
-                            const totalInCategory = achievements.length;
-                            const completedInCategory = achievements.filter(a => a.progress?.done).length;
+                                const sortedAchievements = [...achievements]
+                                    .filter(a => {
+                                        if (a.progress?.done) return true; // Always show completed
+                                        if (showHidden) return true; // Show all if toggle is on
+                                        return !hiddenAchievements.has(a.id); // Hide if in hidden list
+                                    })
+                                    .sort((a, b) => {
+                                        const aCompleted = a.progress?.done || false;
+                                        const bCompleted = b.progress?.done || false;
+                                        if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
+                                        return 0;
+                                    });
 
-                            const isCategoryComplete = totalInCategory > 0 && completedInCategory === totalInCategory;
+                                // Stats for the header
+                                // If hierarchy is pre-filtered, totalInCategory might be lower than actual total?
+                                // `EnrichedCategory` has `totalCount` and `completedCount` properties! Use those!
+                                // That way even if we filter the list, we show correct stats.
 
-                            // Derived state:
-                            // - If Complete: Default Collapsed (true). Toggle makes it Expanded (false).
-                            // - If Incomplete: Default Expanded (false). Toggle makes it Collapsed (true).
-                            const hasToggled = manuallyToggledCategories.has(categoryKey);
-                            const isCategoryCollapsed = isCategoryComplete ? !hasToggled : hasToggled;
+                                const { totalCount, completedCount } = category;
+                                const isCategoryComplete = totalCount > 0 && completedCount >= totalCount;
 
-                            return (
-                                <div key={categoryKey}>
-                                    <button
-                                        onClick={() => toggleCategory(categoryKey)}
-                                        className={cn(
-                                            "w-full flex items-center justify-between p-3 rounded-lg transition-all border-2",
-                                            isCategoryComplete
-                                                ? "bg-slate-700/80 border-green-500 shadow-md"
-                                                : "bg-slate-700/50 hover:bg-slate-700 border-transparent"
+                                // Derived state:
+                                const hasToggled = manuallyToggledCategories.has(categoryKey);
+                                const isCategoryCollapsed = isCategoryComplete ? !hasToggled : hasToggled;
+
+                                return (
+                                    <div key={categoryKey}>
+                                        <button
+                                            onClick={() => toggleCategory(categoryKey)}
+                                            className={cn(
+                                                "w-full flex items-center justify-between p-3 rounded-lg transition-all border-2",
+                                                isCategoryComplete
+                                                    ? "bg-slate-700/80 border-green-500 shadow-md"
+                                                    : "bg-slate-700/50 hover:bg-slate-700 border-transparent"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {isCategoryComplete && (
+                                                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                                )}
+                                                <h4 className={cn(
+                                                    "text-lg font-semibold",
+                                                    isCategoryComplete ? "text-green-50 font-bold" : "text-white"
+                                                )}>
+                                                    {categoryName}
+                                                </h4>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className={cn(
+                                                    "font-medium text-sm",
+                                                    isCategoryComplete ? "text-green-400" : "text-slate-300"
+                                                )}>
+                                                    {completedCount} / {totalCount}
+                                                </span>
+                                                {isCategoryCollapsed ? (
+                                                    <ChevronDown className="w-5 h-5 text-slate-400" />
+                                                ) : (
+                                                    <ChevronUp className="w-5 h-5 text-slate-400" />
+                                                )}
+                                            </div>
+                                        </button>
+
+                                        {!isCategoryCollapsed && (
+                                            <div className="flex flex-wrap gap-4 justify-center mt-3 px-2">
+                                                {sortedAchievements.map((achievement) => (
+                                                    <AchievementCard
+                                                        key={achievement.id}
+                                                        achievement={achievement}
+                                                        isHidden={hiddenAchievements.has(achievement.id) && !achievement.progress?.done}
+                                                        onToggleHidden={onToggleHidden}
+                                                        filter={filter}
+                                                    />
+                                                ))}
+                                            </div>
                                         )}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            {isCategoryComplete && (
-                                                <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                            )}
-                                            <h4 className={cn(
-                                                "text-lg font-semibold",
-                                                isCategoryComplete ? "text-green-50 font-bold" : "text-white"
-                                            )}>
-                                                {categoryName}
-                                            </h4>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className={cn(
-                                                "font-medium text-sm",
-                                                isCategoryComplete ? "text-green-400" : "text-slate-300"
-                                            )}>
-                                                {completedInCategory} / {totalInCategory}
-                                            </span>
-                                            {isCategoryCollapsed ? (
-                                                <ChevronDown className="w-5 h-5 text-slate-400" />
-                                            ) : (
-                                                <ChevronUp className="w-5 h-5 text-slate-400" />
-                                            )}
-                                        </div>
-                                    </button>
-
-                                    {!isCategoryCollapsed && (
-                                        <div className="flex flex-wrap gap-4 justify-center mt-3 px-2">
-                                            {sortedAchievements.map((achievement) => (
-                                                <AchievementCard
-                                                    key={achievement.id}
-                                                    achievement={achievement}
-                                                    isHidden={hiddenAchievements.has(achievement.id) && !achievement.progress?.done}
-                                                    onToggleHidden={onToggleHidden}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                    </div>
+                                );
+                            })}
+                    </div>
                 </div>
             </div>
         </motion.div>

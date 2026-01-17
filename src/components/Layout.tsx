@@ -16,7 +16,7 @@ export default function Layout() {
                 loading={loading}
             />
 
-            <Navigation />
+            {/* <Navigation /> */}
 
             <div className="max-w-[1800px] mx-auto">
                 {/* Subtitle / context if needed, or just let the page handle it */}

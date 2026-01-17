@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import MasteryPage from './pages/mastery/MasteryPage';
+import ExplorationPage from './pages/exploration/ExplorationPage';
 import { useAppStore } from './store/useAppStore';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<MasteryPage />} />
+          <Route path="exploration" element={<ExplorationPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

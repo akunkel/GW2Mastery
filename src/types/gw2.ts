@@ -14,22 +14,45 @@ export type FilterType = 'all' | 'incomplete';
 
 export type GoalType = 'all' | 'required';
 
-
-
-export interface Achievement {
+export interface RawAchievement {
   id: number;
   name: string;
+  description: string;
   requirement: string;
-  icon?: string;
-  masteryRegion?: MasteryRegion | null;
-  bits?: { text?: string }[];
-  rewards?: never; // Ensure we don't accidentally use the old rewards structure
+  locked_text?: string;
+  type: string;
+  flags: string[];
+  tiers: unknown[];
+  icon?: string; // Optional in raw, but we pick it
+  prerequisites?: number[];
+  rewards?: {
+    type: string;
+    id?: number;
+    count?: number;
+    region?: string; // Raw API region string (e.g., "Maguuma")
+  }[];
+  bits?: {
+    type: string;
+    id?: number;
+    text?: string;
+  }[];
+  point_cap?: number;
 }
+
 
 export interface AchievementDatabase {
   timestamp: number;
   achievements: Achievement[];
   categories: AchievementCategory[];
+  groups: AchievementGroup[];
+}
+
+export interface AchievementGroup {
+  id: string;
+  name: string;
+  description: string;
+  order: number;
+  categories: number[];
 }
 
 export interface AchievementCategory {
@@ -41,14 +64,36 @@ export interface AchievementCategory {
   achievements: number[];
 }
 
-export interface AccountAchievement {
-  id: number;
-  done: boolean;
-  current?: number;
-  max?: number;
-  bits?: number[];
-  repeated?: number;
-  unlocked?: boolean;
+// Subset of RawAchievment, stripping unused fields to reduce json size.
+export interface Achievement extends Omit<RawAchievement,
+  | 'description'
+  | 'locked_text'
+  | 'type'
+  | 'flags'
+  | 'tiers'
+  | 'prerequisites'
+  | 'rewards'
+  | 'bits'
+  | 'point_cap'
+> {
+  masteryRegion?: MasteryRegion | null;
+  bits?: { text?: string }[];
+}
+
+export interface EnrichedCategory extends Omit<AchievementCategory, 'achievements'> {
+  achievements: EnrichedAchievement[];
+  totalPoints: number;
+  earnedPoints: number;
+  totalCount: number;
+  completedCount: number;
+}
+
+export interface EnrichedGroup extends Omit<AchievementGroup, 'categories'> {
+  categories: EnrichedCategory[];
+  totalPoints: number;
+  earnedPoints: number;
+  totalCount: number;
+  completedCount: number;
 }
 
 export interface EnrichedAchievement extends Achievement {
@@ -57,10 +102,17 @@ export interface EnrichedAchievement extends Achievement {
   category?: string;
   categoryId?: number;
   categoryOrder?: number;
+  groupId?: string;
+  groupName?: string;
+  groupOrder?: number;
 }
 
-export interface MasteryPointSummary {
-  earned: number;
-  total: number;
-  byRegion: Map<MasteryRegion, { earned: number; total: number }>;
+export interface AccountAchievement {
+  id: number;
+  done: boolean;
+  current?: number;
+  max?: number;
+  bits?: number[];
+  repeated?: number;
+  unlocked?: boolean;
 }

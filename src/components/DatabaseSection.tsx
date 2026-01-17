@@ -23,15 +23,15 @@ export default function DatabaseSection({
         <div className="flex-1">
           <h3 className="text-white font-medium">Achievement Database</h3>
           {error && (
-            <p className="text-sm text-red-400 font-medium">✗ {error}</p>
+            <p className="text-sm text-red-400 font-medium mb-1">✗ {error}</p>
           )}
           {!error && databaseTimestamp && !buildingDatabase && (
-            <p className="text-sm text-green-400 font-medium">
+            <p className="text-sm text-green-400 font-medium mb-1">
               ✓ Last built {new Date(databaseTimestamp).toLocaleDateString()}
             </p>
           )}
           {!error && !databaseTimestamp && (
-            <p className="text-sm text-amber-400 font-medium">
+            <p className="text-sm text-amber-400 font-medium mb-1">
               ⚠️ Database not built, click "Build Database" to start.
             </p>
           )}

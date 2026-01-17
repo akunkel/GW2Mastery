@@ -1,13 +1,14 @@
 import { CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import type { EnrichedAchievement } from '../../types/gw2';
+import type { EnrichedAchievement, FilterType } from '../../types/gw2';
 import { Card, CardContent } from '../ui/card';
 
 interface AchievementCardProps {
   achievement: EnrichedAchievement;
   isHidden?: boolean;
   onToggleHidden?: (achievementId: number) => void;
+  filter?: FilterType;
 }
 
 // Helper functions
@@ -23,7 +24,8 @@ const getProgressPercentage = (current: number = 0, max: number = 0): number => 
 export default function AchievementCard({
   achievement,
   isHidden = false,
-  onToggleHidden
+  onToggleHidden,
+  filter = 'all'
 }: AchievementCardProps) {
   const { name, requirement, icon, progress, bits } = achievement;
   const isCompleted = progress?.done || false;
@@ -33,6 +35,10 @@ export default function AchievementCard({
 
   // State to track if the parts list is expanded (default: collapsed)
   const [isExpanded, setIsExpanded] = useState(false);
+
+  if (filter === 'incomplete' && isCompleted) {
+    return null;
+  }
 
   return (
     <Card

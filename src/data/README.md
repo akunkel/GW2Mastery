@@ -32,6 +32,26 @@ The `achievementDb.json` file contains a timestamped object with the achievement
       "bits": [{ "text": "Step 1" }]
     },
     ...
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Category Name",
+      "description": "...",
+      "order": 1,
+      "achievements": [1234, 5678]
+    },
+    ...
+  ],
+  "groups": [
+    {
+      "id": "A1B2...",
+      "name": "Group Name",
+      "description": "...",
+      "order": 1,
+      "categories": [1, 2]
+    },
+    ...
   ]
 }
 ```

@@ -86,7 +86,7 @@ export function getFilterSettings(): {
   }
 }
 
-const ACHIEVEMENT_DB_KEY = 'gw2_achievement_db_v2';
+const ACHIEVEMENT_DB_KEY = 'gw2_achievement_db_v3';
 
 import type { AchievementDatabase } from '../types/gw2';
 

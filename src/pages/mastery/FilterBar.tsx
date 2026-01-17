@@ -1,41 +1,36 @@
-import type { FilterType, GoalType } from '../../types/gw2';
+import { useAppStore } from '../../store/useAppStore';
 
 interface FilterBarProps {
-  currentFilter: FilterType;
-  onFilterChange: (filter: FilterType) => void;
-  currentGoal: GoalType;
-  onGoalChange: (goal: GoalType) => void;
-  totalCount: number;
   completedCount: number;
-  incompleteCount: number;
-  showHidden: boolean;
-  onShowHiddenChange: (showHidden: boolean) => void;
   hiddenCount: number;
 }
 
 export default function FilterBar({
-  currentFilter,
-  onFilterChange,
-  currentGoal,
-  onGoalChange,
   completedCount,
-  showHidden,
-  onShowHiddenChange,
   hiddenCount,
 }: FilterBarProps) {
-  const showCompleted = currentFilter === 'all';
-  const requiredOnly = currentGoal === 'required';
+  const {
+    filter,
+    goal,
+    showHidden,
+    setFilter,
+    setGoal,
+    setShowHidden
+  } = useAppStore();
+
+  const showCompleted = filter === 'all';
+  const requiredOnly = goal === 'required';
 
   const handleFilterCheckboxChange = () => {
-    onFilterChange(showCompleted ? 'incomplete' : 'all');
+    setFilter(showCompleted ? 'incomplete' : 'all');
   };
 
   const handleGoalCheckboxChange = () => {
-    onGoalChange(requiredOnly ? 'all' : 'required');
+    setGoal(requiredOnly ? 'all' : 'required');
   };
 
   const handleShowHiddenChange = () => {
-    onShowHiddenChange(!showHidden);
+    setShowHidden(!showHidden);
   };
 
   return (
