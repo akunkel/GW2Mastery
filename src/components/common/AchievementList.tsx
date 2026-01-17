@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { cn } from '../../lib/utils';
 import type {
     EnrichedAchievement,
     FilterType,
@@ -55,8 +56,10 @@ export default function AchievementList({
         onSelectionChange?.(id);
     };
 
-    // State to track which categories are collapsed
-    const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+    // State to track which categories have been manually toggled by the user
+    // If a category is complete, it defaults to collapsed, so toggling it expands it.
+    // If a category is incomplete, it defaults to expanded, so toggling it collapses it.
+    const [manuallyToggledCategories, setManuallyToggledCategories] = useState<Set<string>>(
         new Set()
     );
 
@@ -75,7 +78,7 @@ export default function AchievementList({
     }, [currentSelectedId]);
 
     const toggleCategory = (categoryKey: string) => {
-        setCollapsedCategories((prev) => {
+        setManuallyToggledCategories((prev) => {
             const newSet = new Set(prev);
             if (newSet.has(categoryKey)) {
                 newSet.delete(categoryKey);
@@ -198,7 +201,6 @@ export default function AchievementList({
                         })
                         .map(([categoryName, achievements]) => {
                             const categoryKey = `${selectedGroup.id}-${categoryName}`;
-                            const isCategoryCollapsed = collapsedCategories.has(categoryKey);
 
                             // Calculate filtered achievements for display
                             const visibleAchievements = showHidden
@@ -221,17 +223,41 @@ export default function AchievementList({
                             const totalInCategory = achievements.length;
                             const completedInCategory = achievements.filter(a => a.progress?.done).length;
 
+                            const isCategoryComplete = totalInCategory > 0 && completedInCategory === totalInCategory;
+
+                            // Derived state:
+                            // - If Complete: Default Collapsed (true). Toggle makes it Expanded (false).
+                            // - If Incomplete: Default Expanded (false). Toggle makes it Collapsed (true).
+                            const hasToggled = manuallyToggledCategories.has(categoryKey);
+                            const isCategoryCollapsed = isCategoryComplete ? !hasToggled : hasToggled;
+
                             return (
                                 <div key={categoryKey}>
                                     <button
                                         onClick={() => toggleCategory(categoryKey)}
-                                        className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-colors"
+                                        className={cn(
+                                            "w-full flex items-center justify-between p-3 rounded-lg transition-all border-2",
+                                            isCategoryComplete
+                                                ? "bg-slate-700/80 border-green-500 shadow-md"
+                                                : "bg-slate-700/50 hover:bg-slate-700 border-transparent"
+                                        )}
                                     >
-                                        <h4 className="text-lg font-semibold text-white">
-                                            {categoryName}
-                                        </h4>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-slate-300 font-medium text-sm">
+                                            {isCategoryComplete && (
+                                                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                            )}
+                                            <h4 className={cn(
+                                                "text-lg font-semibold",
+                                                isCategoryComplete ? "text-green-50 font-bold" : "text-white"
+                                            )}>
+                                                {categoryName}
+                                            </h4>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className={cn(
+                                                "font-medium text-sm",
+                                                isCategoryComplete ? "text-green-400" : "text-slate-300"
+                                            )}>
                                                 {completedInCategory} / {totalInCategory}
                                             </span>
                                             {isCategoryCollapsed ? (

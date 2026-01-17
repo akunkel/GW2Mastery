@@ -56,7 +56,10 @@ export default function RegionCard({
                 </h2>
                 <div className="flex items-center gap-3">
                     {isComplete && <CheckCircle2 className="w-6 h-6 text-green-400" />}
-                    <span className="text-xl font-semibold text-white">
+                    <span className={cn(
+                        "text-xl font-semibold",
+                        isComplete ? "text-green-400" : "text-white"
+                    )}>
                         {completed} / {total}
                     </span>
                 </div>
