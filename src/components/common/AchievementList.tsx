@@ -6,7 +6,7 @@ import type {
     FilterType,
 } from '../../types/gw2';
 import AchievementCard from './AchievementCard';
-import ProgressCard from './ProgressCard';
+import RegionCard from './RegionCard';
 
 export interface AchievementGroup {
     id: string;
@@ -107,9 +107,9 @@ export default function AchievementList({
                 exit="exit"
                 variants={pageVariants}
                 transition={pageTransition}
-                className="w-full px-4 sm:px-6 lg:px-8"
+                className="w-full"
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="flex flex-wrap gap-4 justify-center">
                     {groups.map((group) => {
                         // Apply filtering logic for the group card visibility?
                         // Assuming parent filters groups passed in, or we just show them.
@@ -120,16 +120,17 @@ export default function AchievementList({
                         }
 
                         return (
-                            <ProgressCard
-                                key={group.id}
-                                title={group.title}
-                                image={group.image}
-                                color={group.color}
-                                completed={group.completedCount}
-                                total={group.totalCount}
-                                isComplete={group.isComplete}
-                                onClick={() => handleGroupSelect(group.id)}
-                            />
+                            <div key={group.id} className="flex-none w-[360px] h-[130px]">
+                                <RegionCard
+                                    title={group.title}
+                                    image={group.image}
+                                    color={group.color}
+                                    completed={group.completedCount}
+                                    total={group.totalCount}
+                                    isComplete={group.isComplete}
+                                    onClick={() => handleGroupSelect(group.id)}
+                                />
+                            </div>
                         );
                     })}
                 </div>
@@ -221,7 +222,7 @@ export default function AchievementList({
                             const completedInCategory = achievements.filter(a => a.progress?.done).length;
 
                             return (
-                                <div key={categoryKey} className="mx-4">
+                                <div key={categoryKey}>
                                     <button
                                         onClick={() => toggleCategory(categoryKey)}
                                         className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-colors"
@@ -242,7 +243,7 @@ export default function AchievementList({
                                     </button>
 
                                     {!isCategoryCollapsed && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center items-start mt-3">
+                                        <div className="flex flex-wrap gap-4 justify-start mt-3 px-2">
                                             {sortedAchievements.map((achievement) => (
                                                 <AchievementCard
                                                     key={achievement.id}

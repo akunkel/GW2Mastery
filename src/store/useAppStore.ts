@@ -55,10 +55,11 @@ interface AppState {
     // Actions
     initialize: () => void;
     setSetupModalOpen: (open: boolean) => void;
+    enableBrowseMode: () => void;
     setFilter: (filter: FilterType) => void;
     setGoal: (goal: GoalType) => void;
     setShowHidden: (show: boolean) => void;
-    loadAchievements: (key: string) => Promise<void>;
+    loadAchievements: (key: string | null) => Promise<void>;
     handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
     handleClearKey: () => void;
     handleToggleHidden: (achievementId: number) => void;
@@ -117,6 +118,16 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     setSetupModalOpen: (open) => set({ setupModalOpen: open }),
 
+    enableBrowseMode: () => {
+        clearApiKey();
+        set({
+            hasStoredKey: false,
+            apiKey: null,
+            setupModalOpen: false
+        });
+        get().loadAchievements(null);
+    },
+
     setFilter: (filter) => {
         set({ filter });
         const { isInitialized, goal } = get();
@@ -149,24 +160,27 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
     },
 
-    loadAchievements: async (key: string) => {
+    loadAchievements: async (key: string | null) => {
         set({ loading: true, loadingProgress: null, error: null });
 
         try {
-            // Validate API key
-            const isValid = await validateApiKey(key);
-            if (!isValid) {
-                throw new Error('Invalid API key or insufficient permissions');
+            // Validate API key if present
+            if (key) {
+                const isValid = await validateApiKey(key);
+                if (!isValid) {
+                    throw new Error('Invalid API key or insufficient permissions');
+                }
             }
 
-            // Fetch account progress first (this is fast)
-            const accountData = await fetchAccountAchievements(key);
-
-            // Create a map of account progress for quick lookup
+            // Fetch account progress only if key is provided
             const progressMap = new Map<number, AccountAchievement>();
-            accountData.forEach((progress) => {
-                progressMap.set(progress.id, progress);
-            });
+
+            if (key) {
+                const accountData = await fetchAccountAchievements(key);
+                accountData.forEach((progress) => {
+                    progressMap.set(progress.id, progress);
+                });
+            }
 
             // Fetch DB (legacy or v2)
             const db = await getDbAchievements();

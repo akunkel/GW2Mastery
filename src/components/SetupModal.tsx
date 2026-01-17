@@ -10,6 +10,7 @@ export default function SetupModal() {
     handleApiKeySubmit: onApiKeySubmit,
     handleClearKey: onClearKey,
     handleBuildDatabase: onBuildDatabase,
+    enableBrowseMode: onBrowseMode,
     loading: isLoading,
     buildingDatabase,
     error,
@@ -86,7 +87,7 @@ export default function SetupModal() {
             <form onSubmit={handleSubmit}>
               <div>
                 <p className="mb-3 text-xs text-slate-400 leading-relaxed">
-                  Generate an API key at{' '}
+                  Tracking achievement completion requires an API key. Generate one at{' '}
                   <a
                     href="https://account.arena.net/applications"
                     target="_blank"
@@ -126,14 +127,27 @@ export default function SetupModal() {
               )}
 
               {!shouldShowClearButton && (
-                <div className="relative group">
-                  <button
-                    type="submit"
-                    disabled={isLoading || !apiKey.trim()}
-                    className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
-                  >
-                    {isLoading ? 'Loading…' : 'Load Achievements'}
-                  </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative group">
+                    <button
+                      type="submit"
+                      disabled={isLoading || !apiKey.trim()}
+                      className="w-full px-4 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
+                    >
+                      {isLoading ? 'Loading…' : 'Set API Key'}
+                    </button>
+                  </div>
+
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      onClick={onBrowseMode}
+                      disabled={isLoading}
+                      className="w-full px-4 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-lg transition-all duration-200 hover:text-white border border-slate-700"
+                    >
+                      No Thanks
+                    </button>
+                  </div>
                 </div>
               )}
             </form>

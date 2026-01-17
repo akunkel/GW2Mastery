@@ -136,7 +136,7 @@ export default function MasteryPage() {
         <>
             {/* Filter Controls */}
             {achievements.length > 0 && (
-                <div className="mb-4 px-6">
+                <div className="mb-4">
                     <FilterBar
                         currentFilter={filter}
                         onFilterChange={setFilter}

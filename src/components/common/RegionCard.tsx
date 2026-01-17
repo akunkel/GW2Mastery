@@ -1,7 +1,7 @@
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-interface ProgressCardProps {
+interface RegionCardProps {
     title: string;
     image?: string;
     color?: string; // Hex color string
@@ -11,7 +11,7 @@ interface ProgressCardProps {
     onClick: () => void;
 }
 
-export default function ProgressCard({
+export default function RegionCard({
     title,
     image,
     color,
@@ -19,12 +19,12 @@ export default function ProgressCard({
     total,
     isComplete,
     onClick,
-}: ProgressCardProps) {
+}: RegionCardProps) {
     return (
         <button
             onClick={onClick}
             className={cn(
-                "w-full p-4 rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 relative overflow-hidden flex items-center gap-4 text-left border-2",
+                "w-full h-full p-4 rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 relative overflow-hidden flex items-center gap-4 text-left border-2",
                 isComplete ? 'border-green-500' : 'border-transparent'
             )}
         >

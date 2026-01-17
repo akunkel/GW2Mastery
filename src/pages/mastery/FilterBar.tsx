@@ -39,7 +39,7 @@ export default function FilterBar({
   };
 
   return (
-    <div className="flex items-end justify-between w-full px-4">
+    <div className="flex items-end justify-between w-full md:px-2">
       {/* Left side - Hide completed and show hidden checkboxes */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
         <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export default function FilterBar({
             </span>
           </label>
           <span className="text-slate-400 text-xs">
-            ({completedCount} completed)
+            ({completedCount}<span className="hidden sm:inline"> completed</span>)
           </span>
         </div>
 
@@ -71,7 +71,9 @@ export default function FilterBar({
               Show hidden
             </span>
           </label>
-          <span className="text-slate-400 text-xs">({hiddenCount} hidden)</span>
+          <span className="text-slate-400 text-xs">
+            ({hiddenCount}<span className="hidden sm:inline"> hidden</span>)
+          </span>
         </div>
       </div>
 
