@@ -62,6 +62,7 @@ interface AppState {
     handleClearKey: () => void;
     handleToggleHidden: (achievementId: number) => void;
     handleBuildDatabase: () => Promise<void>;
+    refreshAccountProgress: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -245,6 +246,32 @@ export const useAppStore = create<AppState>((set, get) => ({
             console.error('Error building database:', err);
         } finally {
             set({ buildingDatabase: false, loadingProgress: null });
+        }
+    },
+
+    refreshAccountProgress: async () => {
+        const { apiKey } = get();
+        if (!apiKey) return;
+
+        set({ loading: true, error: null });
+
+        try {
+            const accountData = await fetchAccountAchievements(apiKey);
+
+            // Create a map of account progress for quick lookup
+            const progressMap = new Map<number, AccountAchievement>();
+            accountData.forEach((progress) => {
+                progressMap.set(progress.id, progress);
+            });
+
+            set({ accountProgress: progressMap });
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Failed to refresh progress';
+            set({ error: errorMessage });
+            console.error('Error refreshing progress:', err);
+        } finally {
+            set({ loading: false });
         }
     },
 }));

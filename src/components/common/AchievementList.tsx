@@ -158,7 +158,7 @@ export default function AchievementList({
             <div className="mb-4">
                 {/* Sticky Header */}
                 <div
-                    className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 shadow-md ${selectedGroup.isComplete ? 'border-y-2 border-green-500' : ''}`}
+                    className={`sticky top-12 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md -mx-4 sm:-mx-6 lg:-mx-8 ${selectedGroup.isComplete ? 'border-b-2 border-green-500' : ''}`}
                     style={{
                         backgroundColor: selectedGroup.color || '#1e293b', // Fallback color
                         color: '#ffffff',
