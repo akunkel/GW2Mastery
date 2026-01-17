@@ -10,6 +10,16 @@ interface AchievementCardProps {
   onToggleHidden?: (achievementId: number) => void;
 }
 
+// Helper functions
+const cleanDescription = (text: string): string => {
+  return text.replace(/<[^>]*>/g, '');
+};
+
+const getProgressPercentage = (current: number = 0, max: number = 0): number => {
+  if (!max) return 0;
+  return Math.round((current / max) * 100);
+};
+
 export default function AchievementCard({
   achievement,
   isHidden = false,
@@ -23,22 +33,6 @@ export default function AchievementCard({
 
   // State to track if the parts list is expanded (default: collapsed)
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const getProgressPercentage = (): number => {
-    if (!progress || !progress.max) return 0;
-    return Math.round(((progress.current || 0) / progress.max) * 100);
-  };
-
-  // Strip HTML tags from requirement text
-  const cleanDescription = (text: string): string => {
-    return text.replace(/<[^>]*>/g, '');
-  };
-
-  // Check if a bit is completed
-  const isBitCompleted = (index: number): boolean => {
-    if (!progress?.bits) return false;
-    return progress.bits.includes(index);
-  };
 
   return (
     <Card
@@ -125,7 +119,7 @@ export default function AchievementCard({
               <div className="mb-2 flex-grow">
                 <ul className="space-y-1">
                   {bits.map((bit, index) => {
-                    const bitCompleted = isBitCompleted(index);
+                    const bitCompleted = progress?.bits?.includes(index) ?? false;
                     return (
                       <li
                         key={index}
@@ -173,7 +167,7 @@ export default function AchievementCard({
                     ? 'bg-gradient-to-r from-green-500 to-green-400'
                     : 'bg-gradient-to-r from-blue-500 to-blue-400'
                 )}
-                style={{ width: `${getProgressPercentage()}%` }}
+                style={{ width: `${getProgressPercentage(progress.current, progress.max)}%` }}
               />
             </div>
           </div>

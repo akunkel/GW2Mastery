@@ -14,36 +14,7 @@ export type FilterType = 'all' | 'incomplete';
 
 export type GoalType = 'all' | 'required';
 
-// Output optimized structure only
-export interface RawAchievementReward {
-  type: string;
-  id?: number;
-  count?: number;
-  region?: MasteryRegion;
-}
 
-export interface RawAchievementBit {
-  type: string;
-  id?: number;
-  text?: string;
-}
-
-// Raw API response type (internal use for build process)
-export interface RawAchievement {
-  id: number;
-  name: string;
-  description: string;
-  requirement: string;
-  locked_text?: string;
-  type: string;
-  flags: string[];
-  tiers: unknown[];
-  icon?: string;
-  prerequisites?: number[];
-  rewards?: RawAchievementReward[];
-  bits?: RawAchievementBit[];
-  point_cap?: number;
-}
 
 export interface Achievement {
   id: number;

@@ -109,11 +109,12 @@ export const useAppStore = create<AppState>((set, get) => ({
                 hasStoredKey: true,
                 apiKey: storedKey
             });
-
-            get().loadAchievements(storedKey);
         } else {
             set({ setupModalOpen: true });
         }
+
+        // Always load achievements (browse mode by default if no key)
+        get().loadAchievements(storedKey || null);
     },
 
     setSetupModalOpen: (open) => set({ setupModalOpen: open }),
@@ -239,7 +240,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({
             hasStoredKey: false,
             apiKey: null,
-            achievements: [],
+            // Don't clear achievements, just the progress
             accountProgress: new Map(),
             error: null,
         });

@@ -1,6 +1,36 @@
-import type { AccountAchievement, Achievement, AchievementCategory, RawAchievement, AchievementDatabase } from '../types/gw2';
+import type { AccountAchievement, Achievement, AchievementCategory, AchievementDatabase, MasteryRegion } from '../types/gw2';
 import achievementDb from '../data/achievementDb.json';
 import { getAchievementDatabase, saveAchievementDatabase } from '../utils/storage';
+
+// Raw API response types (internal use for build process)
+interface RawAchievementReward {
+  type: string;
+  id?: number;
+  count?: number;
+  region?: string; // Raw API region string (e.g., "Maguuma")
+}
+
+interface RawAchievementBit {
+  type: string;
+  id?: number;
+  text?: string;
+}
+
+interface RawAchievement {
+  id: number;
+  name: string;
+  description: string;
+  requirement: string;
+  locked_text?: string;
+  type: string;
+  flags: string[];
+  tiers: unknown[];
+  icon?: string;
+  prerequisites?: number[];
+  rewards?: RawAchievementReward[];
+  bits?: RawAchievementBit[];
+  point_cap?: number;
+}
 
 /**
  * Returns the status of the achievement database (timestamps)
@@ -43,7 +73,7 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
 export async function buildAchievementDatabase(
   onProgress?: (current: number, total: number) => void
 ): Promise<number[]> {
-  console.log('Starting database build...');
+  // console.log('Starting database build...');
 
   // 1. Start fetching categories (don't await yet)
   const categoriesPromise = fetchAchievementCategories();
@@ -100,7 +130,7 @@ export async function buildAchievementDatabase(
 
         const region = raw.rewards?.find((r) => r.type === 'Mastery')?.region;
         if (region) {
-          optimized.masteryRegion = region;
+          optimized.masteryRegion = region as MasteryRegion;
         }
 
         if (raw.bits && raw.bits.length > 0) {
@@ -126,7 +156,7 @@ export async function buildAchievementDatabase(
 
   // Await categories fetch to complete
   const categories = await categoriesPromise;
-  console.log(`Fetched ${categories.length} categories.`);
+  // console.log(`Fetched ${categories.length} categories.`);
 
   // Create database object with timestamp
   const db: AchievementDatabase = {
@@ -139,10 +169,10 @@ export async function buildAchievementDatabase(
   saveAchievementDatabase(db);
 
   // Log the results for developers
-  console.log('=== Database Build Complete ===');
-  console.log(`Total achievements: ${achievements.length}`);
-  console.log(`Total categories: ${categories.length}`);
-  console.log('\n' + JSON.stringify(db));
+  // console.log('=== Database Build Complete ===');
+  // console.log(`Total achievements: ${achievements.length}`);
+  // console.log(`Total categories: ${categories.length}`);
+  // console.log('\n' + JSON.stringify(db));
 
   return ids;
 }

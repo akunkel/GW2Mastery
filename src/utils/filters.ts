@@ -160,15 +160,17 @@ export function getRegionDisplayName(region: MasteryRegion): string {
  * Gets the required achievement counts for each mastery region
  * Based on the chart data provided
  */
+export const REQUIRED_COUNTS: Record<MasteryRegion, number> = {
+  Tyria: 49,
+  Maguuma: 144,
+  Desert: 110,
+  Tundra: 63,
+  Jade: 89,
+  Sky: 88,
+  Wild: 90,
+  Magic: 38,
+};
+
 export function getRequiredCounts(): Record<MasteryRegion, number> {
-  return {
-    Tyria: 49,
-    Maguuma: 144,
-    Desert: 110,
-    Tundra: 63,
-    Jade: 89,
-    Sky: 88,
-    Wild: 90,
-    Magic: 38,
-  };
+  return REQUIRED_COUNTS;
 }

@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import AchievementList, { type AchievementGroup } from '../../components/common/AchievementList';
 import { useAppStore } from '../../store/useAppStore';
@@ -33,77 +33,83 @@ export default function MasteryPage() {
     } = useAppStore();
 
     // Filter for mastery achievements only
-    const achievements = allAchievements.filter((a) => a.masteryRegion);
+    const achievements = useMemo(() => allAchievements.filter((a) => a.masteryRegion), [allAchievements]);
 
     // Calculate filtered and grouped achievements
-    const filteredAchievements = filterByCompletion(
+    const filteredAchievements = useMemo(() => filterByCompletion(
         achievements,
         accountProgress,
         filter
-    );
+    ), [achievements, accountProgress, filter]);
 
-    const enrichedAchievements = enrichAchievements(
+    const enrichedAchievements = useMemo(() => enrichAchievements(
         filteredAchievements,
         accountProgress,
         categoryMap
-    );
+    ), [filteredAchievements, accountProgress, categoryMap]);
 
-    const groupedAchievements = groupByRegionAndCategory(enrichedAchievements);
+    const groupedAchievements = useMemo(() => groupByRegionAndCategory(enrichedAchievements), [enrichedAchievements]);
 
     // Also group ALL enriched achievements for accurate toal counts
-    const allEnriched = enrichAchievements(achievements, accountProgress, categoryMap);
-    const allGrouped = groupByRegionAndCategory(allEnriched);
+    const allEnriched = useMemo(() => enrichAchievements(achievements, accountProgress, categoryMap), [achievements, accountProgress, categoryMap]);
+    const allGrouped = useMemo(() => groupByRegionAndCategory(allEnriched), [allEnriched]);
 
     // Calculate counts for filter bar
-    const totalCount = achievements.length;
-    const completedCount = achievements.filter(
-        (a) => accountProgress.get(a.id)?.done
-    ).length;
-    const incompleteCount = totalCount - completedCount;
+    const { totalCount, completedCount, incompleteCount } = useMemo(() => {
+        const total = achievements.length;
+        const complete = achievements.filter(
+            (a) => accountProgress.get(a.id)?.done
+        ).length;
+        return {
+            totalCount: total,
+            completedCount: complete,
+            incompleteCount: total - complete
+        };
+    }, [achievements, accountProgress]);
 
-
-
-    // Get required counts for mastery logic
-    const requiredCounts = getRequiredCounts();
 
     // Build generic groups from Mastery Regions
-    const groups: AchievementGroup[] = REGION_ORDER.map(region => {
-        // Get categories for this region
-        const regionCategories = groupedAchievements.get(region) || new Map();
+    const groups: AchievementGroup[] = useMemo(() => {
+        const requiredCounts = getRequiredCounts();
 
-        // Calculate totals using ALL achievements (unfiltered)
-        const allRegionCategories = allGrouped.get(region);
-        let totalInRegion = 0;
-        let completedInRegion = 0;
+        return REGION_ORDER.map(region => {
+            // Get categories for this region
+            const regionCategories = groupedAchievements.get(region) || new Map();
 
-        if (allRegionCategories) {
-            allRegionCategories.forEach((achievements) => {
-                totalInRegion += achievements.length;
-                completedInRegion += achievements.filter(
-                    (a) => a.progress?.done
-                ).length;
-            });
-        }
+            // Calculate totals using ALL achievements (unfiltered)
+            const allRegionCategories = allGrouped.get(region);
+            let totalInRegion = 0;
+            let completedInRegion = 0;
 
-        const goalCount = goal === 'required' ? requiredCounts[region] : totalInRegion;
-        const isComplete = completedInRegion >= goalCount;
+            if (allRegionCategories) {
+                allRegionCategories.forEach((achievements) => {
+                    totalInRegion += achievements.length;
+                    completedInRegion += achievements.filter(
+                        (a) => a.progress?.done
+                    ).length;
+                });
+            }
 
-        return {
-            id: region,
-            title: getRegionDisplayName(region),
-            color: getRegionColor(region),
-            image: getRegionImage(region),
-            totalCount: goalCount,
-            completedCount: completedInRegion,
-            isComplete,
-            categories: regionCategories,
-            categoryOrder: REGION_ORDER.indexOf(region) // Just use index for stability
-        };
-    }).filter(g => {
-        // Same filtering logic as before for the "ExpansionCard" list
-        if (filter === 'incomplete' && g.isComplete) return false;
-        return true;
-    });
+            const goalCount = goal === 'required' ? requiredCounts[region] : totalInRegion;
+            const isComplete = completedInRegion >= goalCount;
+
+            return {
+                id: region,
+                title: getRegionDisplayName(region),
+                color: getRegionColor(region),
+                image: getRegionImage(region),
+                totalCount: goalCount,
+                completedCount: completedInRegion,
+                isComplete,
+                categories: regionCategories,
+                categoryOrder: REGION_ORDER.indexOf(region) // Just use index for stability
+            };
+        }).filter(g => {
+            // Same filtering logic as before for the "ExpansionCard" list
+            if (filter === 'incomplete' && g.isComplete) return false;
+            return true;
+        });
+    }, [groupedAchievements, allGrouped, goal, filter]);
 
     // Handle selection state via URL hash
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {
@@ -159,7 +165,7 @@ export default function MasteryPage() {
             )}
 
             {/* Loading state */}
-            {(loading || buildingDatabase) && (
+            {(buildingDatabase || (loading && achievements.length === 0)) && (
                 <LoadingSpinner
                     progress={loadingProgress?.current}
                     total={loadingProgress?.total}
@@ -174,7 +180,7 @@ export default function MasteryPage() {
             )}
 
             {/* Achievement list */}
-            {!loading && !buildingDatabase && achievements.length > 0 && (
+            {!buildingDatabase && achievements.length > 0 && (
                 <AnimatePresence mode="wait">
                     <AchievementList
                         groups={groups}
