@@ -269,7 +269,7 @@ export default function AchievementList({
                                     </button>
 
                                     {!isCategoryCollapsed && (
-                                        <div className="flex flex-wrap gap-4 justify-start mt-3 px-2">
+                                        <div className="flex flex-wrap gap-4 justify-center mt-3 px-2">
                                             {sortedAchievements.map((achievement) => (
                                                 <AchievementCard
                                                     key={achievement.id}
