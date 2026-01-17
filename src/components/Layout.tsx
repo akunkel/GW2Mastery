@@ -18,9 +18,9 @@ export default function Layout() {
 
             <Navigation />
 
-            <div className="max-w-[1800px] mx-auto px-4 py-4">
+            <div className="max-w-[1800px] mx-auto">
                 {/* Subtitle / context if needed, or just let the page handle it */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 mt-4">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
                         GW2Mastery
                     </h1>

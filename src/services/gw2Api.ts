@@ -156,7 +156,7 @@ export async function buildAchievementDatabase(
 
   // Await categories fetch to complete
   const categories = await categoriesPromise;
-  // console.log(`Fetched ${categories.length} categories.`);
+  // console.log(categories);
 
   // Create database object with timestamp
   const db: AchievementDatabase = {
@@ -168,11 +168,10 @@ export async function buildAchievementDatabase(
   // Save to localStorage for immediate use
   saveAchievementDatabase(db);
 
-  // Log the results for developers
-  // console.log('=== Database Build Complete ===');
-  // console.log(`Total achievements: ${achievements.length}`);
-  // console.log(`Total categories: ${categories.length}`);
-  // console.log('\n' + JSON.stringify(db));
+  console.log('=== Database Build Complete ===');
+  console.log(`Total achievements: ${achievements.length}`);
+  console.log(`Total categories: ${categories.length}`);
+  console.log('\n' + JSON.stringify(db));
 
   return ids;
 }

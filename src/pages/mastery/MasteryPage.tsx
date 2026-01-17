@@ -19,9 +19,6 @@ export default function MasteryPage() {
         achievements: allAchievements,
         accountProgress,
         categoryMap,
-        loading,
-        buildingDatabase,
-        loadingProgress,
         filter,
         goal,
         showHidden,
@@ -142,7 +139,7 @@ export default function MasteryPage() {
         <>
             {/* Filter Controls */}
             {achievements.length > 0 && (
-                <div className="mb-4">
+                <div className="mb-4 px-4 sm:px-6 lg:px-8">
                     <FilterBar
                         currentFilter={filter}
                         onFilterChange={setFilter}
@@ -164,23 +161,12 @@ export default function MasteryPage() {
                 </div>
             )}
 
-            {/* Loading state */}
-            {(buildingDatabase || (loading && achievements.length === 0)) && (
-                <LoadingSpinner
-                    progress={loadingProgress?.current}
-                    total={loadingProgress?.total}
-                    message={
-                        buildingDatabase
-                            ? loadingProgress
-                                ? `Building database (${loadingProgress.current} of ${loadingProgress.total} batches)…`
-                                : 'Starting database build…'
-                            : 'Loading your achievements…'
-                    }
-                />
+            {(achievements.length === 0) && (
+                <LoadingSpinner message="Loading…" />
             )}
 
             {/* Achievement list */}
-            {!buildingDatabase && achievements.length > 0 && (
+            {achievements.length > 0 && (
                 <AnimatePresence mode="wait">
                     <AchievementList
                         groups={groups}
@@ -191,8 +177,9 @@ export default function MasteryPage() {
                         showHidden={showHidden}
                         onToggleHidden={handleToggleHidden}
                     />
-                </AnimatePresence>
-            )}
+                </AnimatePresence >
+            )
+            }
         </>
     );
 }
