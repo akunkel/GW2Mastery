@@ -43,6 +43,12 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
 export async function buildAchievementDatabase(
   onProgress?: (current: number, total: number) => void
 ): Promise<number[]> {
+  console.log('Starting database build...');
+
+  // 1. Start fetching categories (don't await yet)
+  const categoriesPromise = fetchAchievementCategories();
+
+  // 2. Fetch Achievements
   // Get all achievement IDs
   const idsResponse = await fetch(`${BASE_URL}/achievements`);
   if (!idsResponse.ok) {
@@ -82,7 +88,6 @@ export async function buildAchievementDatabase(
         ids.push(raw.id);
 
         // Optimize: Map raw API data to our optimized structure
-        // Optimize: Map raw API data to our optimized structure
         const optimized: Achievement = {
           id: raw.id,
           name: raw.name,
@@ -107,6 +112,7 @@ export async function buildAchievementDatabase(
           });
         }
 
+
         achievements.push(optimized);
       });
     });
@@ -118,10 +124,15 @@ export async function buildAchievementDatabase(
     }
   }
 
+  // Await categories fetch to complete
+  const categories = await categoriesPromise;
+  console.log(`Fetched ${categories.length} categories.`);
+
   // Create database object with timestamp
   const db: AchievementDatabase = {
     timestamp: Date.now(),
     achievements,
+    categories,
   };
 
   // Save to localStorage for immediate use
@@ -130,18 +141,16 @@ export async function buildAchievementDatabase(
   // Log the results for developers
   console.log('=== Database Build Complete ===');
   console.log(`Total achievements: ${achievements.length}`);
-  console.log('Timestamp:', new Date(db.timestamp).toISOString());
-  console.log('Copy the following JSON content into src/data/achievementDb.json:');
+  console.log(`Total categories: ${categories.length}`);
   console.log('\n' + JSON.stringify(db));
 
   return ids;
 }
 
 /**
- * Fetches ALL achievements from the database
- * Returns static bundled data or local storage, whichever is newer
+ * Gets ALL achievements from the database, either from local storage or json, whichever is newer.
  */
-export async function fetchAchievements(): Promise<Achievement[]> {
+export async function getDbAchievements(): Promise<AchievementDatabase | null> {
   // 1. Get local storage version
   const localDb = getAchievementDatabase();
 
@@ -155,26 +164,19 @@ export async function fetchAchievements(): Promise<Achievement[]> {
   const localTs = localDb?.timestamp || 0;
   const bundledTs = bundledDb?.timestamp || 0;
 
-  console.log('fetchAchievements Debug:', {
-    localTs,
-    bundledTs,
-    bundledHasAch: bundledDb?.achievements?.length,
-    activeStr: localTs > bundledTs ? 'local' : (bundledTs > 0 ? 'bundled' : 'none')
-  });
-
   if (localTs > bundledTs) {
-    console.log(`Using local database (Timestamp: ${new Date(localTs).toISOString()})`);
+    // console.log(`Using local database (Timestamp: ${new Date(localTs).toISOString()})`);
     activeDb = localDb!;
   } else if (bundledTs > 0) {
-    console.log(`Using bundled database (Timestamp: ${new Date(bundledTs).toISOString()})`);
+    // console.log(`Using bundled database (Timestamp: ${new Date(bundledTs).toISOString()})`);
     activeDb = bundledDb;
   } else {
     // Both are empty/invalid
     console.warn('No valid achievement database found.');
-    return [];
+    return null;
   }
 
-  return activeDb.achievements;
+  return activeDb;
 }
 
 /**

@@ -45,7 +45,6 @@ export function saveFilterSettings(
   showHidden: boolean
 ): void {
   try {
-    console.log('Saving filter settings:', { hideCompleted, requiredOnly, showHidden });
     localStorage.setItem(
       FILTER_SETTINGS_KEY,
       JSON.stringify({ hideCompleted, requiredOnly, showHidden })
@@ -66,7 +65,7 @@ export function getFilterSettings(): {
 } {
   try {
     const data = localStorage.getItem(FILTER_SETTINGS_KEY);
-    console.log('Reading filter settings:', data);
+
     if (data) {
       const parsed = JSON.parse(data);
       const settings = {
@@ -74,7 +73,6 @@ export function getFilterSettings(): {
         requiredOnly: parsed.requiredOnly ?? true,
         showHidden: parsed.showHidden ?? false,
       };
-      console.log('Parsed settings:', settings);
       return settings;
     }
     // Default: show completed (false), required only (true), show hidden (false)
@@ -88,7 +86,7 @@ export function getFilterSettings(): {
   }
 }
 
-const ACHIEVEMENT_DB_KEY = 'gw2_achievement_db_v1';
+const ACHIEVEMENT_DB_KEY = 'gw2_achievement_db_v2';
 
 import type { AchievementDatabase } from '../types/gw2';
 

@@ -4,13 +4,14 @@ import {
     fetchAccountAchievements,
     fetchAchievementCategories,
     getDatabaseStatus,
-    fetchAchievements,
+    getDbAchievements,
     mapAchievementsToCategories,
     validateApiKey,
 } from '../services/gw2Api';
 import type {
     AccountAchievement,
     Achievement,
+    AchievementCategory,
     FilterType,
     GoalType,
 } from '../types/gw2';
@@ -167,11 +168,24 @@ export const useAppStore = create<AppState>((set, get) => ({
                 progressMap.set(progress.id, progress);
             });
 
-            // Fetch categories and achievements concurrently
-            const [categories, allAchievements] = await Promise.all([
-                fetchAchievementCategories(),
-                fetchAchievements(),
-            ]);
+            // Fetch DB (legacy or v2)
+            const db = await getDbAchievements();
+
+            let allAchievements: Achievement[] = [];
+            let categories: AchievementCategory[] = [];
+
+            if (db) {
+                allAchievements = db.achievements;
+                // If DB has categories, use them. Otherwise fetch them (migration path)
+                if (db.categories && db.categories.length > 0) {
+                    categories = db.categories;
+                } else {
+                    categories = await fetchAchievementCategories();
+                }
+            } else {
+                // Should not happen if DB logic returns empty array on failure, but handling null
+                categories = await fetchAchievementCategories();
+            }
 
             // Map achievements to their categories
             const achCategoryMap = mapAchievementsToCategories(

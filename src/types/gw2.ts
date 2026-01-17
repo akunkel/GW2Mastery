@@ -58,6 +58,7 @@ export interface Achievement {
 export interface AchievementDatabase {
   timestamp: number;
   achievements: Achievement[];
+  categories: AchievementCategory[];
 }
 
 export interface AchievementCategory {

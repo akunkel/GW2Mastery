@@ -35,11 +35,16 @@ export default function DatabaseSection({
               ⚠️ Database not built, click "Build Database" to start.
             </p>
           )}
-          {buildingDatabase && loadingProgress && (
-            <p className="text-sm text-blue-400 font-medium mb-1">
-              Building database ({loadingProgress.current} of{' '}
-              {loadingProgress.total} batches)…
-            </p>
+          {buildingDatabase && (
+            <>
+              {!loadingProgress && <p className="text-sm text-blue-400 font-medium mb-1">
+                Building database…
+              </p>}
+              {loadingProgress && <p className="text-sm text-blue-400 font-medium mb-1">
+                Building database ({loadingProgress.current} of{' '}
+                {loadingProgress.total} batches)…
+              </p>}
+            </>
           )}
         </div>
         <button
@@ -51,8 +56,7 @@ export default function DatabaseSection({
         </button>
       </div>
       <p className="text-xs text-slate-400 leading-relaxed">
-        If these achievements are stale, click "Rebuild Database" for the newest
-        data from the server.
+        If these achievements are stale, click "Rebuild Database" to download them from the server (this may take a while).
       </p>
     </div>
   );
