@@ -1,6 +1,5 @@
 import { RefreshCw, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
-import NavTabs from './NavTabs';
 
 interface HeaderProps {
     onRefresh: () => void;

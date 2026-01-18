@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom';
 import Header from './common/Header';
-import Navigation from './common/Navigation';
 import SetupModal from './SetupModal';
 import { useAppStore } from '../store/useAppStore';
 
