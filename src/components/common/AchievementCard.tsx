@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff } from 'lucide-react';
+import { Bug, CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import type { EnrichedAchievement, FilterType } from '../../types/gw2';
@@ -48,23 +48,40 @@ export default function AchievementCard({
                 isHidden && 'opacity-50'
             )}
         >
-            {/* Hidden toggle button - only show if NOT completed and handler exists */}
-            {!isCompleted && onToggleHidden && (
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleHidden(achievement.id);
-                    }}
-                    className="absolute top-2 right-2 z-20 p-1.5 rounded-md bg-slate-700/90 hover:bg-slate-600 transition-all opacity-0 group-hover:opacity-100"
-                    aria-label={isHidden ? 'Show achievement' : 'Hide achievement'}
-                >
-                    {isHidden ? (
-                        <EyeOff className="w-4 h-4 text-slate-300" />
-                    ) : (
-                        <Eye className="w-4 h-4 text-slate-300" />
-                    )}
-                </button>
-            )}
+            {/* Top Right Controls (Debug + Hide) */}
+            <div className="absolute top-2 right-2 z-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Debug Button (Dev only) */}
+                {import.meta.env.DEV && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            console.log(achievement);
+                        }}
+                        className="p-1.5 rounded-md bg-slate-700/90 hover:bg-slate-600 transition-all text-slate-300 hover:text-blue-300"
+                        title="Debug: Log Data"
+                    >
+                        <Bug className="w-4 h-4" />
+                    </button>
+                )}
+
+                {/* Hidden toggle button - only show if NOT completed and handler exists */}
+                {!isCompleted && onToggleHidden && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleHidden(achievement.id);
+                        }}
+                        className="p-1.5 rounded-md bg-slate-700/90 hover:bg-slate-600 transition-all"
+                        aria-label={isHidden ? 'Show achievement' : 'Hide achievement'}
+                    >
+                        {isHidden ? (
+                            <EyeOff className="w-4 h-4 text-slate-300" />
+                        ) : (
+                            <Eye className="w-4 h-4 text-slate-300" />
+                        )}
+                    </button>
+                )}
+            </div>
 
             <CardContent className="p-3 flex flex-col h-full min-h-0">
                 {/* Header with icon and title */}
