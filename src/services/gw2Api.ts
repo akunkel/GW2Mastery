@@ -10,6 +10,8 @@ import type {
 import achievementDb from '../data/achievementDb.json';
 import { getAchievementDatabase, saveAchievementDatabase } from '../utils/storage';
 
+const includeDebugFields = import.meta.env.DEV;
+
 /**
  * Returns the status of the achievement database (timestamps)
  */
@@ -36,8 +38,6 @@ const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (
 export async function buildAchievementDatabase(
     onProgress?: (current: number, total: number) => void
 ): Promise<number[]> {
-    // console.log('Starting database build...');
-
     // 1. Start fetching categories (don't await yet)
     const categoriesPromise = fetchAchievementCategories();
 
@@ -105,6 +105,11 @@ export async function buildAchievementDatabase(
                     });
                 }
 
+                // If Debug: Attach raw data
+                if (includeDebugFields) {
+                    optimized.raw = raw;
+                }
+
                 achievements.push(optimized);
             });
         });
@@ -118,10 +123,8 @@ export async function buildAchievementDatabase(
 
     // Await categories fetch to complete
     const categories = await categoriesPromise;
-    // console.log(categories);
 
     // 4. Fetch all groups
-    // console.log('Fetching groups...');
     const groupsResponse = await fetch('https://api.guildwars2.com/v2/achievements/groups?ids=all');
     if (!groupsResponse.ok) throw new Error('Failed to fetch groups');
     const groupsRaw = await groupsResponse.json();
@@ -134,10 +137,6 @@ export async function buildAchievementDatabase(
         order: g.order,
         categories: g.categories,
     }));
-
-    console.log(
-        `Processed ${achievements.length} achievements, ${categories.length} categories, ${groups.length} groups.`
-    );
 
     // Create database object with timestamp
     const db: AchievementDatabase = {
@@ -155,7 +154,7 @@ export async function buildAchievementDatabase(
     console.log(`Total categories: ${categories.length}`);
     console.log('\n' + JSON.stringify(db));
 
-    return ids;
+    return allIds;
 }
 
 /**
@@ -176,10 +175,8 @@ export async function getDbAchievements(): Promise<AchievementDatabase | null> {
     const bundledTs = bundledDb?.timestamp || 0;
 
     if (localTs > bundledTs) {
-        // console.log(`Using local database (Timestamp: ${new Date(localTs).toISOString()})`);
         activeDb = localDb!;
     } else if (bundledTs > 0) {
-        // console.log(`Using bundled database (Timestamp: ${new Date(bundledTs).toISOString()})`);
         activeDb = bundledDb;
     } else {
         // Both are empty/invalid

@@ -78,6 +78,7 @@ export interface Achievement extends Omit<
 > {
     masteryRegion?: MasteryRegion | null;
     bits?: { text?: string }[];
+    raw?: RawAchievement;
 }
 
 export interface EnrichedCategory extends Omit<AchievementCategory, 'achievements'> {

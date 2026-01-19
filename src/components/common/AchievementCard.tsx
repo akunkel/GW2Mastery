@@ -55,7 +55,7 @@ export default function AchievementCard({
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            console.log(achievement);
+                            console.log(achievement.raw ?? achievement);
                         }}
                         className="p-1.5 rounded-md bg-slate-700/90 hover:bg-slate-600 transition-all text-slate-300 hover:text-blue-300"
                         title="Debug: Log Data"
