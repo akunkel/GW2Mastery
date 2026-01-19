@@ -24,30 +24,33 @@ export default function MasteryPage() {
     } = useAppStore();
 
     // Derive flat list for mastery filtering
-    const allEnrichedAchievements = useMemo(() =>
-        Array.from(enrichedAchievementMap.values()),
+    const allEnrichedAchievements = useMemo(
+        () => Array.from(enrichedAchievementMap.values()),
         [enrichedAchievementMap]
     );
 
     // Filter for mastery achievements only from the ENRICHED source
-    const achievements = useMemo(() => allEnrichedAchievements.filter((a) => a.masteryRegion), [allEnrichedAchievements]);
+    const achievements = useMemo(
+        () => allEnrichedAchievements.filter((a) => a.masteryRegion),
+        [allEnrichedAchievements]
+    );
 
     // Grouping
-    const groupedAchievements = useMemo(() => groupByRegionAndCategory(achievements), [achievements]);
+    const groupedAchievements = useMemo(
+        () => groupByRegionAndCategory(achievements),
+        [achievements]
+    );
 
     // Also group ALL enriched achievements for accurate total counts
     const allGrouped = useMemo(() => groupByRegionAndCategory(achievements), [achievements]);
 
     // Calculate counts for filter bar
     const { completedCount } = useMemo(() => {
-        const complete = achievements.filter(
-            (a) => a.progress?.done
-        ).length;
+        const complete = achievements.filter((a) => a.progress?.done).length;
         return {
             completedCount: complete,
         };
     }, [achievements]);
-
 
     // Build generic groups from Mastery Regions
     // We need to return EnrichedGroup[] to match the new AchievementList props
@@ -61,9 +64,10 @@ export default function MasteryPage() {
     const displayGroups: UIAchievementGroup[] = useMemo(() => {
         const requiredCounts = getRequiredCounts();
 
-        return REGION_ORDER.map(region => {
+        return REGION_ORDER.map((region) => {
             // Get categories for this region
-            const regionCategoriesMap = groupedAchievements.get(region) || new Map<string, EnrichedAchievement[]>();
+            const regionCategoriesMap =
+                groupedAchievements.get(region) || new Map<string, EnrichedAchievement[]>();
 
             // Calculate totals using ALL achievements (unfiltered)
             const allRegionCategories = allGrouped.get(region);
@@ -73,36 +77,35 @@ export default function MasteryPage() {
             if (allRegionCategories) {
                 allRegionCategories.forEach((achievements) => {
                     totalInRegion += achievements.length;
-                    completedInRegion += achievements.filter(
-                        (a) => a.progress?.done
-                    ).length;
+                    completedInRegion += achievements.filter((a) => a.progress?.done).length;
                 });
             }
 
             // Build EnrichedCategories for this region
-            const categoriesList = Array.from(regionCategoriesMap.entries()).map(([catName, achievements]) => {
-                // We need to calculate stats for the category
-                const totalCount = achievements.length;
-                const completedCount = achievements.filter(a => a.progress?.done).length;
+            const categoriesList = Array.from(regionCategoriesMap.entries())
+                .map(([catName, achievements]) => {
+                    // We need to calculate stats for the category
+                    const totalCount = achievements.length;
+                    const completedCount = achievements.filter((a) => a.progress?.done).length;
 
-                // We fake the 'EnrichedCategory' shape since we don't have the full object here
-                // We only have the achievements and the name.
-                // We can pick the first achievement to get metadata closer to reality if needed.
-                const firstAch = achievements[0];
+                    // We fake the 'EnrichedCategory' shape since we don't have the full object here
+                    // We only have the achievements and the name.
+                    // We can pick the first achievement to get metadata closer to reality if needed.
+                    const firstAch = achievements[0];
 
-                return {
-                    id: firstAch?.categoryId || 0, // Fallback
-                    name: catName,
-                    description: '', // Not used in list
-                    order: firstAch?.categoryOrder || 0,
-                    achievements: achievements,
-                    totalPoints: totalCount, // Approx
-                    earnedPoints: completedCount, // Approx
-                    totalCount,
-                    completedCount
-                };
-            }).sort((a, b) => a.order - b.order);
-
+                    return {
+                        id: firstAch?.categoryId || 0, // Fallback
+                        name: catName,
+                        description: '', // Not used in list
+                        order: firstAch?.categoryOrder || 0,
+                        achievements: achievements,
+                        totalPoints: totalCount, // Approx
+                        earnedPoints: completedCount, // Approx
+                        totalCount,
+                        completedCount,
+                    };
+                })
+                .sort((a, b) => a.order - b.order);
 
             const goalCount = goal === 'required' ? requiredCounts[region] : totalInRegion;
             const isComplete = completedInRegion >= goalCount;
@@ -133,22 +136,22 @@ export default function MasteryPage() {
                 // I need to add `isComplete` to the object I pass OR update `AchievementList` to derive it.
                 // Or I can just cast it / extend type locally if needed.
                 // Actually, `AchievementList` uses `selectedGroup.isComplete`.
-                // I should probably add `isComplete` to `EnrichedGroup`? 
+                // I should probably add `isComplete` to `EnrichedGroup`?
                 // No, `isComplete` is a derived UI state usually.
                 // `AchievementList` was looking at `group.isComplete`.
                 // The API `EnrichedGroup` I defined doesn't have it.
                 // I should update `AchievementList` to calculate `isComplete` or accept an intersection type.
                 // The `groups` prop in `AchievementList` is `EnrichedGroup[]`.
                 // I will add `isComplete` to the objects I create here, but TS might complain.
-                // 
+                //
                 // Let's check `types/gw2.ts`. `EnrichedGroup` extends `AchievementGroup` (API type).
                 // API type doesn't have `isComplete`.
-                // 
+                //
                 // Safe fix: Update `AchievementList` to calculate `isComplete` from counts, OR extend the type in `AchievementList` props.
                 // `interface UIEnrichedGroup extends EnrichedGroup { isComplete?: boolean; color?: string; image?: string; title?: string; }`
                 // Wait, `EnrichedGroup` uses `name` not `title`. `AchievementList` used `title`.
                 // I need to map `name` -> `title` or update `AchievementList` to use `name`.
-                // 
+                //
                 // I'll update `AchievementList` to be more robust.
 
                 isComplete,
@@ -156,7 +159,7 @@ export default function MasteryPage() {
                 // name is standard. title was UI.
                 name: getRegionDisplayName(region),
             };
-        }).filter(g => {
+        }).filter((g) => {
             if (filter === 'incomplete' && g.completedCount >= g.totalCount) return false;
             return true;
         });
@@ -203,9 +206,7 @@ export default function MasteryPage() {
                 </div>
             )}
 
-            {(achievements.length === 0) && (
-                <LoadingSpinner message="Loading…" />
-            )}
+            {achievements.length === 0 && <LoadingSpinner message="Loading…" />}
 
             {/* Achievement list */}
             {achievements.length > 0 && (
@@ -219,9 +220,8 @@ export default function MasteryPage() {
                         showHidden={showHidden}
                         onToggleHidden={handleToggleHidden}
                     />
-                </AnimatePresence >
-            )
-            }
+                </AnimatePresence>
+            )}
         </>
     );
 }

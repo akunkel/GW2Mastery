@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Header from './common/Header';
+import Navigation from './common/Navigation';
 import SetupModal from './SetupModal';
 import { useAppStore } from '../store/useAppStore';
 
@@ -8,14 +9,13 @@ export default function Layout() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 relative">
-
             <Header
                 onRefresh={() => refreshAccountProgress()}
                 onSetup={() => setSetupModalOpen(true)}
                 loading={loading}
             />
 
-            {/* <Navigation /> */}
+            <Navigation />
 
             <div className="max-w-[1800px] mx-auto">
                 {/* Subtitle / context if needed, or just let the page handle it */}

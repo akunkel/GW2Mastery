@@ -1,5 +1,6 @@
 import { RefreshCw, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
+import NavTabs from './NavTabs';
 
 interface HeaderProps {
     onRefresh: () => void;
@@ -27,12 +28,9 @@ export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
                 </div>
 
                 {/* Center: Tabs (Desktop Only) */}
-                {/* <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 h-full">
-                    <NavTabs
-                        className="gap-8 h-full"
-                        itemClassName="px-2 h-full"
-                    />``
-                </div> */}
+                <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 h-full">
+                    <NavTabs className="gap-8 h-full" itemClassName="px-2 h-full" />
+                </div>
 
                 {/* Right: Setup Button */}
                 <div className="flex-shrink-0">

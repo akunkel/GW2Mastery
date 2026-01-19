@@ -22,14 +22,16 @@ A web application for tracking Guild Wars 2 achievements that award Mastery Poin
 
 1. Clone this repository
 2. Install dependencies:
-   ```bash
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+
+    ```bash
+    npm run dev
+    ```
 
 4. Open http://localhost:5173 in your browser
 
@@ -44,25 +46,25 @@ The built files will be in the `dist/` directory, ready for deployment to any st
 ## How to Use
 
 1. **Database Initialization**
-   - The app comes with a **bundled database** for instant start.
-   - You only need to use "Build Database" if you want to update to the absolute latest data from the API manually.
-   - The build process indexes all ~8,000 GW2 achievements to find mastery points and saves it locally.
+    - The app comes with a **bundled database** for instant start.
+    - You only need to use "Build Database" if you want to update to the absolute latest data from the API manually.
+    - The build process indexes all ~8,000 GW2 achievements to find mastery points and saves it locally.
 
 2. **Generate an API Key**
-   - Go to https://account.arena.net/applications
-   - Create a new API key with "account" and "progression" permissions
-   - Copy the generated key
+    - Go to https://account.arena.net/applications
+    - Create a new API key with "account" and "progression" permissions
+    - Copy the generated key
 
 3. **Enter Your API Key**
-   - Paste your API key into the input field
-   - Optionally check "Remember API key" to save it in your browser
-   - Click "Load Achievements"
-   - Loads instantly after database is built!
+    - Paste your API key into the input field
+    - Optionally check "Remember API key" to save it in your browser
+    - Click "Load Achievements"
+    - Loads instantly after database is built!
 
 4. **View and Filter**
-   - Browse achievements grouped by mastery region
-   - Use the filter buttons to show All, Completed, or Incomplete achievements
-   - Track your overall progress with the summary at the top
+    - Browse achievements grouped by mastery region
+    - Use the filter buttons to show All, Completed, or Incomplete achievements
+    - Track your overall progress with the summary at the top
 
 ## Security
 
@@ -89,11 +91,13 @@ The built files will be in the `dist/` directory, ready for deployment to any st
 The app uses a smart two-phase approach:
 
 **Phase 1: Database (Hybrid Strategy)**
+
 - Uses **bundled JSON data** for instant load times (zero overhead).
 - Optional: Can rebuild locally to update data without redeploying.
 - Stores optimized data in localStorage for subsequent visits.
 
 **Phase 2: Load Your Achievements (Fast!)**
+
 - Fetches only YOUR account's achievements
 - Uses cached mastery IDs to filter instantly
 - Fetches details for only ~50-100 mastery achievements you have

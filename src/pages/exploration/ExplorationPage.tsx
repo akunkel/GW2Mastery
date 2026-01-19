@@ -8,13 +8,8 @@ import { filterEnrichedHierarchy } from '../../utils/filters';
 import FilterBar from '../mastery/FilterBar';
 
 export default function ExplorationPage() {
-    const {
-        enrichedGroups,
-        filter,
-        showHidden,
-        hiddenAchievements,
-        handleToggleHidden,
-    } = useAppStore();
+    const { enrichedGroups, filter, showHidden, hiddenAchievements, handleToggleHidden } =
+        useAppStore();
 
     // Filter the enriched hierarchy to remove completed items if filter is 'incomplete'
     const displayGroups = useMemo(() => {
@@ -25,16 +20,14 @@ export default function ExplorationPage() {
         );
     }, [enrichedGroups, filter]);
 
-
     // Calculate counts for FilterBar
     const { completedCount } = useMemo(() => {
         let completed = 0;
-        displayGroups.forEach(g => {
+        displayGroups.forEach((g) => {
             completed += g.completedCount;
         });
         return { completedCount: completed };
     }, [displayGroups]);
-
 
     // Handle selection state via URL hash
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {
@@ -62,7 +55,7 @@ export default function ExplorationPage() {
 
     // Convert EnrichedGroup[] to UIAchievementGroup[] for the component
     const uiGroups: UIAchievementGroup[] = useMemo(() => {
-        return displayGroups.map(g => {
+        return displayGroups.map((g) => {
             return {
                 ...g,
                 title: g.name,
@@ -93,7 +86,7 @@ export default function ExplorationPage() {
                 </div>
             )}
 
-            {(enrichedGroups.length === 0) && (
+            {enrichedGroups.length === 0 && (
                 <div className="text-center text-slate-400 mt-10">
                     <LoadingSpinner message="Loading..." />
                 </div>
@@ -111,9 +104,8 @@ export default function ExplorationPage() {
                         showHidden={showHidden}
                         onToggleHidden={handleToggleHidden}
                     />
-                </AnimatePresence >
-            )
-            }
+                </AnimatePresence>
+            )}
         </>
     );
 }

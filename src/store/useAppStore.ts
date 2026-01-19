@@ -116,17 +116,19 @@ export const useAppStore = create<AppState>((set, get) => ({
             isInitialized: true,
         });
 
-        get().initializeAchievementDatabase().then(() => {
-            if (storedKey) {
-                set({
-                    hasStoredKey: true,
-                    apiKey: storedKey
-                });
-                get().refreshAccountProgress();
-            } else {
-                set({ setupModalOpen: true });
-            }
-        });
+        get()
+            .initializeAchievementDatabase()
+            .then(() => {
+                if (storedKey) {
+                    set({
+                        hasStoredKey: true,
+                        apiKey: storedKey,
+                    });
+                    get().refreshAccountProgress();
+                } else {
+                    set({ setupModalOpen: true });
+                }
+            });
     },
 
     setSetupModalOpen: (open) => set({ setupModalOpen: open }),
@@ -192,15 +194,13 @@ export const useAppStore = create<AppState>((set, get) => ({
                 groups: eGroups,
                 groupMap: eGroupMap,
                 categoryMap: eCategoryMap,
-                achievementMap: eAchievementMap
+                achievementMap: eAchievementMap,
             } = buildEnrichedHierarchy(
                 allAchievements,
                 categories,
                 db?.groups || [],
                 new Map() // No progress yet
             );
-
-
 
             set({
                 achievements: allAchievements,
@@ -211,11 +211,9 @@ export const useAppStore = create<AppState>((set, get) => ({
                 enrichedGroupMap: eGroupMap,
                 enrichedCategoryMap: eCategoryMap,
                 enrichedAchievementMap: eAchievementMap,
-
             });
         } catch (err) {
-            const errorMessage =
-                err instanceof Error ? err.message : 'Failed to load achievements';
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load achievements';
             set({ error: errorMessage });
             console.error('Error loading achievements:', err);
         } finally {
@@ -268,8 +266,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             // Timestamp is no longer relevant for static data build output
             set({ databaseTimestamp: Date.now() });
         } catch (err) {
-            const errorMessage =
-                err instanceof Error ? err.message : 'Failed to build database';
+            const errorMessage = err instanceof Error ? err.message : 'Failed to build database';
             set({ databaseError: errorMessage });
             console.error('Error building database:', err);
         } finally {
@@ -299,15 +296,8 @@ export const useAppStore = create<AppState>((set, get) => ({
                 groups: eGroups,
                 groupMap: eGroupMap,
                 categoryMap: eCategoryMap,
-                achievementMap: eAchievementMap
-            } = buildEnrichedHierarchy(
-                achievements,
-                categories,
-                groups,
-                progressMap
-            );
-
-
+                achievementMap: eAchievementMap,
+            } = buildEnrichedHierarchy(achievements, categories, groups, progressMap);
 
             set({
                 accountProgress: progressMap,
@@ -315,11 +305,9 @@ export const useAppStore = create<AppState>((set, get) => ({
                 enrichedGroupMap: eGroupMap,
                 enrichedCategoryMap: eCategoryMap,
                 enrichedAchievementMap: eAchievementMap,
-
             });
         } catch (err) {
-            const errorMessage =
-                err instanceof Error ? err.message : 'Failed to refresh progress';
+            const errorMessage = err instanceof Error ? err.message : 'Failed to refresh progress';
             set({ error: errorMessage });
             console.error('Error refreshing progress:', err);
         } finally {

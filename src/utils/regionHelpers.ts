@@ -14,46 +14,46 @@ import visionsOfEternityImg from '../assets/images/visions_of_eternity.png';
  * Returns the CSS variable for a region's color
  */
 export function getRegionColor(region: MasteryRegion): string {
-  const colorMap: Record<MasteryRegion, string> = {
-    Tyria: 'var(--expansion-tyria)',
-    Maguuma: 'var(--expansion-maguuma)',
-    Desert: 'var(--expansion-desert)',
-    Tundra: 'var(--expansion-tundra)',
-    Jade: 'var(--expansion-jade)',
-    Sky: 'var(--expansion-sky)',
-    Wild: 'var(--expansion-wild)',
-    Magic: 'var(--expansion-magic)',
-  };
-  return colorMap[region];
+    const colorMap: Record<MasteryRegion, string> = {
+        Tyria: 'var(--expansion-tyria)',
+        Maguuma: 'var(--expansion-maguuma)',
+        Desert: 'var(--expansion-desert)',
+        Tundra: 'var(--expansion-tundra)',
+        Jade: 'var(--expansion-jade)',
+        Sky: 'var(--expansion-sky)',
+        Wild: 'var(--expansion-wild)',
+        Magic: 'var(--expansion-magic)',
+    };
+    return colorMap[region];
 }
 
 /**
  * Returns the image path for a region
  */
 export function getRegionImage(region: MasteryRegion): string {
-  const imageMap: Record<MasteryRegion, string> = {
-    Tyria: centralTyriaImg,
-    Maguuma: heartOfThornsImg,
-    Desert: pathOfFireImg,
-    Tundra: icebroodSagaImg,
-    Jade: endOfDragonsImg,
-    Sky: secretsOfTheObscureImg,
-    Wild: janthirWildsImg,
-    Magic: visionsOfEternityImg,
-  };
-  return imageMap[region];
+    const imageMap: Record<MasteryRegion, string> = {
+        Tyria: centralTyriaImg,
+        Maguuma: heartOfThornsImg,
+        Desert: pathOfFireImg,
+        Tundra: icebroodSagaImg,
+        Jade: endOfDragonsImg,
+        Sky: secretsOfTheObscureImg,
+        Wild: janthirWildsImg,
+        Magic: visionsOfEternityImg,
+    };
+    return imageMap[region];
 }
 
 /**
  * The canonical order of regions for display
  */
 export const REGION_ORDER: MasteryRegion[] = [
-  'Tyria',
-  'Maguuma',
-  'Desert',
-  'Tundra',
-  'Jade',
-  'Sky',
-  'Wild',
-  'Magic',
+    'Tyria',
+    'Maguuma',
+    'Desert',
+    'Tundra',
+    'Jade',
+    'Sky',
+    'Wild',
+    'Magic',
 ];

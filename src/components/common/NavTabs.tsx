@@ -14,10 +14,11 @@ export default function NavTabs({ className, itemClassName, activeClassName }: N
     const tabs = [
         { name: 'Mastery', path: '/' },
         { name: 'Exploration', path: '/exploration' },
+        { name: 'Guides', path: '/guides' },
     ];
 
     return (
-        <nav className={cn("flex", className)} aria-label="Tabs">
+        <nav className={cn('flex', className)} aria-label="Tabs">
             {tabs.map((tab) => {
                 const isActive = location.pathname === tab.path;
                 return (

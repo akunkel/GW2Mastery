@@ -59,6 +59,7 @@ The `achievementDb.json` file contains a timestamped object with the achievement
 ## Benefits
 
 By bundling the full database:
+
 - Zero initial API calls for achievement details
 - Instant load times
 - Reduced API rate limiting issues
