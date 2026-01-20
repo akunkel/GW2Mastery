@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
     return (
-        <header className="w-full bg-slate-900 border-b border-slate-800 px-4 py-0 sm:px-6 lg:px-8 shadow-md h-12 flex items-center relative gap-4 sticky top-0 z-50">
+        <header className="w-full bg-slate-900 border-b border-slate-800 px-4 py-0 sm:px-6 lg:px-8 shadow-md h-12 flex items-center gap-4 sticky top-0 z-50">
             <div className="max-w-[1800px] w-full mx-auto flex items-center justify-between h-full">
                 {/* Left: Refresh Button */}
                 <div className="flex-shrink-0">

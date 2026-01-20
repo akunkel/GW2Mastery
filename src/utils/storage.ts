@@ -84,29 +84,67 @@ export function getFilterSettings(): {
 }
 
 const ACHIEVEMENT_DB_KEY = 'gw2_achievement_db_v3';
+const DB_NAME = 'GW2MasteryDB';
+const DB_VERSION = 1;
+const DB_STORE_NAME = 'achievements';
 
 import type { AchievementDatabase } from '../types/gw2';
 
 /**
- * Saves the full achievement database to localStorage
+ * Open IndexedDB database
  */
-export function saveAchievementDatabase(db: AchievementDatabase): void {
+function openDB(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+
+        request.onupgradeneeded = (event) => {
+            const db = (event.target as IDBOpenDBRequest).result;
+            if (!db.objectStoreNames.contains(DB_STORE_NAME)) {
+                db.createObjectStore(DB_STORE_NAME);
+            }
+        };
+    });
+}
+
+/**
+ * Saves the full achievement database to IndexedDB
+ */
+export async function saveAchievementDatabase(db: AchievementDatabase): Promise<void> {
     try {
-        localStorage.setItem(ACHIEVEMENT_DB_KEY, JSON.stringify(db));
+        const idb = await openDB();
+        return new Promise((resolve, reject) => {
+            const transaction = idb.transaction(DB_STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(DB_STORE_NAME);
+            const request = store.put(db, ACHIEVEMENT_DB_KEY);
+
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve();
+        });
     } catch (error) {
-        console.error('Failed to save achievement database to localStorage:', error);
+        console.error('Failed to save achievement database to IndexedDB:', error);
+        throw error;
     }
 }
 
 /**
- * Retrieves the full achievement database from localStorage
+ * Retrieves the full achievement database from IndexedDB
  */
-export function getAchievementDatabase(): AchievementDatabase | null {
+export async function getAchievementDatabase(): Promise<AchievementDatabase | null> {
     try {
-        const data = localStorage.getItem(ACHIEVEMENT_DB_KEY);
-        return data ? JSON.parse(data) : null;
+        const idb = await openDB();
+        return new Promise((resolve, reject) => {
+            const transaction = idb.transaction(DB_STORE_NAME, 'readonly');
+            const store = transaction.objectStore(DB_STORE_NAME);
+            const request = store.get(ACHIEVEMENT_DB_KEY);
+
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result || null);
+        });
     } catch (error) {
-        console.error('Failed to retrieve achievement database from localStorage:', error);
+        console.error('Failed to retrieve achievement database from IndexedDB:', error);
         return null;
     }
 }

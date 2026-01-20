@@ -100,12 +100,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     databaseTimestamp: null,
 
     // Actions
-    initialize: () => {
+    initialize: async () => {
         const storedKey = getApiKey();
         const filterSettings = getFilterSettings();
         const hiddenIds = getHiddenAchievements();
 
-        const { activeTs } = getDatabaseStatus();
+        const { activeTs } = await getDatabaseStatus();
 
         set({
             databaseTimestamp: activeTs > 0 ? activeTs : null,
@@ -260,11 +260,33 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ buildingDatabase: true, loadingProgress: null, databaseError: null });
 
         try {
-            await buildAchievementDatabase((current, total) => {
+            const db = await buildAchievementDatabase((current, total) => {
                 set({ loadingProgress: { current, total } });
             });
-            // Timestamp is no longer relevant for static data build output
-            set({ databaseTimestamp: Date.now() });
+            const { accountProgress } = get();
+
+            const {
+                groups: eGroups,
+                groupMap: eGroupMap,
+                categoryMap: eCategoryMap,
+                achievementMap: eAchievementMap,
+            } = buildEnrichedHierarchy(
+                db.achievements,
+                db.categories,
+                db.groups,
+                accountProgress
+            );
+
+            set({
+                achievements: db.achievements,
+                categories: db.categories,
+                groups: db.groups,
+                enrichedGroups: eGroups,
+                enrichedGroupMap: eGroupMap,
+                enrichedCategoryMap: eCategoryMap,
+                enrichedAchievementMap: eAchievementMap,
+                databaseTimestamp: db.timestamp,
+            });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to build database';
             set({ databaseError: errorMessage });

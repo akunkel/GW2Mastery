@@ -8,7 +8,6 @@
         "build": "tsc -b && npm run lint && vite build",
         "lint": "eslint .",
         "preview": "vite preview",
-        "preview": "vite preview",
         "deploy": "npm run build && gh-pages -d dist",
         "format": "prettier --write ."
     },

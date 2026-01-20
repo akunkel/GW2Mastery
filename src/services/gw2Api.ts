@@ -15,8 +15,11 @@ const includeDebugFields = import.meta.env.DEV;
 /**
  * Returns the status of the achievement database (timestamps)
  */
-export function getDatabaseStatus() {
-    const localDb = getAchievementDatabase();
+/**
+ * Returns the status of the achievement database (timestamps)
+ */
+export async function getDatabaseStatus() {
+    const localDb = await getAchievementDatabase();
     const bundledDb = achievementDb as unknown as AchievementDatabase;
     const localTs = localDb?.timestamp || 0;
     const bundledTs = bundledDb?.timestamp || 0;
@@ -37,7 +40,7 @@ const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (
  */
 export async function buildAchievementDatabase(
     onProgress?: (current: number, total: number) => void
-): Promise<number[]> {
+): Promise<AchievementDatabase> {
     // 1. Start fetching categories (don't await yet)
     const categoriesPromise = fetchAchievementCategories();
 
@@ -59,6 +62,7 @@ export async function buildAchievementDatabase(
     const totalBatches = batches.length;
     const ids: number[] = [];
     const achievements: Achievement[] = [];
+    const rawAchievements: RawAchievement[] = [];
 
     // Process batches in parallel groups to stay under rate limits
     for (let i = 0; i < batches.length; i += PARALLEL_REQUESTS) {
@@ -97,19 +101,19 @@ export async function buildAchievementDatabase(
                 }
 
                 if (raw.bits && raw.bits.length > 0) {
-                    optimized.bits = raw.bits.map((b) => {
-                        // Create clean bit object
+                    optimized.bits = raw.bits.map((b, index) => {
                         const bit: { text?: string } = {};
-                        if (b.text) bit.text = b.text;
+                        if (b.text) {
+                            bit.text = b.text;
+                        } else {
+                            // When there is no text, use the type instead.
+                            bit.text = `${b.type} ${index + 1}`;
+                        }
                         return bit;
                     });
                 }
 
-                // If Debug: Attach raw data
-                if (includeDebugFields) {
-                    optimized.raw = raw;
-                }
-
+                rawAchievements.push(raw);
                 achievements.push(optimized);
             });
         });
@@ -147,14 +151,21 @@ export async function buildAchievementDatabase(
     };
 
     // Save to localStorage for immediate use
-    saveAchievementDatabase(db);
+    await saveAchievementDatabase(db);
 
     console.log('=== Database Build Complete ===');
-    console.log(`Total achievements: ${achievements.length}`);
-    console.log(`Total categories: ${categories.length}`);
-    console.log('\n' + JSON.stringify(db));
+    if (includeDebugFields) {
+        console.log(`Raw achievments: ${rawAchievements.length}`);
+        console.log(JSON.stringify(
+            {
+                ...db,
+                achievements: rawAchievements,
+            }));
+    }
+    console.log(`Achievements: ${achievements.length}`);
+    console.log(JSON.stringify(db));
 
-    return allIds;
+    return db;
 }
 
 /**
@@ -162,7 +173,7 @@ export async function buildAchievementDatabase(
  */
 export async function getDbAchievements(): Promise<AchievementDatabase | null> {
     // 1. Get local storage version
-    const localDb = getAchievementDatabase();
+    const localDb = await getAchievementDatabase();
 
     // 2. Get bundled version
     // We handle the potential type mismatch if the JSON is empty stub
