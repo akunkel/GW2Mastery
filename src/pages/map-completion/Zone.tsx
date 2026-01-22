@@ -9,7 +9,7 @@ interface ZoneProps {
     center: [number, number];
 }
 
-export const Zone = memo(({ name, polygonPoints, center }: ZoneProps) => {
+export const Zone = memo(({ id, name, polygonPoints, center }: ZoneProps) => {
     // Parse polygon points to get coordinates
     const points = polygonPoints.split(' ').map((point) => {
         const [x, y] = point.split(',').map(Number);
@@ -41,11 +41,7 @@ export const Zone = memo(({ name, polygonPoints, center }: ZoneProps) => {
         })
         .join(', ');
 
-    const fontSize = 2 + width * 0.05;
-
-    // Convert center coordinates relative to the element
-    const centerXPercent = ((center[0] - minX) / width) * 100;
-    const centerYPercent = ((center[1] - minY) / height) * 100;
+    const fontSize = Math.min(1.6 + width * 0.05, height * 0.15);
 
     return (
         <div
@@ -58,6 +54,9 @@ export const Zone = memo(({ name, polygonPoints, center }: ZoneProps) => {
                 clipPath: `polygon(${clipPathPoints})`,
                 background: 'rgba(59, 130, 246, 0.1)',
                 transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(59, 130, 246, 0.3)';
@@ -65,23 +64,23 @@ export const Zone = memo(({ name, polygonPoints, center }: ZoneProps) => {
             onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
             }}
+            onClick={() => {
+                if (import.meta.env.DEV) {
+                    console.log('Zone clicked:', { id, name, center, polygonPoints });
+                }
+            }}
             title={name}
         >
             {/* Zone label */}
             <div
-                className="absolute pointer-events-none select-none text-center text-white font-bold"
+                className="pointer-events-none select-none text-center text-white font-bold"
                 style={{
-                    left: `${centerXPercent}%`,
-                    top: `${centerYPercent}%`,
-                    transform: 'translate(-50%, -50%)',
                     fontSize: `${fontSize}px`,
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                     textShadow: getTextStroke(0.08),
                     WebkitFontSmoothing: 'antialiased',
                     MozOsxFontSmoothing: 'grayscale',
-                    lineHeight: '1.2',
                     maxWidth: '90%',
-                    wordWrap: 'break-word',
                 }}
             >
                 {name}

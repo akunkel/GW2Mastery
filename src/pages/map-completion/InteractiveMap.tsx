@@ -12,7 +12,7 @@ export default function InteractiveMap({ zones }: InteractiveMapProps) {
         <TransformWrapper
             initialScale={2}
             minScale={1.2}
-            maxScale={4}
+            maxScale={6}
             wheel={{ step: 0.5 }}
             panning={{ velocityDisabled: true }}
             centerOnInit
