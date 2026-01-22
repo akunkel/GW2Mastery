@@ -84,11 +84,12 @@ export function getFilterSettings(): {
 }
 
 const ACHIEVEMENT_DB_KEY = 'gw2_achievement_db_v3';
+const CONTINENT_DB_KEY = 'gw2_continent_db_v1';
 const DB_NAME = 'GW2MasteryDB';
 const DB_VERSION = 1;
 const DB_STORE_NAME = 'achievements';
 
-import type { AchievementDatabase } from '../types/gw2';
+import type { AchievementDatabase, ContinentDatabase } from '../types/gw2';
 
 /**
  * Open IndexedDB database
@@ -170,5 +171,47 @@ export function getHiddenAchievements(): Set<number> {
     } catch (error) {
         console.error('Failed to retrieve hidden achievements from localStorage:', error);
         return new Set();
+    }
+}
+
+// ===== Continent Database Storage =====
+
+/**
+ * Saves the continent database to IndexedDB
+ */
+export async function saveContinentDatabase(db: ContinentDatabase): Promise<void> {
+    try {
+        const idb = await openDB();
+        return new Promise((resolve, reject) => {
+            const transaction = idb.transaction(DB_STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(DB_STORE_NAME);
+            const request = store.put(db, CONTINENT_DB_KEY);
+
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve();
+        });
+    } catch (error) {
+        console.error('Failed to save continent database to IndexedDB:', error);
+        throw error;
+    }
+}
+
+/**
+ * Retrieves the continent database from IndexedDB
+ */
+export async function getContinentDatabase(): Promise<ContinentDatabase | null> {
+    try {
+        const idb = await openDB();
+        return new Promise((resolve, reject) => {
+            const transaction = idb.transaction(DB_STORE_NAME, 'readonly');
+            const store = transaction.objectStore(DB_STORE_NAME);
+            const request = store.get(CONTINENT_DB_KEY);
+
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result || null);
+        });
+    } catch (error) {
+        console.error('Failed to retrieve continent database from IndexedDB:', error);
+        return null;
     }
 }

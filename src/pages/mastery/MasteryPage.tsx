@@ -191,6 +191,16 @@ export default function MasteryPage() {
 
     return (
         <>
+            {/* Page Title */}
+            <div className="text-center mb-8 mt-4">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
+                    GW2Mastery
+                </h1>
+                <p className="text-slate-400 lg:text-lg md:text-base text-sm">
+                    Just the mastery points, please.
+                </p>
+            </div>
+
             {/* Filter Controls */}
             {achievements.length > 0 && (
                 <div className="mb-4 px-4 sm:px-6 lg:px-8">

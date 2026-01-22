@@ -5,33 +5,26 @@ import SetupModal from './SetupModal';
 import { useAppStore } from '../store/useAppStore';
 
 export default function Layout() {
-    const { setSetupModalOpen, refreshAccountProgress, loading } = useAppStore();
+    const { setSetupModalOpen, refreshAccountProgress, loading, handleBuildContinentDatabase } = useAppStore();
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 relative">
+        <div className="bg-gradient-to-b from-slate-900 to-slate-800 relative overflow-hidden">
+            {/* Header - h-12 (3rem) */}
             <Header
                 onRefresh={() => refreshAccountProgress()}
                 onSetup={() => setSetupModalOpen(true)}
                 loading={loading}
+                onBuildMap={() => handleBuildContinentDatabase()}
             />
 
+            {/* Navigation - Mobile only, approx h-12 */}
             <Navigation />
 
-            <div className="max-w-[1800px] mx-auto">
-                {/* Subtitle / context if needed, or just let the page handle it */}
-                <div className="text-center mb-8 mt-4">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
-                        GW2Mastery
-                    </h1>
-                    <p className="text-slate-400 lg:text-lg md:text-base text-sm">
-                        Just the mastery points, please.
-                    </p>
-                </div>
+            {/* Setup Modal */}
+            <SetupModal />
 
-                {/* Setup Modal */}
-                <SetupModal />
-
-                {/* Page Content */}
+            {/* Page Content */}
+            <div className="max-w-[1800px] mx-auto w-full">
                 <Outlet />
             </div>
         </div>

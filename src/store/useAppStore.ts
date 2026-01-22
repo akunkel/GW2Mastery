@@ -5,6 +5,8 @@ import {
     fetchAchievementCategories,
     getDatabaseStatus,
     getDbAchievements,
+    buildContinentDatabase,
+    getContinentData,
 } from '../services/gw2Api';
 import type {
     AccountAchievement,
@@ -16,6 +18,7 @@ import type {
     EnrichedGroup,
     FilterType,
     GoalType,
+    ContinentDatabase,
 } from '../types/gw2';
 import {
     clearApiKey,
@@ -41,6 +44,11 @@ interface AppState {
     accountProgress: Map<number, AccountAchievement>;
     groups: AchievementGroup[];
     categories: AchievementCategory[];
+
+    // Map Completion Data
+    continentData: ContinentDatabase | null;
+    mapLoading: boolean;
+    mapBuildProgress: string | null;
 
     // UI State
     loading: boolean;
@@ -72,6 +80,10 @@ interface AppState {
     handleToggleHidden: (achievementId: number) => void;
     handleBuildDatabase: () => Promise<void>;
     refreshAccountProgress: () => Promise<void>;
+
+    // Map Actions
+    initializeContinentData: () => Promise<void>;
+    handleBuildContinentDatabase: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -84,6 +96,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     enrichedAchievementMap: new Map(),
     accountProgress: new Map(),
     groups: [],
+    continentData: null,
+    mapLoading: false,
+    mapBuildProgress: null,
     loading: false,
     buildingDatabase: false,
     loadingProgress: null,
@@ -334,6 +349,34 @@ export const useAppStore = create<AppState>((set, get) => ({
             console.error('Error refreshing progress:', err);
         } finally {
             set({ loading: false });
+        }
+    },
+
+    // Map Completion Actions
+    initializeContinentData: async () => {
+        set({ mapLoading: true });
+
+        try {
+            const data = await getContinentData();
+            set({ continentData: data, mapLoading: false });
+        } catch (err) {
+            console.error('Error loading continent data:', err);
+            set({ mapLoading: false });
+        }
+    },
+
+    handleBuildContinentDatabase: async () => {
+        set({ mapLoading: true, mapBuildProgress: null });
+
+        try {
+            const db = await buildContinentDatabase((message) => {
+                set({ mapBuildProgress: message });
+            });
+            set({ continentData: db });
+        } catch (err) {
+            console.error('Error building continent database:', err);
+        } finally {
+            set({ mapLoading: false, mapBuildProgress: null });
         }
     },
 }));

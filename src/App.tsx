@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import MasteryPage from './pages/mastery/MasteryPage';
 import ExplorationPage from './pages/exploration/ExplorationPage';
 import GuidesPage from './pages/guides/GuidesPage';
+import MapCompletionPage from './pages/map-completion/MapCompletionPage';
 import { useAppStore } from './store/useAppStore';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/" element={<Layout />}>
                     <Route index element={<MasteryPage />} />
                     <Route path="exploration" element={<ExplorationPage />} />
+                    <Route path="map-completion" element={<MapCompletionPage />} />
                     <Route path="guides" element={<GuidesPage />} />
                 </Route>
             </Routes>
