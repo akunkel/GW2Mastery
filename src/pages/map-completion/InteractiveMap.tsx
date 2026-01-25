@@ -13,41 +13,33 @@ export default function InteractiveMap({ zones }: InteractiveMapProps) {
             initialScale={2}
             minScale={1.2}
             maxScale={6}
-            wheel={{ step: 0.5 }}
+            smooth
+            wheel={{ smoothStep: 0.005 }}
             panning={{ velocityDisabled: true }}
             centerOnInit
             limitToBounds
             disablePadding
         >
             {() => (
-                <div className="relative h-full flex flex-col">
-                    <div className="flex-1 min-h-0">
-                        <TransformComponent
-                            wrapperClass="w-full h-full bg-slate-900 rounded-lg overflow-hidden"
-                            contentClass="w-full h-full"
-                        >
-                            <div className="relative w-full h-full">
-                                <img
-                                    src={worldMapSmall}
-                                    alt="Tyria World Map"
-                                    className="w-full h-full object-contain"
-                                    draggable={false}
-                                />
-                                <div className="absolute inset-0">
-                                    {zones.map((zone) => (
-                                        <Zone
-                                            key={zone.id}
-                                            id={zone.id}
-                                            name={zone.name}
-                                            polygonPoints={zone.polygonPoints}
-                                            center={zone.center}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </TransformComponent>
+                <TransformComponent wrapperClass="!h-[calc(100dvh-11.8rem)] md:!h-[calc(100dvh-9rem)]">
+                    <img
+                        src={worldMapSmall}
+                        alt="Tyria World Map"
+                        className="w-[100dvw] h-auto object-contain"
+                        draggable={false}
+                    />
+                    <div className="absolute inset-0">
+                        {zones.map((zone) => (
+                            <Zone
+                                key={zone.id}
+                                id={zone.id}
+                                name={zone.name}
+                                polygonPoints={zone.polygonPoints}
+                                center={zone.center}
+                            />
+                        ))}
                     </div>
-                </div>
+                </TransformComponent>
             )}
         </TransformWrapper>
     );

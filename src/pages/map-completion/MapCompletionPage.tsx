@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAppStore } from '../../store/useAppStore';
 import type { RenderedZone } from '../../types/gw2';
+import { applyMapAdjustments } from '../../utils/mapAdjustments';
 import { getZoneCenter, mapRectToPolygon } from '../../utils/mapCoordinates';
 import InteractiveMap from './InteractiveMap';
 
@@ -25,11 +26,14 @@ export default function MapCompletionPage() {
             Object.values(region.maps).forEach((map) => {
                 if (!map.continent_rect) return;
 
+                // Apply visual adjustments at runtime
+                const adjustedRect = applyMapAdjustments(map.continent_rect, map.name);
+
                 const zone: RenderedZone = {
                     id: map.id,
                     name: map.name,
-                    polygonPoints: mapRectToPolygon(map.continent_rect),
-                    center: getZoneCenter(map.continent_rect),
+                    polygonPoints: mapRectToPolygon(adjustedRect),
+                    center: getZoneCenter(adjustedRect),
                     minLevel: map.min_level,
                     maxLevel: map.max_level,
                     regionName: region.name,
@@ -70,10 +74,7 @@ export default function MapCompletionPage() {
                 </p>
             </div>
 
-            {/* Map container with calculated height to exclude header and top section. */}
-            <div className="h-[calc(100dvh-11.8rem)] md:h-[calc(100dvh-9rem)]">
-                <InteractiveMap zones={zones} />
-            </div>
+            <InteractiveMap zones={zones} />
         </div>
     );
 }

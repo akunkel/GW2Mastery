@@ -1,14 +1,15 @@
 import { Outlet } from 'react-router-dom';
+import { useAppStore } from '../store/useAppStore';
 import Header from './common/Header';
 import Navigation from './common/Navigation';
 import SetupModal from './SetupModal';
-import { useAppStore } from '../store/useAppStore';
 
 export default function Layout() {
-    const { setSetupModalOpen, refreshAccountProgress, loading, handleBuildContinentDatabase } = useAppStore();
+    const { setSetupModalOpen, refreshAccountProgress, loading, handleBuildContinentDatabase } =
+        useAppStore();
 
     return (
-        <div className="bg-gradient-to-b from-slate-900 to-slate-800 relative overflow-hidden">
+        <div className="relative overflow-hidden">
             {/* Header - h-12 (3rem) */}
             <Header
                 onRefresh={() => refreshAccountProgress()}

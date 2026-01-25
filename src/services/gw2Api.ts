@@ -372,7 +372,7 @@ async function enrichAndFilterFloorData(
   // First, fetch map types for all maps
   const mapTypes = await fetchMapTypes(floor, onProgress);
 
-  // List of map names to explicitly exclude (non-explorable or special instances)
+  // Maps to exclude from the database (non-explorable or special instances)
   const excludedMapNames = ['', "Noble's Folly", "Lion's Arch Aerodrome"];
 
   const enrichedFloor: ContinentFloor = {
