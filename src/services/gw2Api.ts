@@ -12,6 +12,7 @@ import type {
   MasteryRegion,
   RawAchievement,
 } from '../types/gw2';
+import { REGION_ZONES } from '../utils/regionHelpers';
 import {
   getAchievementDatabase,
   getContinentDatabase,
@@ -363,6 +364,18 @@ async function fetchMapTypes(
 }
 
 /**
+ * Finds the mastery region for a map based on its name using REGION_ZONES
+ */
+function findMasteryRegion(mapName: string): MasteryRegion | undefined {
+  for (const [region, zones] of Object.entries(REGION_ZONES)) {
+    if (zones.includes(mapName)) {
+      return region as MasteryRegion;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Enriches floor data with map types and filters out non-Public maps
  */
 async function enrichAndFilterFloorData(
@@ -393,7 +406,7 @@ async function enrichAndFilterFloorData(
         !map.name.includes('(') &&
         !excludedMapNames.includes(map.name)
       ) {
-        regionMaps[Number(mapId)] = {
+        const mapData: ContinentMapData = {
           id: map.id,
           name: map.name,
           min_level: map.min_level,
@@ -402,8 +415,15 @@ async function enrichAndFilterFloorData(
           type: mapType,
           map_rect: map.map_rect,
           continent_rect: map.continent_rect,
-          // Exclude points_of_interest, tasks, skill_challenges, sectors, adventures, mastery_points
         };
+
+        // Add masteryRegion if the map is in REGION_ZONES
+        const masteryRegion = findMasteryRegion(map.name);
+        if (masteryRegion) {
+          mapData.masteryRegion = masteryRegion;
+        }
+
+        regionMaps[Number(mapId)] = mapData;
       }
     });
 

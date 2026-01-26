@@ -25,7 +25,7 @@
         --ring: 224.3 76.3% 48%;
         --radius: 0.5rem;
 
-        /* GW2 Expansion Colors */
+        /* GW2 Expansion Colors (banners/cards) */
         --expansion-tyria: #383838;
         --expansion-maguuma: #547516;
         --expansion-desert: #6e1a36;
@@ -34,6 +34,16 @@
         --expansion-sky: #745b17;
         --expansion-wild: #0d3d7b;
         --expansion-magic: #c33b05;
+
+        /* GW2 Map Zone Colors */
+        --zone-tyria: #818181;
+        --zone-maguuma: #547516;
+        --zone-desert: #6e1a36;
+        --zone-tundra: #285169;
+        --zone-jade: #247a7d;
+        --zone-sky: #745b17;
+        --zone-wild: #0d3d7b;
+        --zone-magic: #c33b05;
     }
 }
 

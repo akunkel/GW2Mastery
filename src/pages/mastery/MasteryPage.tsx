@@ -5,12 +5,11 @@ import AchievementList, { type UIAchievementGroup } from '../../components/commo
 import { useAppStore } from '../../store/useAppStore';
 
 import {
-    getRegionDisplayName,
     getRequiredCounts,
     groupByRegionAndCategory,
 } from '../../utils/filters';
 import type { EnrichedAchievement } from '../../types/gw2';
-import { getRegionColor, getRegionImage, REGION_ORDER } from '../../utils/regionHelpers';
+import { getRegionColor, getRegionDisplayName, getRegionImage, REGION_ORDER } from '../../utils/regionHelpers';
 import FilterBar from './FilterBar';
 
 export default function MasteryPage() {

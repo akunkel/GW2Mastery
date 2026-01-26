@@ -41,24 +41,6 @@ export function groupByRegionAndCategory(
 }
 
 /**
- * Gets a display name for a mastery region
- */
-export function getRegionDisplayName(region: MasteryRegion): string {
-    const regionNames: Record<MasteryRegion, string> = {
-        Tyria: 'Core Tyria',
-        Maguuma: 'Heart of Thorns',
-        Desert: 'Path of Fire',
-        Tundra: 'Icebrood Saga',
-        Jade: 'End of Dragons',
-        Sky: 'Secrets of the Obscure',
-        Wild: 'Janthir Wilds',
-        Magic: 'Visions of Eternity',
-    };
-
-    return regionNames[region] || region;
-}
-
-/**
  * Gets the required points to unloack all masteries for each region.
  */
 export const REQUIRED_COUNTS: Record<MasteryRegion, number> = {

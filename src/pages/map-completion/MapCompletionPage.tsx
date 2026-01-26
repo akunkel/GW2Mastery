@@ -37,6 +37,7 @@ export default function MapCompletionPage() {
                     minLevel: map.min_level,
                     maxLevel: map.max_level,
                     regionName: region.name,
+                    masteryRegion: map.masteryRegion,
                 };
 
                 allZones.push(zone);

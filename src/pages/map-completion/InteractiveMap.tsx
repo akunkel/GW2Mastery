@@ -36,6 +36,7 @@ export default function InteractiveMap({ zones }: InteractiveMapProps) {
                                 name={zone.name}
                                 polygonPoints={zone.polygonPoints}
                                 center={zone.center}
+                                masteryRegion={zone.masteryRegion}
                             />
                         ))}
                     </div>
