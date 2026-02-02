@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
 interface NavTabsProps {
@@ -13,7 +13,6 @@ export default function NavTabs({ className, itemClassName, activeClassName }: N
 
     const tabs = [
         { name: 'Mastery', path: '/' },
-        { name: 'Exploration', path: '/exploration' },
         { name: 'Map', path: '/map-completion' },
         { name: 'Guides', path: '/guides' },
     ];
