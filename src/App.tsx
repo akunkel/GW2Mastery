@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
+import { TooltipProvider } from './components/ui/tooltip';
 import GuidesPage from './pages/guides/GuidesPage';
 import MapCompletionPage from './pages/map-completion/MapCompletionPage';
 import MasteryPage from './pages/mastery/MasteryPage';
@@ -15,15 +16,17 @@ function App() {
     }, [initialize]);
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<MasteryPage />} />
-                    <Route path="map-completion" element={<MapCompletionPage />} />
-                    <Route path="guides" element={<GuidesPage />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
+        <TooltipProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<MasteryPage />} />
+                        <Route path="map-completion" element={<MapCompletionPage />} />
+                        <Route path="guides" element={<GuidesPage />} />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </TooltipProvider>
     );
 }
 

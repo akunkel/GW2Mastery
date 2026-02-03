@@ -1,13 +1,15 @@
 import { useEffect, useMemo } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useExplorerProgress } from '../../hooks/useExplorerProgress';
 import { useAppStore } from '../../store/useAppStore';
 import type { RenderedZone } from '../../types/gw2';
-import { applyMapAdjustments } from '../../utils/mapAdjustments';
+import { applyMapAdjustments } from '../../utils/mapConfig';
 import { getZoneCenter, mapRectToPolygon } from '../../utils/mapCoordinates';
 import InteractiveMap from './InteractiveMap';
 
 export default function MapCompletionPage() {
     const { continentData, mapLoading, initializeContinentData } = useAppStore();
+    const { progressMap, insightMap } = useExplorerProgress();
 
     useEffect(() => {
         initializeContinentData();
@@ -69,13 +71,11 @@ export default function MapCompletionPage() {
         <div className="pt-4">
             {/* Page header - Fixed height */}
             <div className="mb-4 h-16 px-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Map Completion</h2>
-                <p className="text-slate-400 text-sm">
-                    Explore the world of Tyria. {zones.length} zones available.
-                </p>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Map Exploration</h2>
+                <p className="text-slate-400 text-sm">Explore the world of Tyria.</p>
             </div>
 
-            <InteractiveMap zones={zones} />
+            <InteractiveMap zones={zones} explorerProgress={progressMap} insightProgress={insightMap} />
         </div>
     );
 }

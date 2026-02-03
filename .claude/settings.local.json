@@ -1,13 +1,15 @@
 {
-    "permissions": {
-        "allow": [
-            "Bash(npm install:*)",
-            "Bash(npx tailwindcss:*)",
-            "Bash(npm run build:*)",
-            "Bash(npm run dev:*)",
-            "Bash(timeout:*)",
-            "Bash(curl:*)",
-            "Bash(node -e:*)"
-        ]
-    }
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(node -e:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)"
+    ]
+  }
 }

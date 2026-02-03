@@ -386,7 +386,7 @@ async function enrichAndFilterFloorData(
   const mapTypes = await fetchMapTypes(floor, onProgress);
 
   // Maps to exclude from the database (non-explorable or special instances)
-  const excludedMapNames = ['', "Noble's Folly", "Lion's Arch Aerodrome"];
+  const excludedMapNames = ['', "Noble's Folly", "Lion's Arch Aerodrome", "Labyrinthine Cliffs"];
 
   const enrichedFloor: ContinentFloor = {
     texture_dims: floor.texture_dims,
@@ -443,6 +443,39 @@ async function enrichAndFilterFloorData(
 }
 
 /**
+ * Merges multiple floor data objects, combining regions and maps.
+ * Later floors override earlier floors for maps with the same ID.
+ */
+function mergeFloorData(floors: ContinentFloor[]): ContinentFloor {
+  const merged: ContinentFloor = {
+    texture_dims: floors[0]?.texture_dims ?? [0, 0],
+    regions: {},
+  };
+
+  for (const floor of floors) {
+    for (const [regionId, region] of Object.entries(floor.regions)) {
+      const numRegionId = Number(regionId);
+      if (!merged.regions[numRegionId]) {
+        merged.regions[numRegionId] = {
+          id: region.id,
+          name: region.name,
+          label_coord: region.label_coord,
+          continent_rect: region.continent_rect,
+          maps: {},
+        };
+      }
+
+      // Merge maps, later floors override earlier
+      for (const [mapId, map] of Object.entries(region.maps)) {
+        merged.regions[numRegionId].maps[Number(mapId)] = map;
+      }
+    }
+  }
+
+  return merged;
+}
+
+/**
  * Builds the continent database by fetching continent floor data
  * This creates a pre-bundled JSON file for fast loading
  */
@@ -452,7 +485,8 @@ export async function buildContinentDatabase(
   try {
     // For Tyria continent (ID 1)
     const continentId = 1;
-    const floorId = 1;
+    // Floor 1 has most core maps, Floor 49 has Path of Fire and Living World Season 4/5 maps
+    const floorIds = [1, 49];
 
     if (onProgress) onProgress('Fetching continent data...');
 
@@ -464,13 +498,19 @@ export async function buildContinentDatabase(
     const continentData = await continentResponse.json();
     const continentDims = continentData.continent_dims as [number, number];
 
-    if (onProgress) onProgress('Fetching floor data...');
+    // Fetch all floors
+    const enrichedFloors: ContinentFloor[] = [];
+    for (const floorId of floorIds) {
+      if (onProgress) onProgress(`Fetching floor ${floorId} data...`);
+      const floorRaw = await fetchContinentFloor(continentId, floorId);
+      const enriched = await enrichAndFilterFloorData(floorRaw, onProgress);
+      enrichedFloors.push(enriched);
+    }
 
-    // Fetch floor 1 data (main world map)
-    const floorRaw = await fetchContinentFloor(continentId, floorId);
+    if (onProgress) onProgress('Merging floor data...');
 
-    // Enrich with map types and filter to only Public maps
-    const floor = await enrichAndFilterFloorData(floorRaw, onProgress);
+    // Merge all floors together
+    const floor = mergeFloorData(enrichedFloors);
 
     if (onProgress) onProgress('Building database...');
 
@@ -484,7 +524,7 @@ export async function buildContinentDatabase(
     const db: ContinentDatabase = {
       timestamp: Date.now(),
       continentId,
-      floorId,
+      floorId: floorIds[0], // Primary floor for reference
       continentDims,
       floor,
     };
@@ -495,7 +535,7 @@ export async function buildContinentDatabase(
     if (onProgress) onProgress('Complete!');
 
     console.log('=== Continent Database Build Complete ===');
-    console.log(`Continent ID: ${continentId}, Floor: ${floorId}`);
+    console.log(`Continent ID: ${continentId}, Floors: ${floorIds.join(', ')}`);
     console.log(`Dimensions: ${continentDims[0]} x ${continentDims[1]}`);
     console.log(`Public maps: ${totalMaps}`);
     console.log(JSON.stringify(db));

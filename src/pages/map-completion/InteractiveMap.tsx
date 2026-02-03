@@ -1,13 +1,16 @@
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import worldMapSmall from '../../assets/images/world_map_small.webp';
+import type { ZoneExplorerProgress, ZoneInsightProgress } from '../../hooks/useExplorerProgress';
 import type { RenderedZone } from '../../types/gw2';
 import { Zone } from './Zone';
 
 interface InteractiveMapProps {
     zones: RenderedZone[];
+    explorerProgress: Map<string, ZoneExplorerProgress | null>;
+    insightProgress: Map<string, ZoneInsightProgress>;
 }
 
-export default function InteractiveMap({ zones }: InteractiveMapProps) {
+export default function InteractiveMap({ zones, explorerProgress, insightProgress }: InteractiveMapProps) {
     return (
         <TransformWrapper
             initialScale={2}
@@ -29,16 +32,27 @@ export default function InteractiveMap({ zones }: InteractiveMapProps) {
                         draggable={false}
                     />
                     <div className="absolute inset-0">
-                        {zones.map((zone) => (
-                            <Zone
-                                key={zone.id}
-                                id={zone.id}
-                                name={zone.name}
-                                polygonPoints={zone.polygonPoints}
-                                center={zone.center}
-                                masteryRegion={zone.masteryRegion}
-                            />
-                        ))}
+                        {zones.map((zone) => {
+                            // Get progress: undefined if not in map, null or ZoneExplorerProgress if present
+                            const progress = explorerProgress.has(zone.name)
+                                ? explorerProgress.get(zone.name)
+                                : null; // null indicates no Explorer achievement exists
+
+                            const insight = insightProgress.get(zone.name);
+
+                            return (
+                                <Zone
+                                    key={zone.id}
+                                    id={zone.id}
+                                    name={zone.name}
+                                    polygonPoints={zone.polygonPoints}
+                                    center={zone.center}
+                                    masteryRegion={zone.masteryRegion}
+                                    explorerProgress={progress}
+                                    insightProgress={insight}
+                                />
+                            );
+                        })}
                     </div>
                 </TransformComponent>
             )}
