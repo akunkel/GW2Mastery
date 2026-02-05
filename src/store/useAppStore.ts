@@ -25,9 +25,11 @@ import {
     getApiKey,
     getFilterSettings,
     getHiddenAchievements,
+    getMapFilterSettings,
     saveApiKey,
     saveFilterSettings,
     saveHiddenAchievements,
+    saveMapFilterSettings,
 } from '../utils/storage';
 import { buildEnrichedHierarchy } from '../utils/filters';
 
@@ -66,6 +68,7 @@ interface AppState {
     goal: GoalType;
     hiddenAchievements: Set<number>;
     showHidden: boolean;
+    showCollectibleAchievements: boolean;
     databaseTimestamp: number | null;
 
     // Actions
@@ -74,6 +77,7 @@ interface AppState {
     setFilter: (filter: FilterType) => void;
     setGoal: (goal: GoalType) => void;
     setShowHidden: (show: boolean) => void;
+    setShowCollectibleAchievements: (show: boolean) => void;
     initializeAchievementDatabase: () => Promise<void>;
     handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
     handleClearKey: () => void;
@@ -83,7 +87,6 @@ interface AppState {
 
     // Map Actions
     initializeContinentData: () => Promise<void>;
-    handleBuildContinentDatabase: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -112,12 +115,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     goal: 'all',
     hiddenAchievements: new Set(),
     showHidden: false,
+    showCollectibleAchievements: false,
     databaseTimestamp: null,
 
     // Actions
     initialize: async () => {
         const storedKey = getApiKey();
         const filterSettings = getFilterSettings();
+        const mapFilterSettings = getMapFilterSettings();
         const hiddenIds = getHiddenAchievements();
 
         const { activeTs } = await getDatabaseStatus();
@@ -128,6 +133,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             filter: filterSettings.hideCompleted ? 'incomplete' : 'all',
             goal: filterSettings.requiredOnly ? 'required' : 'all',
             showHidden: filterSettings.showHidden,
+            showCollectibleAchievements: mapFilterSettings.showCollectibleAchievements,
             isInitialized: true,
         });
 
@@ -178,6 +184,11 @@ export const useAppStore = create<AppState>((set, get) => ({
             const requiredOnly = goal === 'required';
             saveFilterSettings(hideCompleted, requiredOnly, show);
         }
+    },
+
+    setShowCollectibleAchievements: (show) => {
+        set({ showCollectibleAchievements: show });
+        saveMapFilterSettings(show);
     },
 
     initializeAchievementDatabase: async () => {
@@ -275,6 +286,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ buildingDatabase: true, loadingProgress: null, databaseError: null });
 
         try {
+            // Build achievement database
             const db = await buildAchievementDatabase((current, total) => {
                 set({ loadingProgress: { current, total } });
             });
@@ -302,6 +314,10 @@ export const useAppStore = create<AppState>((set, get) => ({
                 enrichedAchievementMap: eAchievementMap,
                 databaseTimestamp: db.timestamp,
             });
+
+            // Also build continent/map database
+            const continentDb = await buildContinentDatabase();
+            set({ continentData: continentDb });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to build database';
             set({ databaseError: errorMessage });
@@ -362,21 +378,6 @@ export const useAppStore = create<AppState>((set, get) => ({
         } catch (err) {
             console.error('Error loading continent data:', err);
             set({ mapLoading: false });
-        }
-    },
-
-    handleBuildContinentDatabase: async () => {
-        set({ mapLoading: true, mapBuildProgress: null });
-
-        try {
-            const db = await buildContinentDatabase((message) => {
-                set({ mapBuildProgress: message });
-            });
-            set({ continentData: db });
-        } catch (err) {
-            console.error('Error building continent database:', err);
-        } finally {
-            set({ mapLoading: false, mapBuildProgress: null });
         }
     },
 }));

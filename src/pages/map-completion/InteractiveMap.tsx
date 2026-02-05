@@ -1,6 +1,6 @@
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import worldMapSmall from '../../assets/images/world_map_small.webp';
-import type { ZoneExplorerProgress, ZoneInsightProgress } from '../../hooks/useExplorerProgress';
+import type { CollectibleAchievementProgress, ZoneExplorerProgress, ZoneInsightProgress } from '../../hooks/useExplorerProgress';
 import type { RenderedZone } from '../../types/gw2';
 import { Zone } from './Zone';
 
@@ -8,9 +8,10 @@ interface InteractiveMapProps {
     zones: RenderedZone[];
     explorerProgress: Map<string, ZoneExplorerProgress | null>;
     insightProgress: Map<string, ZoneInsightProgress>;
+    collectibleProgress: Map<string, CollectibleAchievementProgress[]>;
 }
 
-export default function InteractiveMap({ zones, explorerProgress, insightProgress }: InteractiveMapProps) {
+export default function InteractiveMap({ zones, explorerProgress, insightProgress, collectibleProgress }: InteractiveMapProps) {
     return (
         <TransformWrapper
             initialScale={2}
@@ -39,6 +40,7 @@ export default function InteractiveMap({ zones, explorerProgress, insightProgres
                                 : null; // null indicates no Explorer achievement exists
 
                             const insight = insightProgress.get(zone.name);
+                            const collectible = collectibleProgress.get(zone.name);
 
                             return (
                                 <Zone
@@ -50,6 +52,7 @@ export default function InteractiveMap({ zones, explorerProgress, insightProgres
                                     masteryRegion={zone.masteryRegion}
                                     explorerProgress={progress}
                                     insightProgress={insight}
+                                    collectibleAchievements={collectible}
                                 />
                             );
                         })}

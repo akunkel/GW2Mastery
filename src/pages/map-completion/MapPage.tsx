@@ -1,5 +1,7 @@
+import { Info } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
 import { useExplorerProgress } from '../../hooks/useExplorerProgress';
 import { useAppStore } from '../../store/useAppStore';
 import type { RenderedZone } from '../../types/gw2';
@@ -7,9 +9,15 @@ import { applyMapAdjustments } from '../../utils/mapConfig';
 import { getZoneCenter, mapRectToPolygon } from '../../utils/mapCoordinates';
 import InteractiveMap from './InteractiveMap';
 
-export default function MapCompletionPage() {
-    const { continentData, mapLoading, initializeContinentData } = useAppStore();
-    const { progressMap, insightMap } = useExplorerProgress();
+export default function MapPage() {
+    const {
+        continentData,
+        mapLoading,
+        initializeContinentData,
+        showCollectibleAchievements,
+        setShowCollectibleAchievements,
+    } = useAppStore();
+    const { progressMap, insightMap, collectibleMap } = useExplorerProgress();
 
     useEffect(() => {
         initializeContinentData();
@@ -56,11 +64,11 @@ export default function MapCompletionPage() {
     if (!continentData || zones.length === 0) {
         return (
             <div className="max-w-[1800px] mx-auto py-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Map Completion</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Map Achievements</h2>
                 <div className="text-center text-slate-400 mt-10">
                     <p className="mb-4">No map data available.</p>
                     <p className="text-sm">
-                        Click the "Build Map" button in the header to fetch continent data.
+                        Click "Rebuild Database" in Setup to fetch map data.
                     </p>
                 </div>
             </div>
@@ -69,13 +77,40 @@ export default function MapCompletionPage() {
 
     return (
         <div className="pt-4">
-            {/* Page header - Fixed height */}
-            <div className="mb-4 h-16 px-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Map Exploration</h2>
-                <p className="text-slate-400 text-sm">Explore the world of Tyria.</p>
+            {/* Page header */}
+            <div className="mb-4 px-6 flex items-center justify-between">
+                <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                    <span>Map Achievements</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="w-5 h-5 text-slate-400 cursor-help translate-y-px" />
+                        </TooltipTrigger>
+                        <TooltipContent
+                            side="bottom"
+                            className="max-w-64 border border-slate-700 font-normal text-sm"
+                        >
+                            Map completion data is not available in the API, so we track
+                            achievements related to each zone instead.
+                        </TooltipContent>
+                    </Tooltip>
+                </h2>
+                <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none">
+                    <input
+                        type="checkbox"
+                        checked={showCollectibleAchievements}
+                        onChange={(e) => setShowCollectibleAchievements(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                    />
+                    Include collectibles
+                </label>
             </div>
 
-            <InteractiveMap zones={zones} explorerProgress={progressMap} insightProgress={insightMap} />
+            <InteractiveMap
+                zones={zones}
+                explorerProgress={progressMap}
+                insightProgress={insightMap}
+                collectibleProgress={showCollectibleAchievements ? collectibleMap : new Map()}
+            />
         </div>
     );
 }

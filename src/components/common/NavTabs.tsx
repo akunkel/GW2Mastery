@@ -14,7 +14,6 @@ export default function NavTabs({ className, itemClassName, activeClassName }: N
     const tabs = [
         { name: 'Mastery', path: '/' },
         { name: 'Map', path: '/map-completion' },
-        { name: 'Guides', path: '/guides' },
     ];
 
     return (

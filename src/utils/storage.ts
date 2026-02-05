@@ -1,5 +1,6 @@
 const API_KEY_STORAGE_KEY = 'gw2_api_key';
 const FILTER_SETTINGS_KEY = 'gw2_filter_settings';
+const MAP_FILTER_SETTINGS_KEY = 'gw2_map_filter_settings';
 const HIDDEN_ACHIEVEMENTS_KEY = 'gw2_hidden_achievements';
 
 /**
@@ -80,6 +81,34 @@ export function getFilterSettings(): {
     } catch (error) {
         console.error('Failed to retrieve filter settings from localStorage:', error);
         return { hideCompleted: false, requiredOnly: true, showHidden: false };
+    }
+}
+
+/**
+ * Saves map filter settings to localStorage
+ */
+export function saveMapFilterSettings(showCollectibleAchievements: boolean): void {
+    try {
+        localStorage.setItem(MAP_FILTER_SETTINGS_KEY, JSON.stringify({ showCollectibleAchievements }));
+    } catch (error) {
+        console.error('Failed to save map filter settings to localStorage:', error);
+    }
+}
+
+/**
+ * Retrieves map filter settings from localStorage
+ */
+export function getMapFilterSettings(): { showCollectibleAchievements: boolean } {
+    try {
+        const data = localStorage.getItem(MAP_FILTER_SETTINGS_KEY);
+        if (data) {
+            const parsed = JSON.parse(data);
+            return { showCollectibleAchievements: parsed.showCollectibleAchievements ?? false };
+        }
+        return { showCollectibleAchievements: false };
+    } catch (error) {
+        console.error('Failed to retrieve map filter settings from localStorage:', error);
+        return { showCollectibleAchievements: false };
     }
 }
 

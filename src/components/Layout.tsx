@@ -5,8 +5,7 @@ import Navigation from './common/Navigation';
 import SetupModal from './SetupModal';
 
 export default function Layout() {
-    const { setSetupModalOpen, refreshAccountProgress, loading, handleBuildContinentDatabase } =
-        useAppStore();
+    const { setSetupModalOpen, refreshAccountProgress, loading } = useAppStore();
 
     return (
         <div className="relative overflow-hidden">
@@ -15,7 +14,6 @@ export default function Layout() {
                 onRefresh={() => refreshAccountProgress()}
                 onSetup={() => setSetupModalOpen(true)}
                 loading={loading}
-                onBuildMap={() => handleBuildContinentDatabase()}
             />
 
             {/* Navigation - Mobile only, approx h-12 */}

@@ -1,6 +1,10 @@
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
-import type { ZoneExplorerProgress, ZoneInsightProgress } from '../../hooks/useExplorerProgress';
+import type {
+    CollectibleAchievementProgress,
+    ZoneExplorerProgress,
+    ZoneInsightProgress,
+} from '../../hooks/useExplorerProgress';
 import { getTextStroke } from '../../lib/utils';
 import type { MasteryRegion } from '../../types/gw2';
 import { IMAGE_HEIGHT, IMAGE_WIDTH } from '../../utils/mapCoordinates';
@@ -14,6 +18,7 @@ interface ZoneProps {
     masteryRegion?: MasteryRegion;
     explorerProgress?: ZoneExplorerProgress | null; // null = no achievement exists, undefined = no data yet
     insightProgress?: ZoneInsightProgress; // undefined = zone has no mastery insights
+    collectibleAchievements?: CollectibleAchievementProgress[]; // undefined = zone has no collectible achievements
 }
 
 export const Zone = memo(
@@ -25,6 +30,7 @@ export const Zone = memo(
         masteryRegion,
         explorerProgress,
         insightProgress,
+        collectibleAchievements,
     }: ZoneProps) => {
         // Get region color or fallback to white
         const baseColor = getRegionZoneColor(masteryRegion ?? 'Tyria');
@@ -58,7 +64,10 @@ export const Zone = memo(
             })
             .join(', ');
 
-        const fontSize = Math.min(1.6 + width * 0.05, height * 0.15);
+        // Font size scales with the zone's rendered size (as percentage of viewport)
+        // widthPercent is the zone's width as % of map, and map is 100vw wide
+        // Use the smaller of width-based or height-based sizing to fit within zone bounds
+        const fontSizeVw = Math.min(widthPercent * 0.12, heightPercent * 0.25);
 
         // Calculate combined progress from all tracked types (sum of completed / sum of total)
         const getCombinedProgress = (): { percentage: number; hasProgress: boolean } => {
@@ -72,6 +81,12 @@ export const Zone = memo(
             if (insightProgress) {
                 totalCompleted += insightProgress.completed;
                 totalItems += insightProgress.total;
+            }
+            if (collectibleAchievements) {
+                for (const achievement of collectibleAchievements) {
+                    totalCompleted += achievement.completedBits;
+                    totalItems += achievement.totalBits;
+                }
             }
 
             if (totalItems === 0) {
@@ -104,32 +119,60 @@ export const Zone = memo(
             );
 
             const insightLine = insightProgress && (
-                <div className="text-xs text-slate-300">
-                    Insights:{' '}
-                    {insightProgress.isComplete ? 'Complete' : `${insightProgress.percentage}%`}
+                <div
+                    className={`text-[10px] ${insightProgress.isComplete ? 'text-slate-500' : 'text-slate-300'}`}
+                >
+                    Insights: {insightProgress.completed}/{insightProgress.total}
                 </div>
             );
 
+            const collectibleLines = collectibleAchievements?.map((achievement) => {
+                const colorClass = achievement.isComplete ? 'text-slate-500' : 'text-slate-300';
+                return (
+                    <div key={achievement.achievementId} className={`text-[10px] ${colorClass}`}>
+                        <a
+                            href={toWikiUrl(achievement.achievementName)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`${colorClass} hover:text-amber-300 transition-colors pointer-events-auto`}
+                        >
+                            {achievement.achievementName}
+                        </a>
+                        : {achievement.completedBits}/{achievement.totalBits}
+                    </div>
+                );
+            });
+
             // No explorer achievement for this zone
             if (explorerProgress === null || explorerProgress === undefined) {
-                if (insightProgress) {
+                if (insightProgress || collectibleAchievements?.length) {
                     return (
                         <div className="text-center">
                             <div>{zoneLink}</div>
                             {insightLine}
+                            {collectibleLines}
                         </div>
                     );
                 }
-                return <div>{zoneLink}</div>;
+                return (
+                    <div className="text-center">
+                        <div>{zoneLink}</div>
+                        <div className="text-[10px] text-slate-400">No explorer data available</div>
+                    </div>
+                );
             }
 
             // Has explorer achievement
+            const explorerColorClass = explorerProgress.isComplete
+                ? 'text-slate-500'
+                : 'text-slate-300';
+
             const achievementLink = (
                 <a
                     href={toWikiUrl(explorerProgress.achievementName)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-slate-300 hover:text-amber-300 transition-colors pointer-events-auto"
+                    className={`${explorerColorClass} hover:text-amber-300 transition-colors pointer-events-auto`}
                 >
                     Explorer
                 </a>
@@ -138,13 +181,12 @@ export const Zone = memo(
             return (
                 <div className="text-center">
                     <div>{zoneLink}</div>
-                    <div className="text-xs text-slate-300">
-                        {achievementLink}:{' '}
-                        {explorerProgress.isComplete
-                            ? 'Complete'
-                            : `${explorerProgress.percentage}%`}
+                    <div className={`text-[10px] ${explorerColorClass}`}>
+                        {achievementLink}: {explorerProgress.completedBits}/
+                        {explorerProgress.totalBits}
                     </div>
                     {insightLine}
+                    {collectibleLines}
                 </div>
             );
         };
@@ -153,7 +195,7 @@ export const Zone = memo(
             <Tooltip>
                 <TooltipTrigger asChild>
                     <div
-                        className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background] duration-200 bg-[color-mix(in_srgb,var(--zone-base-color)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] border border-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)]"
+                        className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background] duration-200 bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] border border-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)]"
                         style={
                             {
                                 '--zone-base-color': baseColor,
@@ -173,9 +215,9 @@ export const Zone = memo(
                         {/* Zone label and progress bar */}
                         <div className="pointer-events-none select-none flex flex-col items-center w-full max-w-[80%]">
                             <div
-                                className="text-center text-white font-bold"
+                                className="text-center text-white font-bold leading-tight"
                                 style={{
-                                    fontSize: `${fontSize}px`,
+                                    fontSize: `${fontSizeVw}vw`,
                                     fontFamily: 'system-ui, -apple-system, sans-serif',
                                     textShadow: getTextStroke(0.08),
                                     WebkitFontSmoothing: 'antialiased',
@@ -187,9 +229,8 @@ export const Zone = memo(
                             {/* Progress bar - show if any tracked progress exists */}
                             {combinedProgress.hasProgress && (
                                 <div
-                                    className="mt-0.5 rounded-full overflow-hidden w-full"
+                                    className="mt-0.5 rounded-full overflow-hidden w-3/4 h-1"
                                     style={{
-                                        height: `${Math.max(fontSize * 0.25, 3)}px`,
                                         backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                     }}
                                 >

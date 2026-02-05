@@ -19,6 +19,14 @@ export interface ZoneInsightProgress {
   isComplete: boolean;
 }
 
+export interface CollectibleAchievementProgress {
+  achievementId: number;
+  achievementName: string;
+  completedBits: number;
+  totalBits: number;
+  isComplete: boolean;
+}
+
 /**
  * Hook that returns Explorer achievement and Mastery Insight progress for each zone.
  * Returns Maps keyed by zone name.
@@ -26,9 +34,9 @@ export interface ZoneInsightProgress {
 export function useExplorerProgress(): {
   progressMap: Map<string, ZoneExplorerProgress | null>;
   insightMap: Map<string, ZoneInsightProgress>;
-  hasApiKey: boolean;
+  collectibleMap: Map<string, CollectibleAchievementProgress[]>;
 } {
-  const { enrichedAchievementMap, accountProgress, apiKey } = useAppStore();
+  const { enrichedAchievementMap, accountProgress } = useAppStore();
 
   const explorerMap = useMemo(() => {
     return buildZoneToExplorerMap(enrichedAchievementMap);
@@ -126,9 +134,49 @@ export function useExplorerProgress(): {
     return map;
   }, [accountProgress]);
 
+  // Calculate collectible achievement progress for each zone
+  const collectibleMap = useMemo(() => {
+    const map = new Map<string, CollectibleAchievementProgress[]>();
+
+    for (const [zoneName, config] of Object.entries(zoneConfigs)) {
+      const collectibleIds = config.collectibleAchievementIds;
+      if (!collectibleIds?.length) continue;
+
+      const achievements: CollectibleAchievementProgress[] = [];
+
+      for (const achievementId of collectibleIds) {
+        const achievement = enrichedAchievementMap.get(achievementId);
+        const progress = accountProgress.get(achievementId);
+        const totalBits = achievement?.bits?.length ?? 0;
+
+        let completedBits = 0;
+        let isComplete = false;
+
+        if (progress?.done) {
+          completedBits = totalBits;
+          isComplete = true;
+        } else if (progress) {
+          completedBits = progress.bits?.length ?? 0;
+        }
+
+        achievements.push({
+          achievementId,
+          achievementName: achievement?.name ?? `Achievement ${achievementId}`,
+          completedBits,
+          totalBits,
+          isComplete,
+        });
+      }
+
+      map.set(zoneName, achievements);
+    }
+
+    return map;
+  }, [enrichedAchievementMap, accountProgress]);
+
   return {
     progressMap,
     insightMap,
-    hasApiKey: !!apiKey,
+    collectibleMap,
   };
 }
