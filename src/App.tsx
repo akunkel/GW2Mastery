@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import { TooltipProvider } from './components/ui/tooltip';
-import MapPage from './pages/map-completion/MapPage';
+import MapPage from './pages/map/MapPage';
 import MasteryPage from './pages/mastery/MasteryPage';
 import { useAppStore } from './store/useAppStore';
 
@@ -20,7 +20,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Layout />}>
                         <Route index element={<MasteryPage />} />
-                        <Route path="map-completion" element={<MapPage />} />
+                        <Route path="map" element={<MapPage />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
