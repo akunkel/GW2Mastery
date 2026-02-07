@@ -159,12 +159,13 @@ export const Zone = memo(
                             >
                                 {name}
                             </div>
-                            {/* Progress bar - show if any tracked progress exists */}
+                            {/* Progress bar - show if any tracked progress exists, height scales with zone width */}
                             {combinedProgress.hasProgress && (
                                 <div
-                                    className="mt-0.5 rounded-full overflow-hidden w-3/4 h-1"
+                                    className="mt-0.5 rounded-full overflow-hidden w-3/4"
                                     style={{
                                         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                        height: `min(3px, ${widthPercent * 0.05}vw)`,
                                     }}
                                 >
                                     <div
