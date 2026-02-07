@@ -22,7 +22,10 @@ export interface RawAchievement {
   locked_text?: string;
   type: string;
   flags: string[];
-  tiers: unknown[];
+  tiers: {
+    count: number;
+    points: number;
+  }[];
   icon?: string; // Optional in raw, but we pick it
   prerequisites?: number[];
   rewards?: {
@@ -69,7 +72,6 @@ export interface Achievement extends Omit<
   | 'description'
   | 'locked_text'
   | 'type'
-  | 'flags'
   | 'tiers'
   | 'prerequisites'
   | 'rewards'

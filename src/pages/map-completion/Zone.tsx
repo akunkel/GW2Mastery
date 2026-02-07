@@ -1,4 +1,5 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
 import type {
     CollectibleAchievementProgress,
@@ -19,6 +20,7 @@ interface ZoneProps {
     explorerProgress?: ZoneExplorerProgress | null; // null = no achievement exists, undefined = no data yet
     insightProgress?: ZoneInsightProgress; // undefined = zone has no mastery insights
     collectibleAchievements?: CollectibleAchievementProgress[]; // undefined = zone has no collectible achievements
+    includeCollectiblesInProgress?: boolean; // whether to include collectibles in the progress bar
 }
 
 export const Zone = memo(
@@ -31,6 +33,7 @@ export const Zone = memo(
         explorerProgress,
         insightProgress,
         collectibleAchievements,
+        includeCollectiblesInProgress = false,
     }: ZoneProps) => {
         // Get region color or fallback to white
         const baseColor = getRegionZoneColor(masteryRegion ?? 'Tyria');
@@ -82,7 +85,7 @@ export const Zone = memo(
                 totalCompleted += insightProgress.completed;
                 totalItems += insightProgress.total;
             }
-            if (collectibleAchievements) {
+            if (includeCollectiblesInProgress && collectibleAchievements) {
                 for (const achievement of collectibleAchievements) {
                     totalCompleted += achievement.completedBits;
                     totalItems += achievement.totalBits;
@@ -101,152 +104,263 @@ export const Zone = memo(
 
         const combinedProgress = getCombinedProgress();
 
+        // Dialog state for showing full achievement details
+        const [dialogOpen, setDialogOpen] = useState(false);
+
         // Convert a name to a wiki URL (spaces become underscores)
         const toWikiUrl = (text: string) =>
             `https://wiki.guildwars2.com/wiki/${encodeURIComponent(text.replace(/ /g, '_'))}`;
 
-        // Determine tooltip content based on explorer and insight progress
+        // Calculate other achievements count
+        const otherAchievementsCount = collectibleAchievements?.length ?? 0;
+        const otherAchievementsCompleted =
+            collectibleAchievements?.filter((a) => a.isComplete).length ?? 0;
+
+        // Determine tooltip content (simplified summary)
         const getTooltipContent = () => {
-            const zoneLink = (
-                <a
-                    href={toWikiUrl(name)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-white hover:text-amber-300 transition-colors pointer-events-auto"
+            const explorerLine = explorerProgress && (
+                <div
+                    className={`text-[9px] leading-tight ${explorerProgress.isComplete ? 'text-slate-500' : 'text-slate-300'}`}
                 >
-                    {name}
-                </a>
+                    Explorer: {explorerProgress.completedBits}/{explorerProgress.totalBits}
+                </div>
             );
 
             const insightLine = insightProgress && (
                 <div
-                    className={`text-[10px] ${insightProgress.isComplete ? 'text-slate-500' : 'text-slate-300'}`}
+                    className={`text-[9px] leading-tight ${insightProgress.isComplete ? 'text-slate-500' : 'text-slate-300'}`}
                 >
                     Insights: {insightProgress.completed}/{insightProgress.total}
                 </div>
             );
 
-            const collectibleLines = collectibleAchievements?.map((achievement) => {
-                const colorClass = achievement.isComplete ? 'text-slate-500' : 'text-slate-300';
-                return (
-                    <div key={achievement.achievementId} className={`text-[10px] ${colorClass}`}>
-                        <a
-                            href={toWikiUrl(achievement.achievementName)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`${colorClass} hover:text-amber-300 transition-colors pointer-events-auto`}
-                        >
-                            {achievement.achievementName}
-                        </a>
-                        : {achievement.completedBits}/{achievement.totalBits}
-                    </div>
-                );
-            });
-
-            // No explorer achievement for this zone
-            if (explorerProgress === null || explorerProgress === undefined) {
-                if (insightProgress || collectibleAchievements?.length) {
-                    return (
-                        <div className="text-center">
-                            <div>{zoneLink}</div>
-                            {insightLine}
-                            {collectibleLines}
-                        </div>
-                    );
-                }
-                return (
-                    <div className="text-center">
-                        <div>{zoneLink}</div>
-                        <div className="text-[10px] text-slate-400">No explorer data available</div>
-                    </div>
-                );
-            }
-
-            // Has explorer achievement
-            const explorerColorClass = explorerProgress.isComplete
-                ? 'text-slate-500'
-                : 'text-slate-300';
-
-            const achievementLink = (
-                <a
-                    href={toWikiUrl(explorerProgress.achievementName)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${explorerColorClass} hover:text-amber-300 transition-colors pointer-events-auto`}
+            const otherLine = includeCollectiblesInProgress && otherAchievementsCount > 0 && (
+                <div
+                    className={`text-[9px] leading-tight ${otherAchievementsCompleted === otherAchievementsCount ? 'text-slate-500' : 'text-slate-300'}`}
                 >
-                    Explorer
-                </a>
+                    Other: {otherAchievementsCompleted}/{otherAchievementsCount}
+                </div>
             );
+
+            const hasAnyProgress =
+                explorerProgress || insightProgress || otherAchievementsCount > 0;
 
             return (
                 <div className="text-center">
-                    <div>{zoneLink}</div>
-                    <div className={`text-[10px] ${explorerColorClass}`}>
-                        {achievementLink}: {explorerProgress.completedBits}/
-                        {explorerProgress.totalBits}
-                    </div>
+                    <div className="font-semibold text-white leading-tight mb-1">{name}</div>
+                    {explorerLine}
                     {insightLine}
-                    {collectibleLines}
+                    {otherLine}
+                    {!hasAnyProgress && (
+                        <div className="text-[10px] leading-tight text-slate-400">
+                            No achievement data
+                        </div>
+                    )}
+                    {hasAnyProgress && (
+                        <div className="text-[8px] leading-tight text-amber-500 mt-1">
+                            Click for more…
+                        </div>
+                    )}
                 </div>
             );
         };
 
+        const hasAnyProgress = explorerProgress || insightProgress || otherAchievementsCount > 0;
+
         return (
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <div
-                        className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background] duration-200 bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] border border-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)]"
-                        style={
-                            {
-                                '--zone-base-color': baseColor,
-                                left: `${leftPercent}%`,
-                                top: `${topPercent}%`,
-                                width: `${widthPercent}%`,
-                                height: `${heightPercent}%`,
-                                clipPath: `polygon(${clipPathPoints})`,
-                            } as React.CSSProperties
-                        }
-                        onClick={() => {
-                            if (import.meta.env.DEV) {
-                                console.log('Zone clicked:', { id, name, center, polygonPoints });
+            <>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background] duration-200 bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] border border-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)]"
+                            style={
+                                {
+                                    '--zone-base-color': baseColor,
+                                    left: `${leftPercent}%`,
+                                    top: `${topPercent}%`,
+                                    width: `${widthPercent}%`,
+                                    height: `${heightPercent}%`,
+                                    clipPath: `polygon(${clipPathPoints})`,
+                                } as React.CSSProperties
                             }
-                        }}
-                    >
-                        {/* Zone label and progress bar */}
-                        <div className="pointer-events-none select-none flex flex-col items-center w-full max-w-[80%]">
-                            <div
-                                className="text-center text-white font-bold leading-tight"
-                                style={{
-                                    fontSize: `${fontSizeVw}vw`,
-                                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                                    textShadow: getTextStroke(0.08),
-                                    WebkitFontSmoothing: 'antialiased',
-                                    MozOsxFontSmoothing: 'grayscale',
-                                }}
-                            >
-                                {name}
-                            </div>
-                            {/* Progress bar - show if any tracked progress exists */}
-                            {combinedProgress.hasProgress && (
+                            onClick={() => {
+                                if (hasAnyProgress) {
+                                    setDialogOpen(true);
+                                }
+                                if (import.meta.env.DEV) {
+                                    console.log('Zone clicked:', {
+                                        id,
+                                        name,
+                                        center,
+                                        polygonPoints,
+                                    });
+                                }
+                            }}
+                        >
+                            {/* Zone label and progress bar */}
+                            <div className="pointer-events-none select-none flex flex-col items-center w-full max-w-[80%]">
                                 <div
-                                    className="mt-0.5 rounded-full overflow-hidden w-3/4 h-1"
+                                    className="text-center text-white font-bold leading-tight"
                                     style={{
-                                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                        fontSize: `${fontSizeVw}vw`,
+                                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                                        textShadow: getTextStroke(0.08),
+                                        WebkitFontSmoothing: 'antialiased',
+                                        MozOsxFontSmoothing: 'grayscale',
                                     }}
                                 >
+                                    {name}
+                                </div>
+                                {/* Progress bar - show if any tracked progress exists */}
+                                {combinedProgress.hasProgress && (
                                     <div
-                                        className={`h-full rounded-full transition-all duration-300 ${combinedProgress.percentage === 100 ? 'bg-green-500' : 'bg-green-700'}`}
+                                        className="mt-0.5 rounded-full overflow-hidden w-3/4 h-1"
                                         style={{
-                                            width: `${combinedProgress.percentage}%`,
+                                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                         }}
-                                    />
+                                    >
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-300 ${combinedProgress.percentage === 100 ? 'bg-green-500' : 'bg-green-700'}`}
+                                            style={{
+                                                width: `${combinedProgress.percentage}%`,
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">{getTooltipContent()}</TooltipContent>
+                </Tooltip>
+
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                    <DialogContent className="max-h-[80vh] overflow-y-auto custom-scrollbar">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl">
+                                <a
+                                    href={toWikiUrl(name)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-amber-300 transition-colors"
+                                >
+                                    {name}
+                                </a>
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        <div className="space-y-4">
+                            {/* Explorer Achievement */}
+                            {explorerProgress && (
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-300 mb-2">
+                                        Explorer Achievement
+                                    </h3>
+                                    <div
+                                        className={`text-sm ${explorerProgress.isComplete ? 'text-slate-500' : 'text-white'}`}
+                                    >
+                                        <a
+                                            href={toWikiUrl(explorerProgress.achievementName)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:text-amber-300 transition-colors"
+                                        >
+                                            {explorerProgress.achievementName}
+                                        </a>
+                                        <span className="text-slate-400 ml-2">
+                                            {explorerProgress.completedBits}/
+                                            {explorerProgress.totalBits}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Mastery Insights */}
+                            {insightProgress && (
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-300 mb-2">
+                                        Mastery Insights ({insightProgress.completed}/
+                                        {insightProgress.total})
+                                    </h3>
+                                    <div className="space-y-1">
+                                        {[...insightProgress.insights]
+                                            .sort((a, b) => {
+                                                // First by completion (incomplete first)
+                                                const completeDiff =
+                                                    Number(a.isComplete) - Number(b.isComplete);
+                                                if (completeDiff !== 0) return completeDiff;
+                                                // Then alphabetically
+                                                return a.achievementName.localeCompare(
+                                                    b.achievementName
+                                                );
+                                            })
+                                            .map((insight) => (
+                                                <div
+                                                    key={insight.achievementId}
+                                                    className={`text-sm ${insight.isComplete ? 'text-slate-500' : 'text-white'}`}
+                                                >
+                                                    <a
+                                                        href={toWikiUrl(insight.achievementName)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="hover:text-amber-300 transition-colors"
+                                                    >
+                                                        {insight.achievementName}
+                                                    </a>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Other Achievements */}
+                            {collectibleAchievements && collectibleAchievements.length > 0 && (
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-300 mb-2">
+                                        Other Achievements ({otherAchievementsCompleted}/
+                                        {otherAchievementsCount})
+                                    </h3>
+                                    <div className="space-y-1">
+                                        {[...collectibleAchievements]
+                                            .sort((a, b) => {
+                                                // First by completion (incomplete first)
+                                                const completeDiff =
+                                                    Number(a.isComplete) - Number(b.isComplete);
+                                                if (completeDiff !== 0) return completeDiff;
+                                                // Then alphabetically
+                                                return a.achievementName.localeCompare(
+                                                    b.achievementName
+                                                );
+                                            })
+                                            .map((achievement) => (
+                                                <div
+                                                    key={achievement.achievementId}
+                                                    className={`text-sm ${achievement.isComplete ? 'text-slate-500' : 'text-white'}`}
+                                                >
+                                                    <a
+                                                        href={toWikiUrl(
+                                                            achievement.achievementName
+                                                        )}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="hover:text-amber-300 transition-colors"
+                                                    >
+                                                        {achievement.achievementName}
+                                                    </a>
+                                                    {achievement.totalBits > 0 && (
+                                                        <span className="text-slate-400 ml-2">
+                                                            {achievement.completedBits}/
+                                                            {achievement.totalBits}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
-                    </div>
-                </TooltipTrigger>
-                <TooltipContent side="top">{getTooltipContent()}</TooltipContent>
-            </Tooltip>
+                    </DialogContent>
+                </Dialog>
+            </>
         );
     }
 );

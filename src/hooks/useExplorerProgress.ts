@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import mapAchievements from '../data/mapAchievements.json';
 import { useAppStore } from '../store/useAppStore';
 import { buildZoneToExplorerMap } from '../utils/explorerMapping';
 import { zoneConfigs } from '../utils/mapConfig';
@@ -12,11 +13,18 @@ export interface ZoneExplorerProgress {
   isComplete: boolean;
 }
 
+export interface InsightAchievement {
+  achievementId: number;
+  achievementName: string;
+  isComplete: boolean;
+}
+
 export interface ZoneInsightProgress {
   completed: number;
   total: number;
   percentage: number;
   isComplete: boolean;
+  insights: InsightAchievement[];
 }
 
 export interface CollectibleAchievementProgress {
@@ -111,16 +119,24 @@ export function useExplorerProgress(): {
       const insightIds = config.insightAchievementIds;
       if (!insightIds?.length) continue;
 
-      const total = insightIds.length;
+      const insights: InsightAchievement[] = [];
       let completed = 0;
 
       for (const achievementId of insightIds) {
+        const achievement = enrichedAchievementMap.get(achievementId);
         const progress = accountProgress.get(achievementId);
-        if (progress?.done) {
-          completed++;
-        }
+        const isComplete = progress?.done ?? false;
+
+        if (isComplete) completed++;
+
+        insights.push({
+          achievementId,
+          achievementName: achievement?.name ?? `Mastery Insight ${achievementId}`,
+          isComplete,
+        });
       }
 
+      const total = insightIds.length;
       const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
       map.set(zoneName, {
@@ -128,24 +144,41 @@ export function useExplorerProgress(): {
         total,
         percentage,
         isComplete: completed === total,
+        insights,
       });
     }
 
     return map;
-  }, [accountProgress]);
+  }, [enrichedAchievementMap, accountProgress]);
 
-  // Calculate collectible achievement progress for each zone
+  // Calculate "other achievements" progress for each zone
+  // Uses mapAchievements.json but filters out explorer and insight achievements
   const collectibleMap = useMemo(() => {
     const map = new Map<string, CollectibleAchievementProgress[]>();
 
-    for (const [zoneName, config] of Object.entries(zoneConfigs)) {
-      const collectibleIds = config.collectibleAchievementIds;
-      if (!collectibleIds?.length) continue;
+    for (const [zoneName, achievementIds] of Object.entries(mapAchievements as Record<string, number[]>)) {
+      const config = zoneConfigs[zoneName];
+
+      // Build set of IDs to exclude (explorer and insight achievements)
+      const excludedIds = new Set<number>();
+      if (config?.explorerAchievementId) excludedIds.add(config.explorerAchievementId);
+      if (config?.regionalExplorerId) excludedIds.add(config.regionalExplorerId);
+      if (config?.insightAchievementIds) {
+        for (const id of config.insightAchievementIds) excludedIds.add(id);
+      }
+
+      // Filter to only include "other" achievements
+      const otherIds = achievementIds.filter((id) => !excludedIds.has(id));
+      if (!otherIds.length) continue;
 
       const achievements: CollectibleAchievementProgress[] = [];
 
-      for (const achievementId of collectibleIds) {
+      for (const achievementId of otherIds) {
         const achievement = enrichedAchievementMap.get(achievementId);
+
+        // Only include achievements with the Permanent flag (skip if flags exist but don't include Permanent)
+        if (!achievement || !achievement.flags?.includes('Permanent')) continue;
+
         const progress = accountProgress.get(achievementId);
         const totalBits = achievement?.bits?.length ?? 0;
 
@@ -168,7 +201,9 @@ export function useExplorerProgress(): {
         });
       }
 
-      map.set(zoneName, achievements);
+      if (achievements.length > 0) {
+        map.set(zoneName, achievements);
+      }
     }
 
     return map;

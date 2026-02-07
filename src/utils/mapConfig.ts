@@ -20,8 +20,6 @@ export interface ZoneConfig {
   explorerAchievementId?: number;
   regionalExplorerId?: number;
   insightAchievementIds?: number[];
-  // Collectible achievements to track (e.g., hero points, diving goggles, etc.)
-  collectibleAchievementIds?: number[];
 }
 
 /**
@@ -50,7 +48,7 @@ export const zoneConfigs: Record<string, ZoneConfig> = {
   'Kessex Hills': { regionalExplorerId: KRYTAN_EXPLORER },
   'Gendarran Fields': { regionalExplorerId: KRYTAN_EXPLORER },
   'Harathi Hinterlands': { regionalExplorerId: KRYTAN_EXPLORER, insightAchievementIds: [3539] },
-  'Bloodtide Coast': { regionalExplorerId: KRYTAN_EXPLORER, insightAchievementIds: [3501], collectibleAchievementIds: [3092] },
+  'Bloodtide Coast': { regionalExplorerId: KRYTAN_EXPLORER, insightAchievementIds: [3501] },
   "Lion's Arch": { regionalExplorerId: KRYTAN_EXPLORER },
   "Divinity's Reach": { regionalExplorerId: KRYTAN_EXPLORER },
   'Claw Island': { adjustBounds: { right: -250 }, regionalExplorerId: KRYTAN_EXPLORER },
@@ -61,7 +59,7 @@ export const zoneConfigs: Record<string, ZoneConfig> = {
   "Lornar's Pass": { regionalExplorerId: SHIVERPEAK_EXPLORER },
   'Dredgehaunt Cliffs': { regionalExplorerId: SHIVERPEAK_EXPLORER, insightAchievementIds: [3534] },
   'Timberline Falls': { regionalExplorerId: SHIVERPEAK_EXPLORER, insightAchievementIds: [3504] },
-  'Frostgorge Sound': { regionalExplorerId: SHIVERPEAK_EXPLORER, collectibleAchievementIds: [3096] },
+  'Frostgorge Sound': { regionalExplorerId: SHIVERPEAK_EXPLORER },
   Hoelbrak: { regionalExplorerId: SHIVERPEAK_EXPLORER },
 
   // === Orr (Regional: Orr Explorer) ===
@@ -79,27 +77,27 @@ export const zoneConfigs: Record<string, ZoneConfig> = {
   'The Grove': { regionalExplorerId: MAGUUMA_JUNGLE_EXPLORER },
 
   // === Heart of Maguuma ===
-  'Bloodstone Fen': { offsetY: -20, masteryRegion: 'Maguuma', insightAchievementIds: [3061, 3078], collectibleAchievementIds: [8025] },
-  'Dry Top': { adjustBounds: { top: 1050 }, masteryRegion: 'Maguuma', collectibleAchievementIds: [5785] },
+  'Bloodstone Fen': { offsetY: -20, masteryRegion: 'Maguuma', insightAchievementIds: [3061, 3078] },
+  'Dry Top': { adjustBounds: { top: 1050 }, masteryRegion: 'Maguuma' },
   'Spirit Vale': { offsetY: -250, masteryRegion: 'Maguuma' },
   'The Silverwastes': { adjustBounds: { bottom: -100 }, masteryRegion: 'Maguuma' },
-  'Verdant Brink': { explorerAchievementId: 2222, collectibleAchievementIds: [2489] },
-  'Auric Basin': { explorerAchievementId: 2370, insightAchievementIds: [2164, 2168, 2517, 2267, 2204, 2612, 2143, 2608], collectibleAchievementIds: [2574] },
+  'Verdant Brink': { explorerAchievementId: 2222 },
+  'Auric Basin': { explorerAchievementId: 2370, insightAchievementIds: [2164, 2168, 2517, 2267, 2204, 2612, 2143, 2608] },
   'Tangled Depths': { explorerAchievementId: 2378, insightAchievementIds: [2349, 2396, 2305, 2380, 2457] },
   "Dragon's Stand": { explorerAchievementId: 2212 },
 
   // === Living World Season 3 ===
-  'Ember Bay': { insightAchievementIds: [3103, 3116], collectibleAchievementIds: [3137] },
+  'Ember Bay': { insightAchievementIds: [3103, 3116] },
   'Bitterfrost Frontier': { insightAchievementIds: [3174, 3217, 3240] },
   'Lake Doric': { insightAchievementIds: [3350, 3358, 3284, 3377] },
   'Draconis Mons': { insightAchievementIds: [3404, 3431, 3418] },
-  "Siren's Landing": { insightAchievementIds: [3475, 3508, 3506, 3477, 3490], collectibleAchievementIds: [3498] },
+  "Siren's Landing": { insightAchievementIds: [3475, 3508, 3506, 3477, 3490] },
 
   // === Path of Fire ===
   'Crystal Oasis': { explorerAchievementId: 3864, insightAchievementIds: [3805, 3763, 3655, 3710, 3717, 3714] },
   'Desert Highlands': { explorerAchievementId: 3616, insightAchievementIds: [3713, 3640, 3591, 3755, 3769, 3878, 3605, 3671, 3810, 3630, 3656, 3783, 3875, 3800, 3610] },
-  'Elon Riverlands': { explorerAchievementId: 3623, insightAchievementIds: [3795, 3563, 3704, 3761, 3603, 3701, 3767, 3852], collectibleAchievementIds: [3632] },
-  'The Desolation': { explorerAchievementId: 3612, insightAchievementIds: [3645, 3592, 3885, 3659, 3620, 3695, 3573, 3600], collectibleAchievementIds: [3683] },
+  'Elon Riverlands': { explorerAchievementId: 3623, insightAchievementIds: [3795, 3563, 3704, 3761, 3603, 3701, 3767, 3852] },
+  'The Desolation': { explorerAchievementId: 3612, insightAchievementIds: [3645, 3592, 3885, 3659, 3620, 3695, 3573, 3600] },
   'Domain of Vabbi': { explorerAchievementId: 3865, insightAchievementIds: [3841, 3803, 3692] },
 
   // === Living World Season 4 ===
@@ -108,30 +106,30 @@ export const zoneConfigs: Record<string, ZoneConfig> = {
   'Domain of Kourna': { insightAchievementIds: [4206, 4213, 4228, 4261, 4255] },
   'Jahai Bluffs': { insightAchievementIds: [4380, 4368, 4386, 4405, 4411] },
   'Thunderhead Peaks': { insightAchievementIds: [4543, 4524, 4578, 4525] },
-  Dragonfall: { insightAchievementIds: [4701, 4664, 4685, 4741, 4690, 4735], collectibleAchievementIds: [4757] },
+  Dragonfall: { insightAchievementIds: [4701, 4664, 4685, 4741, 4690, 4735] },
 
   // === Icebrood Saga ===
-  'Grothmar Valley': { insightAchievementIds: [5128, 5111], collectibleAchievementIds: [4919] },
+  'Grothmar Valley': { insightAchievementIds: [5128, 5111] },
   'Bjora Marches': { insightAchievementIds: [5088, 5058, 5129, 5041, 5043, 5090, 5057] },
-  'Drizzlewood Coast': { insightAchievementIds: [5374, 5336, 5415, 5333, 5378, 5396, 5421, 5326, 5303], collectibleAchievementIds: [5376] },
+  'Drizzlewood Coast': { insightAchievementIds: [5374, 5336, 5415, 5333, 5378, 5396, 5421, 5326, 5303] },
   Champions: { insightAchievementIds: [5536, 5540, 5504, 5515, 5533, 5502, 5478, 5485, 5517, 5498] },
 
   // === End of Dragons ===
   Arborstone: { offsetY: -2300, scaleX: 0.75, scaleY: 0.75, masteryRegion: 'Jade' },
   'Seitung Province': { explorerAchievementId: 6077, insightAchievementIds: [6410, 6104, 6281, 6070, 6277, 6267, 6087, 6149, 6105, 6119, 6100, 6479, 6095, 6191] },
-  'New Kaineng City': { explorerAchievementId: 6142, insightAchievementIds: [6341, 6477, 6182, 6365, 6449, 6177, 6441, 6476, 6507, 6379, 6214, 6128, 6389], collectibleAchievementIds: [6461] },
+  'New Kaineng City': { explorerAchievementId: 6142, insightAchievementIds: [6341, 6477, 6182, 6365, 6449, 6177, 6441, 6476, 6507, 6379, 6214, 6128, 6389] },
   'The Echovald Wilds': { explorerAchievementId: 6481, insightAchievementIds: [6226, 6351, 6462, 6338, 6244, 6249, 6094, 6102, 6238, 6382, 6334, 6076] },
   "Dragon's End": { explorerAchievementId: 6248, insightAchievementIds: [6360, 6395, 6406, 6122, 6404] },
 
   // === Secrets of the Obscure ===
   'Mistburned Barrens': { adjustBounds: { right: -2200 }, explorerAchievementId: 8625, insightAchievementIds: [8597, 8590, 8594, 8588, 8563, 8617] },
-  Amnytas: { explorerAchievementId: 7054, insightAchievementIds: [6977, 7124, 7045, 6966, 7209, 6999, 7182, 7213, 7046], collectibleAchievementIds: [7034] },
+  Amnytas: { explorerAchievementId: 7054, insightAchievementIds: [6977, 7124, 7045, 6966, 7209, 6999, 7182, 7213, 7046] },
   'Skywatch Archipelago': { explorerAchievementId: 7147, insightAchievementIds: [7150, 7177, 7093, 7006, 7216, 7125, 7171, 7016, 7188, 7115, 7086] },
   'Inner Nayos': { explorerAchievementId: 8101, insightAchievementIds: [7836, 7683, 7694, 8014, 7731, 7708, 7673, 7724, 7817, 7671] },
   Tower: { insightAchievementIds: [7022, 7000] },
 
   // === Janthir Wilds ===
-  'Lowland Shore': { explorerAchievementId: 8154, insightAchievementIds: [8235, 8365, 8169, 8307, 8321, 8215, 8212, 8295, 8220, 8176, 8238], collectibleAchievementIds: [8291] },
+  'Lowland Shore': { explorerAchievementId: 8154, insightAchievementIds: [8235, 8365, 8169, 8307, 8321, 8215, 8212, 8295, 8220, 8176, 8238] },
   'Janthir Syntri': { explorerAchievementId: 8283, insightAchievementIds: [8186, 8308, 8277, 8264, 8274, 8359, 8181, 8211, 8254, 8225, 8315] },
 
   // === Realm of Dreams ===

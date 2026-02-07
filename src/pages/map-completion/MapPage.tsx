@@ -67,9 +67,7 @@ export default function MapPage() {
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Map Achievements</h2>
                 <div className="text-center text-slate-400 mt-10">
                     <p className="mb-4">No map data available.</p>
-                    <p className="text-sm">
-                        Click "Rebuild Database" in Setup to fetch map data.
-                    </p>
+                    <p className="text-sm">Click "Rebuild Database" in Setup to fetch map data.</p>
                 </div>
             </div>
         );
@@ -90,7 +88,8 @@ export default function MapPage() {
                             className="max-w-64 border border-slate-700 font-normal text-sm"
                         >
                             Map completion data is not available in the API, so we track
-                            achievements related to each zone instead.
+                            achievements related to each map instead. "Other achievements" include
+                            all achievements that mention the map by name.
                         </TooltipContent>
                     </Tooltip>
                 </h2>
@@ -101,7 +100,7 @@ export default function MapPage() {
                         onChange={(e) => setShowCollectibleAchievements(e.target.checked)}
                         className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                     />
-                    Include collectibles
+                    Include other achievements
                 </label>
             </div>
 
@@ -109,7 +108,8 @@ export default function MapPage() {
                 zones={zones}
                 explorerProgress={progressMap}
                 insightProgress={insightMap}
-                collectibleProgress={showCollectibleAchievements ? collectibleMap : new Map()}
+                collectibleProgress={collectibleMap}
+                includeCollectiblesInProgress={showCollectibleAchievements}
             />
         </div>
     );

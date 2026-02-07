@@ -9,9 +9,10 @@ interface InteractiveMapProps {
     explorerProgress: Map<string, ZoneExplorerProgress | null>;
     insightProgress: Map<string, ZoneInsightProgress>;
     collectibleProgress: Map<string, CollectibleAchievementProgress[]>;
+    includeCollectiblesInProgress: boolean;
 }
 
-export default function InteractiveMap({ zones, explorerProgress, insightProgress, collectibleProgress }: InteractiveMapProps) {
+export default function InteractiveMap({ zones, explorerProgress, insightProgress, collectibleProgress, includeCollectiblesInProgress }: InteractiveMapProps) {
     return (
         <TransformWrapper
             initialScale={2}
@@ -53,6 +54,7 @@ export default function InteractiveMap({ zones, explorerProgress, insightProgres
                                     explorerProgress={progress}
                                     insightProgress={insight}
                                     collectibleAchievements={collectible}
+                                    includeCollectiblesInProgress={includeCollectiblesInProgress}
                                 />
                             );
                         })}

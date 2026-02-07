@@ -1,4 +1,5 @@
 import achievementDb from '../data/achievementDb.json';
+import continentDb from '../data/continentDb.json';
 import type {
   AccountAchievement,
   Achievement,
@@ -92,6 +93,9 @@ export async function buildAchievementDatabase(
     // Process results
     results.forEach((batchData) => {
       batchData.forEach((raw) => {
+        // Skip achievements without the Permanent flag
+        if (!raw.flags?.includes('Permanent')) return;
+
         ids.push(raw.id);
 
         // Optimize: Map raw API data to our optimized structure
@@ -99,6 +103,7 @@ export async function buildAchievementDatabase(
           id: raw.id,
           name: raw.name,
           requirement: raw.requirement,
+          flags: raw.flags,
         };
 
         if (raw.icon) {
@@ -165,13 +170,43 @@ export async function buildAchievementDatabase(
 
   console.log('=== Database Build Complete ===');
   if (includeDebugFields) {
-    console.log(`Raw achievments: ${rawAchievements.length}`);
+    console.log(`Raw achievements: ${rawAchievements.length}`);
     console.log(
       JSON.stringify({
         ...db,
         achievements: rawAchievements,
       })
     );
+
+    // Build map of map name -> achievement IDs using ALL maps from continentDb
+    const allMapNames: string[] = [];
+    const continentData = continentDb as unknown as ContinentDatabase;
+    Object.values(continentData.floor.regions).forEach((region) => {
+      Object.values(region.maps).forEach((map) => {
+        if (map.name) allMapNames.push(map.name);
+      });
+    });
+
+    const mapAchievementIds: Record<string, number[]> = {};
+    for (const mapName of allMapNames) {
+      const escaped = mapName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+
+      const matchingIds = rawAchievements
+        .filter((raw) => {
+          // Check if map name is mentioned in title, description, or requirement
+          const searchText = `${raw.name || ''} ${raw.description || ''} ${raw.requirement || ''}`;
+          return regex.test(searchText);
+        })
+        .map((raw) => raw.id);
+
+      if (matchingIds.length > 0) {
+        mapAchievementIds[mapName] = matchingIds;
+      }
+    }
+
+    console.log(`Map achievement IDs (${Object.keys(mapAchievementIds).length} maps):`);
+    console.log(JSON.stringify(mapAchievementIds, null, 2));
   }
   console.log(`Achievements: ${achievements.length}`);
   console.log(JSON.stringify(db));

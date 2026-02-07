@@ -79,3 +79,27 @@ body {
 .animate-fade-out {
     animation: fade-out 0.25s ease-in-out;
 }
+
+/* Custom scrollbar styling */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
