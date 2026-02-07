@@ -1,3 +1,4 @@
+import { CheckCircle2 } from 'lucide-react';
 import { memo, useState } from 'react';
 import type {
     CollectibleAchievementProgress,
@@ -159,23 +160,35 @@ export const Zone = memo(
                             >
                                 {name}
                             </div>
-                            {/* Progress bar - show if any tracked progress exists, height scales with zone width */}
-                            {combinedProgress.hasProgress && (
-                                <div
-                                    className="mt-0.5 rounded-full overflow-hidden w-3/4"
-                                    style={{
-                                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                        height: `min(3px, ${widthPercent * 0.05}vw)`,
-                                    }}
-                                >
-                                    <div
-                                        className={`h-full rounded-full transition-all duration-300 ${combinedProgress.percentage === 100 ? 'bg-green-500' : 'bg-green-700'}`}
+                            {/* Progress indicator - checkmark when complete, progress bar otherwise */}
+                            {combinedProgress.hasProgress &&
+                                (combinedProgress.percentage === 100 ? (
+                                    <CheckCircle2
+                                        className="zone-checkmark text-green-500"
+                                        strokeWidth={3}
                                         style={{
-                                            width: `${combinedProgress.percentage}%`,
+                                            marginTop: '1px',
+                                            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))',
+                                            overflow: 'visible',
                                         }}
                                     />
-                                </div>
-                            )}
+                                ) : (
+                                    <div
+                                        className="rounded-full overflow-hidden w-3/4"
+                                        style={{
+                                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                            height: `min(3px, ${widthPercent * 0.05}vw)`,
+                                            marginTop: `min(4px, ${widthPercent * 0.06}vw)`,
+                                        }}
+                                    >
+                                        <div
+                                            className="h-full rounded-full transition-all duration-300 bg-green-500"
+                                            style={{
+                                                width: `${combinedProgress.percentage}%`,
+                                            }}
+                                        />
+                                    </div>
+                                ))}
                         </div>
                     </div>
                 </ZoneTooltip>

@@ -103,3 +103,16 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #64748b;
 }
+
+/* Zone completion checkmark sizes */
+.zone-checkmark {
+    width: 2px;
+    height: 2px;
+}
+
+@media (min-width: 640px) {
+    .zone-checkmark {
+        width: 6px;
+        height: 6px;
+    }
+}

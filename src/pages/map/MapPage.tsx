@@ -76,8 +76,8 @@ export default function MapPage() {
     return (
         <div className="pt-4">
             {/* Page header */}
-            <div className="mb-4 px-6 flex items-center justify-between">
-                <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+            <div className="mb-4 px-6 flex flex-wrap items-center justify-between gap-y-2">
+                <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 w-full sm:w-auto">
                     <span>Map Achievements</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -93,7 +93,7 @@ export default function MapPage() {
                         </TooltipContent>
                     </Tooltip>
                 </h2>
-                <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none">
+                <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none whitespace-nowrap">
                     <input
                         type="checkbox"
                         checked={showCollectibleAchievements}
