@@ -175,12 +175,11 @@ export function useExplorerProgress(): {
 
       for (const achievementId of otherIds) {
         const achievement = enrichedAchievementMap.get(achievementId);
-
-        // Only include achievements with the Permanent flag (skip if flags exist but don't include Permanent)
-        if (!achievement || !achievement.flags?.includes('Permanent')) continue;
+        if (!achievement) continue;
 
         const progress = accountProgress.get(achievementId);
-        const totalBits = achievement?.bits?.length ?? 0;
+        // Bit-less achievements (simple done/not-done) count as 1 item
+        const totalBits = achievement.bits?.length || 1;
 
         let completedBits = 0;
         let isComplete = false;
