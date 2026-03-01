@@ -41,24 +41,6 @@ export function groupByRegionAndCategory(
 }
 
 /**
- * Gets the required points to unloack all masteries for each region.
- */
-export const REQUIRED_COUNTS: Record<MasteryRegion, number> = {
-    Tyria: 49,
-    Maguuma: 144,
-    Desert: 110,
-    Tundra: 63,
-    Jade: 89,
-    Sky: 88,
-    Wild: 90,
-    Magic: 38,
-};
-
-export function getRequiredCounts(): Record<MasteryRegion, number> {
-    return REQUIRED_COUNTS;
-}
-
-/**
  * Builds the full enriched hierarchy: Groups -> Categories -> Achievements
  */
 export function buildEnrichedHierarchy(
@@ -196,7 +178,6 @@ export function buildEnrichedHierarchy(
 export function filterEnrichedHierarchy(
     groups: EnrichedGroup[],
     filter: FilterType,
-    _requiredOnly: boolean, // For goal === 'required' (Mastery specific logic usually)
     masteryRegion?: MasteryRegion, // Optional: Filter by specific mastery region
     searchTerm?: string
 ): EnrichedGroup[] {

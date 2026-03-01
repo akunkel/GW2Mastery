@@ -1,7 +1,8 @@
-import { Bug, CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff } from 'lucide-react';
+import { Bug, CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff, Star } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import type { EnrichedAchievement, FilterType } from '../../types/gw2';
+import { isRecommended } from '../../utils/recommendedAchievements';
 import { Card, CardContent } from '../ui/card';
 
 interface AchievementCardProps {
@@ -48,8 +49,8 @@ export default function AchievementCard({
                 isHidden && 'opacity-50'
             )}
         >
-            {/* Top Right Controls (Debug + Hide) */}
-            <div className="absolute top-2 right-2 z-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Bottom Right Controls (Debug + Hide) */}
+            <div className="absolute bottom-2 right-2 z-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {/* Debug Button (Dev only) */}
                 {import.meta.env.DEV && (
                     <button
@@ -104,11 +105,13 @@ export default function AchievementCard({
                             {name}
                         </a>
                     </div>
-                    {isCompleted && (
-                        <div className="flex-shrink-0">
+                    <div className="flex-shrink-0">
+                        {isCompleted ? (
                             <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        </div>
-                    )}
+                        ) : isRecommended(achievement.id) ? (
+                            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                        ) : null}
+                    </div>
                 </div>
 
                 {/* Requirement (unlock criteria) */}

@@ -13,7 +13,7 @@ import type {
   MasteryRegion,
   RawAchievement,
 } from '../types/gw2';
-import { REGION_ZONES } from '../utils/regionHelpers';
+import { getRegionDisplayName, REGION_ZONES } from '../utils/regionHelpers';
 import {
   getAchievementDatabase,
   getContinentDatabase,
@@ -207,6 +207,20 @@ export async function buildAchievementDatabase(
 
     console.log(`Map achievement IDs (${Object.keys(mapAchievementIds).length} maps):`);
     console.log(JSON.stringify(mapAchievementIds, null, 2));
+
+    // Build mastery achievement name-to-ID mapping keyed by region display name
+    const masteryByRegion: Record<string, Record<string, number>> = {};
+    for (const achievement of achievements) {
+      if (achievement.masteryRegion) {
+        const displayName = getRegionDisplayName(achievement.masteryRegion);
+        if (!masteryByRegion[displayName]) {
+          masteryByRegion[displayName] = {};
+        }
+        masteryByRegion[displayName][achievement.name] = achievement.id;
+      }
+    }
+    console.log('Mastery achievements by region:');
+    console.log(JSON.stringify(masteryByRegion, null, 2));
   }
   console.log(`Achievements: ${achievements.length}`);
   console.log(JSON.stringify(db));

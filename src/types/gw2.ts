@@ -12,7 +12,6 @@ export type MasteryRegion =
 
 export type FilterType = 'all' | 'incomplete';
 
-export type GoalType = 'all' | 'required';
 
 export interface RawAchievement {
   id: number;

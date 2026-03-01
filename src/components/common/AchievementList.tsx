@@ -1,11 +1,9 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { FilterType } from '../../types/gw2';
+import type { EnrichedGroup, FilterType } from '../../types/gw2';
 import AchievementCategory from './AchievementCategory';
 import RegionCard from './RegionCard';
-
-import type { EnrichedGroup } from '../../types/gw2';
 
 export interface UIAchievementGroup extends EnrichedGroup {
     title?: string; // Optional override for display

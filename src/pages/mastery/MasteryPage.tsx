@@ -4,20 +4,23 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import AchievementList, { type UIAchievementGroup } from '../../components/common/AchievementList';
 import { useAppStore } from '../../store/useAppStore';
 
-import {
-    getRequiredCounts,
-    groupByRegionAndCategory,
-} from '../../utils/filters';
 import type { EnrichedAchievement } from '../../types/gw2';
-import { getRegionColor, getRegionDisplayName, getRegionImage, REGION_ORDER } from '../../utils/regionHelpers';
+import { groupByRegionAndCategory } from '../../utils/filters';
+import { isRecommended } from '../../utils/recommendedAchievements';
+import {
+    getRegionColor,
+    getRegionDisplayName,
+    getRegionImage,
+    REGION_ORDER,
+} from '../../utils/regionHelpers';
 import FilterBar from './FilterBar';
 
 export default function MasteryPage() {
     const {
         enrichedAchievementMap,
         filter,
-        goal,
         showHidden,
+        showRecommendedOnly,
         hiddenAchievements,
         handleToggleHidden,
     } = useAppStore();
@@ -34,10 +37,17 @@ export default function MasteryPage() {
         [allEnrichedAchievements]
     );
 
+    // Apply recommended filter
+    const filteredAchievements = useMemo(
+        () =>
+            showRecommendedOnly ? achievements.filter((a) => isRecommended(a.id)) : achievements,
+        [achievements, showRecommendedOnly]
+    );
+
     // Grouping
     const groupedAchievements = useMemo(
-        () => groupByRegionAndCategory(achievements),
-        [achievements]
+        () => groupByRegionAndCategory(filteredAchievements),
+        [filteredAchievements]
     );
 
     // Also group ALL enriched achievements for accurate total counts
@@ -61,8 +71,6 @@ export default function MasteryPage() {
     // This is fine, as long as the shape matches.
 
     const displayGroups: UIAchievementGroup[] = useMemo(() => {
-        const requiredCounts = getRequiredCounts();
-
         return REGION_ORDER.map((region) => {
             // Get categories for this region
             const regionCategoriesMap =
@@ -97,17 +105,34 @@ export default function MasteryPage() {
                         name: catName,
                         description: '', // Not used in list
                         order: firstAch?.categoryOrder || 0,
-                        achievements: achievements,
+                        achievements: [...achievements].sort((a, b) => {
+                            const aRecommended = isRecommended(a.id) ? 1 : 0;
+                            const bRecommended = isRecommended(b.id) ? 1 : 0;
+                            const aDone = a.progress?.done ? 1 : 0;
+                            const bDone = b.progress?.done ? 1 : 0;
+                            // Recommended first, then incomplete, then complete
+                            if (aRecommended !== bRecommended) return bRecommended - aRecommended;
+                            return aDone - bDone;
+                        }),
                         totalPoints: totalCount, // Approx
                         earnedPoints: completedCount, // Approx
                         totalCount,
                         completedCount,
                     };
                 })
-                .sort((a, b) => a.order - b.order);
+                .sort((a, b) => {
+                    const aHasRecommended = a.achievements.some((ach) => isRecommended(ach.id))
+                        ? 1
+                        : 0;
+                    const bHasRecommended = b.achievements.some((ach) => isRecommended(ach.id))
+                        ? 1
+                        : 0;
+                    if (aHasRecommended !== bHasRecommended)
+                        return bHasRecommended - aHasRecommended;
+                    return a.name.localeCompare(b.name);
+                });
 
-            const goalCount = goal === 'required' ? requiredCounts[region] : totalInRegion;
-            const isComplete = completedInRegion >= goalCount;
+            const isComplete = completedInRegion >= totalInRegion;
 
             return {
                 id: region,
@@ -120,7 +145,7 @@ export default function MasteryPage() {
                 categories: categoriesList,
                 totalPoints: totalInRegion, // Approx
                 earnedPoints: completedInRegion, // Approx
-                totalCount: goalCount,
+                totalCount: totalInRegion,
                 completedCount: completedInRegion,
 
                 // AchievementList specific extra props (if any? AchievementGroup checked `isComplete`)
@@ -162,7 +187,7 @@ export default function MasteryPage() {
             if (filter === 'incomplete' && g.completedCount >= g.totalCount) return false;
             return true;
         });
-    }, [groupedAchievements, allGrouped, goal, filter]);
+    }, [groupedAchievements, allGrouped, filter]);
 
     // Handle selection state via URL hash
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {
@@ -200,8 +225,8 @@ export default function MasteryPage() {
                 </p>
             </div>
 
-            {/* Filter Controls */}
-            {achievements.length > 0 && (
+            {/* Filter Controls - only when a region is selected */}
+            {achievements.length > 0 && selectedGroupId && (
                 <div className="mb-4 px-4 sm:px-6 lg:px-8">
                     <FilterBar
                         completedCount={completedCount}

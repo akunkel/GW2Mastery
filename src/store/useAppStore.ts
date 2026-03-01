@@ -17,7 +17,6 @@ import type {
     EnrichedCategory,
     EnrichedGroup,
     FilterType,
-    GoalType,
     ContinentDatabase,
 } from '../types/gw2';
 import {
@@ -65,18 +64,18 @@ interface AppState {
     apiKey: string | null;
     hasStoredKey: boolean;
     filter: FilterType;
-    goal: GoalType;
     hiddenAchievements: Set<number>;
     showHidden: boolean;
     showCollectibleAchievements: boolean;
+    showRecommendedOnly: boolean;
     databaseTimestamp: number | null;
 
     // Actions
     initialize: () => void;
     setSetupModalOpen: (open: boolean) => void;
     setFilter: (filter: FilterType) => void;
-    setGoal: (goal: GoalType) => void;
     setShowHidden: (show: boolean) => void;
+    setShowRecommendedOnly: (show: boolean) => void;
     setShowCollectibleAchievements: (show: boolean) => void;
     initializeAchievementDatabase: () => Promise<void>;
     handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
@@ -112,10 +111,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     apiKey: null,
     hasStoredKey: false,
     filter: 'all',
-    goal: 'all',
     hiddenAchievements: new Set(),
     showHidden: false,
     showCollectibleAchievements: false,
+    showRecommendedOnly: false,
     databaseTimestamp: null,
 
     // Actions
@@ -131,8 +130,8 @@ export const useAppStore = create<AppState>((set, get) => ({
             databaseTimestamp: activeTs > 0 ? activeTs : null,
             hiddenAchievements: hiddenIds,
             filter: filterSettings.hideCompleted ? 'incomplete' : 'all',
-            goal: filterSettings.requiredOnly ? 'required' : 'all',
             showHidden: filterSettings.showHidden,
+            showRecommendedOnly: filterSettings.showRecommendedOnly,
             showCollectibleAchievements: mapFilterSettings.showCollectibleAchievements,
             isInitialized: true,
         });
@@ -156,33 +155,28 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     setFilter: (filter) => {
         set({ filter });
-        const { isInitialized, goal } = get();
+        const { isInitialized, showHidden, showRecommendedOnly } = get();
         if (isInitialized) {
             const hideCompleted = filter === 'incomplete';
-            const requiredOnly = goal === 'required';
-            const { showHidden } = get();
-            saveFilterSettings(hideCompleted, requiredOnly, showHidden);
-        }
-    },
-
-    setGoal: (goal) => {
-        set({ goal });
-        const { isInitialized, filter } = get();
-        if (isInitialized) {
-            const hideCompleted = filter === 'incomplete';
-            const requiredOnly = goal === 'required';
-            const { showHidden } = get();
-            saveFilterSettings(hideCompleted, requiredOnly, showHidden);
+            saveFilterSettings(hideCompleted, showHidden, showRecommendedOnly);
         }
     },
 
     setShowHidden: (show) => {
         set({ showHidden: show });
-        const { isInitialized, filter, goal } = get();
+        const { isInitialized, filter, showRecommendedOnly } = get();
         if (isInitialized) {
             const hideCompleted = filter === 'incomplete';
-            const requiredOnly = goal === 'required';
-            saveFilterSettings(hideCompleted, requiredOnly, show);
+            saveFilterSettings(hideCompleted, show, showRecommendedOnly);
+        }
+    },
+
+    setShowRecommendedOnly: (show) => {
+        set({ showRecommendedOnly: show });
+        const { isInitialized, filter, showHidden } = get();
+        if (isInitialized) {
+            const hideCompleted = filter === 'incomplete';
+            saveFilterSettings(hideCompleted, showHidden, show);
         }
     },
 
