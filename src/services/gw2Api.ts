@@ -262,22 +262,22 @@ export async function getDbAchievements(): Promise<AchievementDatabase | null> {
  * Fetches account-specific achievement progress
  */
 export async function fetchAccountAchievements(apiKey: string): Promise<AccountAchievement[]> {
-  try {
-    const response = await fetch(`${BASE_URL}/account/achievements?access_token=${apiKey}`);
+  const response = await fetch(`${BASE_URL}/account/achievements?access_token=${apiKey}`);
 
-    if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error('Invalid API key or insufficient permissions');
-      }
-      throw new Error(`Failed to fetch account achievements: ${response.statusText}`);
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('Invalid API key or insufficient permissions');
     }
-
-    const data = await response.json();
-    return data as AccountAchievement[];
-  } catch (error) {
-    console.error('Failed to fetch account achievements:', error);
-    throw error;
+    throw new Error(`Failed to fetch account achievements: ${response.statusText}`);
   }
+
+  const data = await response.json() as AccountAchievement[];
+  if (data.length === 0) {
+    throw new Error('Achievements API returned no achievement data. Try using a different API key.');
+  } else {
+    console.log(`Loaded data for ${data.length} achievements, ${data.filter((a) => a.done).length} completed.`);
+  }
+  return data;
 }
 
 /**

@@ -37,6 +37,7 @@ export default function SetupModal() {
             <DialogContent
                 className="max-w-2xl max-h-[90vh] overflow-y-auto"
                 hideClose={!hasAchievements}
+                aria-describedby={undefined}
             >
                 <DialogHeader>
                     <DialogTitle>Setup</DialogTitle>

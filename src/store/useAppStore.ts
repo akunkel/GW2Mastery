@@ -1,388 +1,385 @@
 import { create } from 'zustand';
 import {
-    buildAchievementDatabase,
-    fetchAccountAchievements,
-    fetchAchievementCategories,
-    getDatabaseStatus,
-    getDbAchievements,
-    buildContinentDatabase,
-    getContinentData,
+  buildAchievementDatabase,
+  buildContinentDatabase,
+  fetchAccountAchievements,
+  fetchAchievementCategories,
+  getContinentData,
+  getDatabaseStatus,
+  getDbAchievements,
 } from '../services/gw2Api';
 import type {
-    AccountAchievement,
-    Achievement,
-    AchievementCategory,
-    AchievementGroup,
-    EnrichedAchievement,
-    EnrichedCategory,
-    EnrichedGroup,
-    FilterType,
-    ContinentDatabase,
+  AccountAchievement,
+  Achievement,
+  AchievementCategory,
+  AchievementGroup,
+  ContinentDatabase,
+  EnrichedAchievement,
+  EnrichedCategory,
+  EnrichedGroup,
+  FilterType,
 } from '../types/gw2';
-import {
-    clearApiKey,
-    getApiKey,
-    getFilterSettings,
-    getHiddenAchievements,
-    getMapFilterSettings,
-    saveApiKey,
-    saveFilterSettings,
-    saveHiddenAchievements,
-    saveMapFilterSettings,
-} from '../utils/storage';
 import { buildEnrichedHierarchy } from '../utils/filters';
+import {
+  clearApiKey,
+  getApiKey,
+  getFilterSettings,
+  getHiddenAchievements,
+  getMapFilterSettings,
+  saveApiKey,
+  saveFilterSettings,
+  saveHiddenAchievements,
+  saveMapFilterSettings,
+} from '../utils/storage';
 
 interface AppState {
-    // Data State
-    achievements: Achievement[];
+  // Data State
+  achievements: Achievement[];
 
-    // Enriched Data (Single Source of Truth)
-    enrichedGroups: EnrichedGroup[];
-    enrichedGroupMap: Map<string, EnrichedGroup>;
-    enrichedCategoryMap: Map<number, EnrichedCategory>;
-    enrichedAchievementMap: Map<number, EnrichedAchievement>;
+  // Enriched Data (Single Source of Truth)
+  enrichedGroups: EnrichedGroup[];
+  enrichedGroupMap: Map<string, EnrichedGroup>;
+  enrichedCategoryMap: Map<number, EnrichedCategory>;
+  enrichedAchievementMap: Map<number, EnrichedAchievement>;
 
-    accountProgress: Map<number, AccountAchievement>;
-    groups: AchievementGroup[];
-    categories: AchievementCategory[];
+  accountProgress: Map<number, AccountAchievement>;
+  groups: AchievementGroup[];
+  categories: AchievementCategory[];
 
-    // Map Completion Data
-    continentData: ContinentDatabase | null;
-    mapLoading: boolean;
-    mapBuildProgress: string | null;
+  // Map Completion Data
+  continentData: ContinentDatabase | null;
+  mapLoading: boolean;
+  mapBuildProgress: string | null;
 
-    // UI State
-    loading: boolean;
-    buildingDatabase: boolean;
-    loadingProgress: { current: number; total: number } | null;
-    error: string | null;
-    databaseError: string | null;
-    setupModalOpen: boolean;
-    isInitialized: boolean;
+  // UI State
+  loading: boolean;
+  buildingDatabase: boolean;
+  loadingProgress: { current: number; total: number; } | null;
+  error: string | null;
+  databaseError: string | null;
+  setupModalOpen: boolean;
+  isInitialized: boolean;
 
-    // User Preferences
-    apiKey: string | null;
-    hasStoredKey: boolean;
-    filter: FilterType;
-    hiddenAchievements: Set<number>;
-    showHidden: boolean;
-    showCollectibleAchievements: boolean;
-    hideCompletedZones: boolean;
-    showRecommendedOnly: boolean;
-    databaseTimestamp: number | null;
+  // User Preferences
+  apiKey: string | null;
+  hasStoredKey: boolean;
+  filter: FilterType;
+  hiddenAchievements: Set<number>;
+  showHidden: boolean;
+  showCollectibleAchievements: boolean;
+  hideCompletedZones: boolean;
+  showRecommendedOnly: boolean;
+  databaseTimestamp: number | null;
 
-    // Actions
-    initialize: () => void;
-    setSetupModalOpen: (open: boolean) => void;
-    setFilter: (filter: FilterType) => void;
-    setShowHidden: (show: boolean) => void;
-    setShowRecommendedOnly: (show: boolean) => void;
-    setShowCollectibleAchievements: (show: boolean) => void;
-    setHideCompletedZones: (hide: boolean) => void;
-    initializeAchievementDatabase: () => Promise<void>;
-    handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
-    handleClearKey: () => void;
-    handleToggleHidden: (achievementId: number) => void;
-    handleBuildDatabase: () => Promise<void>;
-    refreshAccountProgress: () => Promise<void>;
+  // Actions
+  initialize: () => void;
+  setSetupModalOpen: (open: boolean) => void;
+  setFilter: (filter: FilterType) => void;
+  setShowHidden: (show: boolean) => void;
+  setShowRecommendedOnly: (show: boolean) => void;
+  setShowCollectibleAchievements: (show: boolean) => void;
+  setHideCompletedZones: (hide: boolean) => void;
+  initializeAchievementDatabase: () => Promise<void>;
+  handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
+  handleClearKey: () => void;
+  handleToggleHidden: (achievementId: number) => void;
+  handleBuildDatabase: () => Promise<void>;
+  refreshAccountProgress: () => Promise<void>;
 
-    // Map Actions
-    initializeContinentData: () => Promise<void>;
+  // Map Actions
+  initializeContinentData: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-    // Initial State
-    achievements: [],
-    categories: [],
-    enrichedGroups: [],
-    enrichedGroupMap: new Map(),
-    enrichedCategoryMap: new Map(),
-    enrichedAchievementMap: new Map(),
-    accountProgress: new Map(),
-    groups: [],
-    continentData: null,
-    mapLoading: false,
-    mapBuildProgress: null,
-    loading: false,
-    buildingDatabase: false,
-    loadingProgress: null,
-    error: null,
-    databaseError: null,
-    setupModalOpen: false,
-    isInitialized: false,
-    apiKey: null,
-    hasStoredKey: false,
-    filter: 'all',
-    hiddenAchievements: new Set(),
-    showHidden: false,
-    showCollectibleAchievements: false,
-    hideCompletedZones: false,
-    showRecommendedOnly: false,
-    databaseTimestamp: null,
+  // Initial State
+  achievements: [],
+  categories: [],
+  enrichedGroups: [],
+  enrichedGroupMap: new Map(),
+  enrichedCategoryMap: new Map(),
+  enrichedAchievementMap: new Map(),
+  accountProgress: new Map(),
+  groups: [],
+  continentData: null,
+  mapLoading: false,
+  mapBuildProgress: null,
+  loading: false,
+  buildingDatabase: false,
+  loadingProgress: null,
+  error: null,
+  databaseError: null,
+  setupModalOpen: false,
+  isInitialized: false,
+  apiKey: null,
+  hasStoredKey: false,
+  filter: 'all',
+  hiddenAchievements: new Set(),
+  showHidden: false,
+  showCollectibleAchievements: false,
+  hideCompletedZones: false,
+  showRecommendedOnly: false,
+  databaseTimestamp: null,
 
-    // Actions
-    initialize: async () => {
-        const storedKey = getApiKey();
-        const filterSettings = getFilterSettings();
-        const mapFilterSettings = getMapFilterSettings();
-        const hiddenIds = getHiddenAchievements();
+  // Actions
+  initialize: async () => {
+    const storedKey = getApiKey();
+    const filterSettings = getFilterSettings();
+    const mapFilterSettings = getMapFilterSettings();
+    const hiddenIds = getHiddenAchievements();
 
-        const { activeTs } = await getDatabaseStatus();
+    const { activeTs } = await getDatabaseStatus();
 
-        set({
-            databaseTimestamp: activeTs > 0 ? activeTs : null,
-            hiddenAchievements: hiddenIds,
-            filter: filterSettings.hideCompleted ? 'incomplete' : 'all',
-            showHidden: filterSettings.showHidden,
-            showRecommendedOnly: filterSettings.showRecommendedOnly,
-            showCollectibleAchievements: mapFilterSettings.showCollectibleAchievements,
-            hideCompletedZones: mapFilterSettings.hideCompletedZones,
-            isInitialized: true,
-        });
+    set({
+      databaseTimestamp: activeTs > 0 ? activeTs : null,
+      hiddenAchievements: hiddenIds,
+      filter: filterSettings.hideCompleted ? 'incomplete' : 'all',
+      showHidden: filterSettings.showHidden,
+      showRecommendedOnly: filterSettings.showRecommendedOnly,
+      showCollectibleAchievements: mapFilterSettings.showCollectibleAchievements,
+      hideCompletedZones: mapFilterSettings.hideCompletedZones,
+      isInitialized: true,
+    });
 
-        get()
-            .initializeAchievementDatabase()
-            .then(() => {
-                if (storedKey) {
-                    set({
-                        hasStoredKey: true,
-                        apiKey: storedKey,
-                    });
-                    get().refreshAccountProgress();
-                } else {
-                    set({ setupModalOpen: true });
-                }
-            });
-    },
-
-    setSetupModalOpen: (open) => set({ setupModalOpen: open }),
-
-    setFilter: (filter) => {
-        set({ filter });
-        const { isInitialized, showHidden, showRecommendedOnly } = get();
-        if (isInitialized) {
-            const hideCompleted = filter === 'incomplete';
-            saveFilterSettings(hideCompleted, showHidden, showRecommendedOnly);
+    get()
+      .initializeAchievementDatabase()
+      .then(() => {
+        if (storedKey) {
+          set({
+            hasStoredKey: true,
+            apiKey: storedKey,
+          });
+          get().refreshAccountProgress();
+        } else {
+          set({ setupModalOpen: true });
         }
-    },
+      });
+  },
 
-    setShowHidden: (show) => {
-        set({ showHidden: show });
-        const { isInitialized, filter, showRecommendedOnly } = get();
-        if (isInitialized) {
-            const hideCompleted = filter === 'incomplete';
-            saveFilterSettings(hideCompleted, show, showRecommendedOnly);
+  setSetupModalOpen: (open) => set({ setupModalOpen: open }),
+
+  setFilter: (filter) => {
+    set({ filter });
+    const { isInitialized, showHidden, showRecommendedOnly } = get();
+    if (isInitialized) {
+      const hideCompleted = filter === 'incomplete';
+      saveFilterSettings(hideCompleted, showHidden, showRecommendedOnly);
+    }
+  },
+
+  setShowHidden: (show) => {
+    set({ showHidden: show });
+    const { isInitialized, filter, showRecommendedOnly } = get();
+    if (isInitialized) {
+      const hideCompleted = filter === 'incomplete';
+      saveFilterSettings(hideCompleted, show, showRecommendedOnly);
+    }
+  },
+
+  setShowRecommendedOnly: (show) => {
+    set({ showRecommendedOnly: show });
+    const { isInitialized, filter, showHidden } = get();
+    if (isInitialized) {
+      const hideCompleted = filter === 'incomplete';
+      saveFilterSettings(hideCompleted, showHidden, show);
+    }
+  },
+
+  setShowCollectibleAchievements: (show) => {
+    set({ showCollectibleAchievements: show });
+    const { hideCompletedZones } = get();
+    saveMapFilterSettings(show, hideCompletedZones);
+  },
+
+  setHideCompletedZones: (hide) => {
+    set({ hideCompletedZones: hide });
+    const { showCollectibleAchievements } = get();
+    saveMapFilterSettings(showCollectibleAchievements, hide);
+  },
+
+  initializeAchievementDatabase: async () => {
+    set({ loading: true, loadingProgress: null, error: null });
+
+    try {
+      // Fetch DB (legacy or v2)
+      const db = await getDbAchievements();
+
+      let allAchievements: Achievement[] = [];
+      let categories: AchievementCategory[] = [];
+
+      if (db) {
+        allAchievements = db.achievements;
+        // If DB has categories, use them. Otherwise fetch them (migration path)
+        if (db.categories && db.categories.length > 0) {
+          categories = db.categories;
+        } else {
+          categories = await fetchAchievementCategories();
         }
-    },
+      } else {
+        // Should not happen if DB logic returns empty array on failure, but handling null
+        categories = await fetchAchievementCategories();
+      }
 
-    setShowRecommendedOnly: (show) => {
-        set({ showRecommendedOnly: show });
-        const { isInitialized, filter, showHidden } = get();
-        if (isInitialized) {
-            const hideCompleted = filter === 'incomplete';
-            saveFilterSettings(hideCompleted, showHidden, show);
-        }
-    },
+      // Build full hierarchy logic
 
-    setShowCollectibleAchievements: (show) => {
-        set({ showCollectibleAchievements: show });
-        const { hideCompletedZones } = get();
-        saveMapFilterSettings(show, hideCompletedZones);
-    },
+      const {
+        groups: eGroups,
+        groupMap: eGroupMap,
+        categoryMap: eCategoryMap,
+        achievementMap: eAchievementMap,
+      } = buildEnrichedHierarchy(
+        allAchievements,
+        categories,
+        db?.groups || [],
+        new Map() // No progress yet
+      );
 
-    setHideCompletedZones: (hide) => {
-        set({ hideCompletedZones: hide });
-        const { showCollectibleAchievements } = get();
-        saveMapFilterSettings(showCollectibleAchievements, hide);
-    },
+      set({
+        achievements: allAchievements,
+        categories: categories,
+        groups: db?.groups || [],
 
-    initializeAchievementDatabase: async () => {
-        set({ loading: true, loadingProgress: null, error: null });
+        enrichedGroups: eGroups,
+        enrichedGroupMap: eGroupMap,
+        enrichedCategoryMap: eCategoryMap,
+        enrichedAchievementMap: eAchievementMap,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load achievements';
+      set({ error: errorMessage });
+      console.error('Error loading achievements:', err);
+    } finally {
+      set({ loading: false, loadingProgress: null });
+    }
+  },
 
-        try {
-            // Fetch DB (legacy or v2)
-            const db = await getDbAchievements();
+  handleApiKeySubmit: async (key: string) => {
+    set({ hasStoredKey: saveApiKey(key), apiKey: key });
 
-            let allAchievements: Achievement[] = [];
-            let categories: AchievementCategory[] = [];
+    await get().refreshAccountProgress();
+  },
 
-            if (db) {
-                allAchievements = db.achievements;
-                // If DB has categories, use them. Otherwise fetch them (migration path)
-                if (db.categories && db.categories.length > 0) {
-                    categories = db.categories;
-                } else {
-                    categories = await fetchAchievementCategories();
-                }
-            } else {
-                // Should not happen if DB logic returns empty array on failure, but handling null
-                categories = await fetchAchievementCategories();
-            }
+  handleClearKey: () => {
+    clearApiKey();
+    set({
+      hasStoredKey: false,
+      apiKey: null,
+      accountProgress: new Map(),
+      error: null,
+    });
+  },
 
-            // Build full hierarchy logic
+  handleToggleHidden: (achievementId: number) => {
+    set((state) => {
+      const newSet = new Set(state.hiddenAchievements);
+      if (newSet.has(achievementId)) {
+        newSet.delete(achievementId);
+      } else {
+        newSet.add(achievementId);
+      }
+      saveHiddenAchievements(newSet);
+      return { hiddenAchievements: newSet };
+    });
+  },
 
-            const {
-                groups: eGroups,
-                groupMap: eGroupMap,
-                categoryMap: eCategoryMap,
-                achievementMap: eAchievementMap,
-            } = buildEnrichedHierarchy(
-                allAchievements,
-                categories,
-                db?.groups || [],
-                new Map() // No progress yet
-            );
+  handleBuildDatabase: async () => {
+    set({ buildingDatabase: true, loadingProgress: null, databaseError: null });
 
-            set({
-                achievements: allAchievements,
-                categories: categories,
-                groups: db?.groups || [],
+    try {
+      // Build achievement database
+      const db = await buildAchievementDatabase((current, total) => {
+        set({ loadingProgress: { current, total } });
+      });
+      const { accountProgress } = get();
 
-                enrichedGroups: eGroups,
-                enrichedGroupMap: eGroupMap,
-                enrichedCategoryMap: eCategoryMap,
-                enrichedAchievementMap: eAchievementMap,
-            });
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to load achievements';
-            set({ error: errorMessage });
-            console.error('Error loading achievements:', err);
-        } finally {
-            set({ loading: false, loadingProgress: null });
-        }
-    },
+      const {
+        groups: eGroups,
+        groupMap: eGroupMap,
+        categoryMap: eCategoryMap,
+        achievementMap: eAchievementMap,
+      } = buildEnrichedHierarchy(
+        db.achievements,
+        db.categories,
+        db.groups,
+        accountProgress
+      );
 
-    handleApiKeySubmit: async (key: string, remember: boolean) => {
-        const stored = remember ? saveApiKey(key) : (clearApiKey(), false);
-        set({ hasStoredKey: stored, apiKey: key });
+      set({
+        achievements: db.achievements,
+        categories: db.categories,
+        groups: db.groups,
+        enrichedGroups: eGroups,
+        enrichedGroupMap: eGroupMap,
+        enrichedCategoryMap: eCategoryMap,
+        enrichedAchievementMap: eAchievementMap,
+        databaseTimestamp: db.timestamp,
+      });
 
-        await get().refreshAccountProgress();
-    },
+      // Also build continent/map database
+      const continentDb = await buildContinentDatabase();
+      set({ continentData: continentDb });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to build database';
+      set({ databaseError: errorMessage });
+      console.error('Error building database:', err);
+    } finally {
+      set({ buildingDatabase: false, loadingProgress: null });
+    }
+  },
 
-    handleClearKey: () => {
-        clearApiKey();
-        set({
-            hasStoredKey: false,
-            apiKey: null,
-            accountProgress: new Map(),
-            error: null,
-        });
-    },
+  refreshAccountProgress: async () => {
+    const { apiKey } = get();
+    if (!apiKey) {
+      console.warn('[Store] refreshAccountProgress called with no API key in state — skipping');
+      return;
+    }
 
-    handleToggleHidden: (achievementId: number) => {
-        set((state) => {
-            const newSet = new Set(state.hiddenAchievements);
-            if (newSet.has(achievementId)) {
-                newSet.delete(achievementId);
-            } else {
-                newSet.add(achievementId);
-            }
-            saveHiddenAchievements(newSet);
-            return { hiddenAchievements: newSet };
-        });
-    },
+    set({ loading: true, error: null });
 
-    handleBuildDatabase: async () => {
-        set({ buildingDatabase: true, loadingProgress: null, databaseError: null });
+    try {
+      const accountData = await fetchAccountAchievements(apiKey);
 
-        try {
-            // Build achievement database
-            const db = await buildAchievementDatabase((current, total) => {
-                set({ loadingProgress: { current, total } });
-            });
-            const { accountProgress } = get();
+      // Create a map of account progress for quick lookup
+      const progressMap = new Map<number, AccountAchievement>();
+      accountData.forEach((progress) => {
+        progressMap.set(progress.id, progress);
+      });
 
-            const {
-                groups: eGroups,
-                groupMap: eGroupMap,
-                categoryMap: eCategoryMap,
-                achievementMap: eAchievementMap,
-            } = buildEnrichedHierarchy(
-                db.achievements,
-                db.categories,
-                db.groups,
-                accountProgress
-            );
+      // Re-build hierarchy with new progress
+      const { achievements, groups, categories } = get();
 
-            set({
-                achievements: db.achievements,
-                categories: db.categories,
-                groups: db.groups,
-                enrichedGroups: eGroups,
-                enrichedGroupMap: eGroupMap,
-                enrichedCategoryMap: eCategoryMap,
-                enrichedAchievementMap: eAchievementMap,
-                databaseTimestamp: db.timestamp,
-            });
+      const {
+        groups: eGroups,
+        groupMap: eGroupMap,
+        categoryMap: eCategoryMap,
+        achievementMap: eAchievementMap,
+      } = buildEnrichedHierarchy(achievements, categories, groups, progressMap);
 
-            // Also build continent/map database
-            const continentDb = await buildContinentDatabase();
-            set({ continentData: continentDb });
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to build database';
-            set({ databaseError: errorMessage });
-            console.error('Error building database:', err);
-        } finally {
-            set({ buildingDatabase: false, loadingProgress: null });
-        }
-    },
+      set({
+        accountProgress: progressMap,
+        enrichedGroups: eGroups,
+        enrichedGroupMap: eGroupMap,
+        enrichedCategoryMap: eCategoryMap,
+        enrichedAchievementMap: eAchievementMap,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to refresh progress';
+      set({ error: errorMessage });
+      console.error('Error refreshing progress:', err);
+    } finally {
+      set({ loading: false });
+    }
+  },
 
-    refreshAccountProgress: async () => {
-        const { apiKey } = get();
-        if (!apiKey) {
-            console.warn('[Store] refreshAccountProgress called with no API key in state — skipping');
-            return;
-        }
+  // Map Completion Actions
+  initializeContinentData: async () => {
+    set({ mapLoading: true });
 
-        set({ loading: true, error: null });
-
-        try {
-            const accountData = await fetchAccountAchievements(apiKey);
-
-            // Create a map of account progress for quick lookup
-            const progressMap = new Map<number, AccountAchievement>();
-            accountData.forEach((progress) => {
-                progressMap.set(progress.id, progress);
-            });
-            console.log('[Store] Progress map built:', progressMap.size, 'entries,', accountData.filter((a) => a.done).length, 'completed');
-
-            // Re-build hierarchy with new progress
-            const { achievements, groups, categories } = get();
-            console.log('[Store] Building enriched hierarchy over', achievements.length, 'achievements');
-
-            const {
-                groups: eGroups,
-                groupMap: eGroupMap,
-                categoryMap: eCategoryMap,
-                achievementMap: eAchievementMap,
-            } = buildEnrichedHierarchy(achievements, categories, groups, progressMap);
-
-            set({
-                accountProgress: progressMap,
-                enrichedGroups: eGroups,
-                enrichedGroupMap: eGroupMap,
-                enrichedCategoryMap: eCategoryMap,
-                enrichedAchievementMap: eAchievementMap,
-            });
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to refresh progress';
-            set({ error: errorMessage });
-            console.error('Error refreshing progress:', err);
-        } finally {
-            set({ loading: false });
-        }
-    },
-
-    // Map Completion Actions
-    initializeContinentData: async () => {
-        set({ mapLoading: true });
-
-        try {
-            const data = await getContinentData();
-            set({ continentData: data, mapLoading: false });
-        } catch (err) {
-            console.error('Error loading continent data:', err);
-            set({ mapLoading: false });
-        }
-    },
+    try {
+      const data = await getContinentData();
+      set({ continentData: data, mapLoading: false });
+    } catch (err) {
+      console.error('Error loading continent data:', err);
+      set({ mapLoading: false });
+    }
+  },
 }));
