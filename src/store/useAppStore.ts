@@ -67,6 +67,7 @@ interface AppState {
     hiddenAchievements: Set<number>;
     showHidden: boolean;
     showCollectibleAchievements: boolean;
+    hideCompletedZones: boolean;
     showRecommendedOnly: boolean;
     databaseTimestamp: number | null;
 
@@ -77,6 +78,7 @@ interface AppState {
     setShowHidden: (show: boolean) => void;
     setShowRecommendedOnly: (show: boolean) => void;
     setShowCollectibleAchievements: (show: boolean) => void;
+    setHideCompletedZones: (hide: boolean) => void;
     initializeAchievementDatabase: () => Promise<void>;
     handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
     handleClearKey: () => void;
@@ -114,6 +116,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     hiddenAchievements: new Set(),
     showHidden: false,
     showCollectibleAchievements: false,
+    hideCompletedZones: false,
     showRecommendedOnly: false,
     databaseTimestamp: null,
 
@@ -133,6 +136,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             showHidden: filterSettings.showHidden,
             showRecommendedOnly: filterSettings.showRecommendedOnly,
             showCollectibleAchievements: mapFilterSettings.showCollectibleAchievements,
+            hideCompletedZones: mapFilterSettings.hideCompletedZones,
             isInitialized: true,
         });
 
@@ -182,7 +186,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     setShowCollectibleAchievements: (show) => {
         set({ showCollectibleAchievements: show });
-        saveMapFilterSettings(show);
+        const { hideCompletedZones } = get();
+        saveMapFilterSettings(show, hideCompletedZones);
+    },
+
+    setHideCompletedZones: (hide) => {
+        set({ hideCompletedZones: hide });
+        const { showCollectibleAchievements } = get();
+        saveMapFilterSettings(showCollectibleAchievements, hide);
     },
 
     initializeAchievementDatabase: async () => {
@@ -242,13 +253,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     },
 
     handleApiKeySubmit: async (key: string, remember: boolean) => {
-        if (remember) {
-            saveApiKey(key);
-            set({ hasStoredKey: true, apiKey: key });
-        } else {
-            clearApiKey();
-            set({ hasStoredKey: false, apiKey: null });
-        }
+        const stored = remember ? saveApiKey(key) : (clearApiKey(), false);
+        set({ hasStoredKey: stored, apiKey: key });
 
         await get().refreshAccountProgress();
     },
@@ -323,7 +329,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     refreshAccountProgress: async () => {
         const { apiKey } = get();
-        if (!apiKey) return;
+        if (!apiKey) {
+            console.warn('[Store] refreshAccountProgress called with no API key in state — skipping');
+            return;
+        }
 
         set({ loading: true, error: null });
 
@@ -335,9 +344,11 @@ export const useAppStore = create<AppState>((set, get) => ({
             accountData.forEach((progress) => {
                 progressMap.set(progress.id, progress);
             });
+            console.log('[Store] Progress map built:', progressMap.size, 'entries,', accountData.filter((a) => a.done).length, 'completed');
 
             // Re-build hierarchy with new progress
             const { achievements, groups, categories } = get();
+            console.log('[Store] Building enriched hierarchy over', achievements.length, 'achievements');
 
             const {
                 groups: eGroups,

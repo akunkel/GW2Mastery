@@ -16,6 +16,8 @@ export default function MapPage() {
         initializeContinentData,
         showCollectibleAchievements,
         setShowCollectibleAchievements,
+        hideCompletedZones,
+        setHideCompletedZones,
     } = useAppStore();
     const { progressMap, insightMap, collectibleMap } = useExplorerProgress();
 
@@ -93,15 +95,26 @@ export default function MapPage() {
                         </TooltipContent>
                     </Tooltip>
                 </h2>
-                <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none whitespace-nowrap">
-                    <input
-                        type="checkbox"
-                        checked={showCollectibleAchievements}
-                        onChange={(e) => setShowCollectibleAchievements(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
-                    />
-                    Include other achievements
-                </label>
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none whitespace-nowrap">
+                        <input
+                            type="checkbox"
+                            checked={showCollectibleAchievements}
+                            onChange={(e) => setShowCollectibleAchievements(e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                        />
+                        Include other achievements
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none whitespace-nowrap">
+                        <input
+                            type="checkbox"
+                            checked={hideCompletedZones}
+                            onChange={(e) => setHideCompletedZones(e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                        />
+                        Hide completed
+                    </label>
+                </div>
             </div>
 
             <InteractiveMap
@@ -110,6 +123,7 @@ export default function MapPage() {
                 insightProgress={insightMap}
                 collectibleProgress={collectibleMap}
                 includeCollectiblesInProgress={showCollectibleAchievements}
+                hideCompletedZones={hideCompletedZones}
             />
         </div>
     );

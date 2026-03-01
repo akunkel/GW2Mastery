@@ -10,9 +10,10 @@ interface InteractiveMapProps {
     insightProgress: Map<string, ZoneInsightProgress>;
     collectibleProgress: Map<string, CollectibleAchievementProgress[]>;
     includeCollectiblesInProgress: boolean;
+    hideCompletedZones: boolean;
 }
 
-export default function InteractiveMap({ zones, explorerProgress, insightProgress, collectibleProgress, includeCollectiblesInProgress }: InteractiveMapProps) {
+export default function InteractiveMap({ zones, explorerProgress, insightProgress, collectibleProgress, includeCollectiblesInProgress, hideCompletedZones }: InteractiveMapProps) {
     return (
         <TransformWrapper
             initialScale={2}
@@ -42,6 +43,27 @@ export default function InteractiveMap({ zones, explorerProgress, insightProgres
 
                             const insight = insightProgress.get(zone.name);
                             const collectible = collectibleProgress.get(zone.name);
+
+                            // Filter out fully completed zones when hideCompletedZones is enabled
+                            if (hideCompletedZones) {
+                                let totalCompleted = 0;
+                                let totalItems = 0;
+                                if (progress) {
+                                    totalCompleted += progress.completedBits;
+                                    totalItems += progress.totalBits;
+                                }
+                                if (insight) {
+                                    totalCompleted += insight.completed;
+                                    totalItems += insight.total;
+                                }
+                                if (includeCollectiblesInProgress && collectible) {
+                                    for (const achievement of collectible) {
+                                        totalCompleted += achievement.completedBits;
+                                        totalItems += achievement.totalBits;
+                                    }
+                                }
+                                if (totalItems > 0 && totalCompleted === totalItems) return null;
+                            }
 
                             return (
                                 <Zone

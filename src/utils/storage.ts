@@ -6,11 +6,13 @@ const HIDDEN_ACHIEVEMENTS_KEY = 'gw2_hidden_achievements';
 /**
  * Saves the API key to localStorage
  */
-export function saveApiKey(key: string): void {
+export function saveApiKey(key: string): boolean {
   try {
     localStorage.setItem(API_KEY_STORAGE_KEY, key);
+    return true;
   } catch (error) {
     console.error('Failed to save API key to localStorage:', error);
+    return false;
   }
 }
 
@@ -86,9 +88,9 @@ export function getFilterSettings(): {
 /**
  * Saves map filter settings to localStorage
  */
-export function saveMapFilterSettings(showCollectibleAchievements: boolean): void {
+export function saveMapFilterSettings(showCollectibleAchievements: boolean, hideCompletedZones: boolean): void {
   try {
-    localStorage.setItem(MAP_FILTER_SETTINGS_KEY, JSON.stringify({ showCollectibleAchievements }));
+    localStorage.setItem(MAP_FILTER_SETTINGS_KEY, JSON.stringify({ showCollectibleAchievements, hideCompletedZones }));
   } catch (error) {
     console.error('Failed to save map filter settings to localStorage:', error);
   }
@@ -97,17 +99,20 @@ export function saveMapFilterSettings(showCollectibleAchievements: boolean): voi
 /**
  * Retrieves map filter settings from localStorage
  */
-export function getMapFilterSettings(): { showCollectibleAchievements: boolean; } {
+export function getMapFilterSettings(): { showCollectibleAchievements: boolean; hideCompletedZones: boolean; } {
   try {
     const data = localStorage.getItem(MAP_FILTER_SETTINGS_KEY);
     if (data) {
       const parsed = JSON.parse(data);
-      return { showCollectibleAchievements: parsed.showCollectibleAchievements ?? false };
+      return {
+        showCollectibleAchievements: parsed.showCollectibleAchievements ?? false,
+        hideCompletedZones: parsed.hideCompletedZones ?? false,
+      };
     }
-    return { showCollectibleAchievements: false };
+    return { showCollectibleAchievements: false, hideCompletedZones: false };
   } catch (error) {
     console.error('Failed to retrieve map filter settings from localStorage:', error);
-    return { showCollectibleAchievements: false };
+    return { showCollectibleAchievements: false, hideCompletedZones: false };
   }
 }
 
