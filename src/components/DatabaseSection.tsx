@@ -58,8 +58,9 @@ export default function DatabaseSection({
                 </button>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-                If these achievements are stale, click "Rebuild Database" to download them from the
-                server (this may take a while).
+                Rebuilding the database re-downloads all achievements in the game, which will take a
+                while. You likely don't need to do this unless new achievements have been added
+                since the last time this app was updated.
             </p>
         </div>
     );
