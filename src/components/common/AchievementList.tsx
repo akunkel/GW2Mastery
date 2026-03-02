@@ -115,8 +115,8 @@ export default function AchievementList({
 
     const isGroupComplete = selectedGroup
         ? (selectedGroup.isComplete ??
-            (selectedGroup.totalCount > 0 &&
-                selectedGroup.completedCount >= selectedGroup.totalCount))
+          (selectedGroup.totalCount > 0 &&
+              selectedGroup.completedCount >= selectedGroup.totalCount))
         : false;
 
     if (!selectedGroup) {
@@ -137,7 +137,7 @@ export default function AchievementList({
             <div className="mb-4">
                 {/* Sticky Header */}
                 <div
-                    className={`sticky top-12 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md ${isGroupComplete ? 'border-b-2 border-green-500' : ''}`}
+                    className={`sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md ${isGroupComplete ? 'border-b-2 border-green-500' : ''}`}
                     style={{
                         backgroundColor: selectedGroup.color || '#1e293b', // Fallback color
                         color: '#ffffff',
@@ -178,6 +178,20 @@ export default function AchievementList({
                             />
                         ))}
                     </div>
+                    {selectedGroup.id === 'Tundra' && (
+                        <p className="text-xs text-slate-400 py-4 px-10">
+                            Credit to{' '}
+                            <a
+                                href="https://www.reddit.com/r/Guildwars2/comments/j1ya99/icebrood_saga_logo_recolored_from_one_of_the/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline hover:text-slate-300 transition-colors"
+                            >
+                                u/KortasEE
+                            </a>{' '}
+                            for the Icebrood Saga artwork!
+                        </p>
+                    )}
                 </div>
             </div>
         </motion.div>
