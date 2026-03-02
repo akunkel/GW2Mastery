@@ -8,7 +8,7 @@ export default function Layout() {
     const { setSetupModalOpen, refreshAccountProgress, loading } = useAppStore();
 
     return (
-        <div className="relative overflow-hidden">
+        <div className="h-dvh flex flex-col overflow-hidden">
             {/* Header - h-12 (3rem) */}
             <Header
                 onRefresh={() => refreshAccountProgress()}
@@ -23,7 +23,7 @@ export default function Layout() {
             <SetupModal />
 
             {/* Page Content */}
-            <div className="max-w-[1800px] mx-auto w-full">
+            <div className="flex-1 min-h-0 overflow-y-auto max-w-[1800px] mx-auto w-full">
                 <Outlet />
             </div>
         </div>

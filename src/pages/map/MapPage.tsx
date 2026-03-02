@@ -76,9 +76,9 @@ export default function MapPage() {
     }
 
     return (
-        <div className="pt-4">
+        <div className="h-full flex flex-col">
             {/* Page header */}
-            <div className="mb-4 px-6 flex flex-wrap items-center justify-between gap-y-2">
+            <div className="pt-4 mb-4 px-6 flex-shrink-0 flex flex-wrap items-center justify-between gap-y-2">
                 <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 w-full sm:w-auto">
                     <span>Map Achievements</span>
                     <Tooltip>

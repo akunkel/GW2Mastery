@@ -15,6 +15,7 @@ interface InteractiveMapProps {
 
 export default function InteractiveMap({ zones, explorerProgress, insightProgress, collectibleProgress, includeCollectiblesInProgress, hideCompletedZones }: InteractiveMapProps) {
     return (
+        <div className="flex-1 min-h-0">
         <TransformWrapper
             initialScale={2}
             minScale={1.2}
@@ -27,7 +28,7 @@ export default function InteractiveMap({ zones, explorerProgress, insightProgres
             disablePadding
         >
             {() => (
-                <TransformComponent wrapperClass="!h-[calc(100dvh-11.8rem)] md:!h-[calc(100dvh-9rem)]">
+                <TransformComponent wrapperClass="!h-full">
                     <img
                         src={worldMapSmall}
                         alt="Tyria World Map"
@@ -84,5 +85,6 @@ export default function InteractiveMap({ zones, explorerProgress, insightProgres
                 </TransformComponent>
             )}
         </TransformWrapper>
+        </div>
     );
 }
