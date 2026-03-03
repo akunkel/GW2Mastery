@@ -14,6 +14,7 @@ import {
     REGION_ORDER,
 } from '../../utils/regionHelpers';
 import FilterBar from './FilterBar';
+import RegionsFilterBar from './RegionsFilterBar';
 
 export default function MasteryPage() {
     const {
@@ -23,6 +24,8 @@ export default function MasteryPage() {
         showRecommendedOnly,
         hiddenAchievements,
         handleToggleHidden,
+        goalFilter,
+        setGoalFilter,
     } = useAppStore();
 
     // Derive flat list for mastery filtering
@@ -83,9 +86,20 @@ export default function MasteryPage() {
 
             if (allRegionCategories) {
                 allRegionCategories.forEach((achievements) => {
-                    totalInRegion += achievements.length;
-                    completedInRegion += achievements.filter((a) => a.progress?.done).length;
+                    const relevant =
+                        goalFilter === 'required'
+                            ? achievements.filter((a) => isRecommended(a.id))
+                            : achievements;
+                    totalInRegion += relevant.length;
+                    completedInRegion += relevant.filter((a) => a.progress?.done).length;
                 });
+                // If Required Only yields no achievements for this region, fall back to full count
+                if (goalFilter === 'required' && totalInRegion === 0) {
+                    allRegionCategories.forEach((achievements) => {
+                        totalInRegion += achievements.length;
+                        completedInRegion += achievements.filter((a) => a.progress?.done).length;
+                    });
+                }
             }
 
             // Build EnrichedCategories for this region
@@ -187,7 +201,7 @@ export default function MasteryPage() {
             if (filter === 'incomplete' && g.completedCount >= g.totalCount) return false;
             return true;
         });
-    }, [groupedAchievements, allGrouped, filter]);
+    }, [groupedAchievements, allGrouped, filter, goalFilter]);
 
     // Handle selection state via URL hash
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {
@@ -249,6 +263,12 @@ export default function MasteryPage() {
                         groups={displayGroups}
                         selectedId={selectedGroupId}
                         onSelectionChange={handleSelectionChange}
+                        toolbar={
+                            <RegionsFilterBar
+                                goalFilter={goalFilter}
+                                onGoalChange={setGoalFilter}
+                            />
+                        }
                         filter={filter}
                         hiddenAchievements={hiddenAchievements}
                         showHidden={showHidden}

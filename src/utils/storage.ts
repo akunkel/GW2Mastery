@@ -45,12 +45,13 @@ export function clearApiKey(): void {
 export function saveFilterSettings(
   hideCompleted: boolean,
   showHidden: boolean,
-  showRecommendedOnly: boolean = false
+  showRecommendedOnly: boolean = false,
+  goalFilter: 'all' | 'required' = 'required'
 ): void {
   try {
     localStorage.setItem(
       FILTER_SETTINGS_KEY,
-      JSON.stringify({ hideCompleted, showHidden, showRecommendedOnly })
+      JSON.stringify({ hideCompleted, showHidden, showRecommendedOnly, goalFilter })
     );
   } catch (error) {
     console.error('Failed to save filter settings to localStorage:', error);
@@ -65,23 +66,24 @@ export function getFilterSettings(): {
   hideCompleted: boolean;
   showHidden: boolean;
   showRecommendedOnly: boolean;
+  goalFilter: 'all' | 'required';
 } {
   try {
     const data = localStorage.getItem(FILTER_SETTINGS_KEY);
 
     if (data) {
       const parsed = JSON.parse(data);
-      const settings = {
+      return {
         hideCompleted: parsed.hideCompleted ?? false,
         showHidden: parsed.showHidden ?? false,
         showRecommendedOnly: parsed.showRecommendedOnly ?? false,
+        goalFilter: parsed.goalFilter ?? 'required',
       };
-      return settings;
     }
-    return { hideCompleted: false, showHidden: false, showRecommendedOnly: false };
+    return { hideCompleted: false, showHidden: false, showRecommendedOnly: false, goalFilter: 'required' };
   } catch (error) {
     console.error('Failed to retrieve filter settings from localStorage:', error);
-    return { hideCompleted: false, showHidden: false, showRecommendedOnly: false };
+    return { hideCompleted: false, showHidden: false, showRecommendedOnly: false, goalFilter: 'required' };
   }
 }
 

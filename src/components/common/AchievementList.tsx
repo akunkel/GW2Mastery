@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EnrichedGroup, FilterType } from '../../types/gw2';
 import AchievementCategory from './AchievementCategory';
 import RegionCard from './RegionCard';
@@ -16,6 +16,7 @@ interface AchievementListProps {
     groups: UIAchievementGroup[];
     selectedId?: string | null;
     onSelectionChange?: (id: string | null) => void;
+    toolbar?: React.ReactNode;
 
     filter: FilterType;
     hiddenAchievements: Set<number>;
@@ -27,6 +28,7 @@ export default function AchievementList({
     groups,
     selectedId,
     onSelectionChange,
+    toolbar,
     filter,
     hiddenAchievements,
     showHidden,
@@ -81,18 +83,25 @@ export default function AchievementList({
                 transition={pageTransition}
                 className="w-full"
             >
-                <div className="flex flex-wrap gap-4 justify-center">
+                <div
+                    className="grid gap-4"
+                    style={{
+                        gridTemplateColumns: 'repeat(auto-fill, 360px)',
+                        justifyContent: 'center',
+                    }}
+                >
+                    {toolbar && (
+                        <div style={{ gridColumn: '1 / -1' }} className="flex justify-end">
+                            {toolbar}
+                        </div>
+                    )}
                     {groups.map((group) => {
-                        // Apply filtering logic for the group card visibility?
-                        // Assuming parent filters groups passed in, or we just show them.
-                        // If filter === 'incomplete' and group is complete, maybe hide?
-                        // Generally better if parent handles data filtering, but we can do simple check here.
                         const isComplete =
                             group.isComplete ??
                             (group.totalCount > 0 && group.completedCount >= group.totalCount);
 
                         return (
-                            <div key={group.id} className="flex-none w-[360px] h-[130px]">
+                            <div key={group.id} className="h-[130px]">
                                 <RegionCard
                                     title={group.title || group.name}
                                     image={group.image}
