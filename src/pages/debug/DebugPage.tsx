@@ -17,8 +17,8 @@ import { mapsView } from './views/maps';
 const ALL_VIEWS: DebugViewConfig[] = [
     achievementDbView,
     achievementGroupsView,
-    achievementsView,
     achievementCategoriesView,
+    achievementsView,
     accountAchievementsView,
     continentsView,
     continentFloorView,
@@ -81,6 +81,7 @@ export default function DebugPage() {
     useEffect(() => {
         if (view.endpointPath) return;
         setLoading(true);
+        setError(null);
         setResponse(null);
         view.queryFn(paramValues)
             .then(setResponse)

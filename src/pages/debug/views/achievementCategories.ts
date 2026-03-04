@@ -2,24 +2,24 @@ import { queryAchievementCategories } from '../../../services/achievementsApi';
 import { LANG_OPTIONS, type DebugViewConfig } from '../../../services/endpointTypes';
 
 export const achievementCategoriesView: DebugViewConfig = {
-    label: 'Achievements / Categories',
-    endpointPath: '/achievements/categories',
-    description: 'Returns achievement categories.',
-    queryFn: queryAchievementCategories,
-    params: [
-        {
-            name: 'ids',
-            label: 'IDs',
-            type: 'text',
-            placeholder: 'e.g. all, or comma-separated IDs',
-            description: 'Use "all" to fetch all objects. Enter comma-separated IDs to fetch specific items.',
-            defaultValue: 'all',
-        },
-        {
-            name: 'lang',
-            label: 'Language',
-            type: 'select',
-            options: LANG_OPTIONS,
-        },
-    ],
+  label: 'Achievement Categories',
+  endpointPath: '/achievements/categories',
+  description: 'Returns achievement categories.',
+  queryFn: queryAchievementCategories,
+  params: [
+    {
+      name: 'ids',
+      label: 'IDs',
+      type: 'text',
+      placeholder: 'e.g. all, or comma-separated IDs',
+      description: 'Use "all" to fetch all objects. Enter comma-separated IDs to fetch specific items.',
+      defaultValue: 'all',
+    },
+    {
+      name: 'lang',
+      label: 'Language',
+      type: 'select',
+      options: LANG_OPTIONS,
+    },
+  ],
 };

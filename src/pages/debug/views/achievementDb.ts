@@ -3,11 +3,11 @@ import type { DebugViewConfig } from '../../../services/endpointTypes';
 import { useAppStore } from '../../../store/useAppStore';
 
 export const achievementDbView: DebugViewConfig = {
-  label: 'Achievement DB',
+  label: 'Achievement DB (Local)',
   description: 'Shows the active achievement database from the store.',
   queryFn: async (params: Record<string, string>) => {
     if (params.raw === 'true')
-      return (rawAchievementDb as { achievements: unknown[] }).achievements;
+      return (rawAchievementDb as { achievements: unknown[]; }).achievements;
     const { enrichedAchievementMap } = useAppStore.getState();
     return Array.from(enrichedAchievementMap.values());
   },
@@ -17,7 +17,7 @@ export const achievementDbView: DebugViewConfig = {
       label: 'Raw',
       type: 'checkbox',
       description: 'Show raw achievement data from rawAchievementDb.json instead.',
-      defaultValue: 'false',
+      defaultValue: 'true',
     },
   ],
 };
