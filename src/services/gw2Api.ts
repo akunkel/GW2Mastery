@@ -21,12 +21,10 @@ import {
   saveAchievementDatabase,
   saveContinentDatabase,
 } from '../utils/storage';
+import { BASE_URL } from './apiConfig';
 
 const includeDebugFields = import.meta.env.DEV;
 
-/**
- * Returns the status of the achievement database (timestamps)
- */
 /**
  * Returns the status of the achievement database (timestamps)
  */
@@ -43,7 +41,6 @@ export async function getDatabaseStatus() {
   };
 }
 
-const BASE_URL = 'https://api.guildwars2.com/v2';
 const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (5/sec)
 
 /**

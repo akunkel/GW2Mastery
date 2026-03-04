@@ -1,15 +1,16 @@
 import { BASE_URL } from './apiConfig';
-export interface AchievementGroupsParams {
+
+export interface MapsParams {
   ids?: string;
   lang?: string;
 }
 
-export async function queryAchievementGroups({ ids, lang }: AchievementGroupsParams): Promise<unknown> {
+export async function queryMaps({ ids, lang }: MapsParams): Promise<unknown> {
   const params: Record<string, string> = {};
   if (ids) params.ids = ids;
   if (lang) params.lang = lang;
   const query = new URLSearchParams(params).toString();
-  const url = `${BASE_URL}/achievements/groups${query ? `?${query}` : ''}`;
+  const url = `${BASE_URL}/maps${query ? `?${query}` : ''}`;
   const response = await fetch(url);
   if (!response.ok) {
     const text = await response.text();

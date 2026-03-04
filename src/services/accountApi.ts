@@ -1,15 +1,14 @@
 import { BASE_URL } from './apiConfig';
-export interface AchievementGroupsParams {
-  ids?: string;
-  lang?: string;
+
+export interface AccountAchievementsParams {
+  access_token?: string;
 }
 
-export async function queryAchievementGroups({ ids, lang }: AchievementGroupsParams): Promise<unknown> {
+export async function queryAccountAchievements({ access_token }: AccountAchievementsParams): Promise<unknown> {
   const params: Record<string, string> = {};
-  if (ids) params.ids = ids;
-  if (lang) params.lang = lang;
+  if (access_token) params.access_token = access_token;
   const query = new URLSearchParams(params).toString();
-  const url = `${BASE_URL}/achievements/groups${query ? `?${query}` : ''}`;
+  const url = `${BASE_URL}/account/achievements${query ? `?${query}` : ''}`;
   const response = await fetch(url);
   if (!response.ok) {
     const text = await response.text();
