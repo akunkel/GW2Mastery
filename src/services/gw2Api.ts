@@ -1,11 +1,12 @@
 import achievementDb from '../data/achievementDb.json';
 import continentDb from '../data/continentDb.json';
+import historicalAchievements from '../data/historicalAchievements.json';
+
 import type {
   AccountAchievement,
   Achievement,
   AchievementCategory,
   AchievementDatabase,
-  AchievementGroup,
   ContinentDatabase,
   ContinentFloor,
   ContinentMapData,
@@ -143,26 +144,22 @@ export async function buildAchievementDatabase(
   // Await categories fetch to complete
   const categories = await categoriesPromise;
 
-  // 4. Fetch all groups
-  const groupsResponse = await fetch('https://api.guildwars2.com/v2/achievements/groups?ids=all');
-  if (!groupsResponse.ok) throw new Error('Failed to fetch groups');
-  const groupsRaw = await groupsResponse.json();
-
-  // Validate groups
-  const groups = groupsRaw.map((g: AchievementGroup) => ({
-    id: g.id,
-    name: g.name,
-    description: g.description,
-    order: g.order,
-    categories: g.categories,
-  }));
+  // Filter out achievements belonging to historical categories
+  const historicalCategoryIds = new Set(historicalAchievements.categories);
+  const historicalAchievementIds = new Set(
+    categories
+      .filter((cat) => historicalCategoryIds.has(cat.id))
+      .flatMap((cat) => cat.achievements)
+  );
+  const filteredAchievements = achievements.filter((a) => !historicalAchievementIds.has(a.id));
+  const filteredCategories = categories.filter((cat) => !historicalCategoryIds.has(cat.id));
 
   // Create database object with timestamp
   const db: AchievementDatabase = {
     timestamp: Date.now(),
-    achievements,
-    categories,
-    groups,
+    achievements: filteredAchievements,
+    categories: filteredCategories,
+    groups: [],
   };
 
   // Save to localStorage for immediate use

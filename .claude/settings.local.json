@@ -9,7 +9,10 @@
       "Bash(curl:*)",
       "Bash(node -e:*)",
       "Bash(npm run lint)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:wiki.guildwars2.com)",
+      "WebFetch(domain:api.guildwars2.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

@@ -1,4 +1,5 @@
-import { RefreshCw, Settings } from 'lucide-react';
+import { Bug, RefreshCw, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import NavTabs from './NavTabs';
 
@@ -9,6 +10,8 @@ interface HeaderProps {
 }
 
 export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
+    const navigate = useNavigate();
+
     return (
         <header className="w-full bg-slate-900 border-b border-slate-800 px-4 py-0 sm:px-6 lg:px-8 shadow-md h-12 flex items-center gap-4 sticky top-0 z-50">
             <div className="max-w-[1800px] w-full mx-auto flex items-center justify-between h-full">
@@ -32,11 +35,22 @@ export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
                     <NavTabs className="gap-8 h-full" itemClassName="px-2 h-full" />
                 </div>
 
-                {/* Right: Setup Button */}
-                <div className="flex-shrink-0">
+                {/* Right: Debug + Setup Buttons */}
+                <div className="flex-shrink-0 flex gap-2">
+                    {import.meta.env.DEV && (
+                        <Button
+                            onClick={() => navigate('/debug')}
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"
+                            title="Open Debug"
+                        >
+                            <Bug className="w-4 h-4" />
+                            <span className="hidden sm:inline">Debug</span>
+                        </Button>
+                    )}
                     <Button
                         onClick={onSetup}
-                        disabled={loading}
                         variant="ghost"
                         size="sm"
                         className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"

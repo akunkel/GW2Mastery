@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import { TooltipProvider } from './components/ui/tooltip';
+import DebugPage from './pages/debug/DebugPage';
 import MapPage from './pages/map/MapPage';
 import MasteryPage from './pages/mastery/MasteryPage';
 import { useAppStore } from './store/useAppStore';
@@ -21,6 +22,7 @@ function App() {
                     <Route path="/" element={<Layout />}>
                         <Route index element={<MasteryPage />} />
                         <Route path="map" element={<MapPage />} />
+                        {import.meta.env.DEV && <Route path="debug" element={<DebugPage />} />}
                     </Route>
                 </Routes>
             </BrowserRouter>
