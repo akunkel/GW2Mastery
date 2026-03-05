@@ -91,13 +91,12 @@ export default function MasteryPage() {
                             ? achievements.filter((a) => isRecommended(a.id))
                             : achievements;
                     totalInRegion += relevant.length;
-                    completedInRegion += relevant.filter((a) => a.progress?.done).length;
+                    completedInRegion += achievements.filter((a) => a.progress?.done).length;
                 });
                 // If Required Only yields no achievements for this region, fall back to full count
                 if (goalFilter === 'required' && totalInRegion === 0) {
                     allRegionCategories.forEach((achievements) => {
                         totalInRegion += achievements.length;
-                        completedInRegion += achievements.filter((a) => a.progress?.done).length;
                     });
                 }
             }
