@@ -22,7 +22,7 @@ function App() {
                     <Route path="/" element={<Layout />}>
                         <Route index element={<MasteryPage />} />
                         <Route path="map" element={<MapPage />} />
-                        {import.meta.env.DEV && <Route path="debug" element={<DebugPage />} />}
+                        <Route path="debug" element={<DebugPage />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
