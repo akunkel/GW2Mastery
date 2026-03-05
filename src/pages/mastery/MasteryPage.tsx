@@ -190,11 +190,8 @@ export default function MasteryPage() {
                 // name is standard. title was UI.
                 name: getRegionDisplayName(region),
             };
-        }).filter((g) => {
-            if (filter === 'incomplete' && g.completedCount >= g.totalCount) return false;
-            return true;
         });
-    }, [groupedAchievements, allGrouped, filter, goalFilter]);
+    }, [groupedAchievements, allGrouped, goalFilter]);
 
     // Handle selection state via URL hash
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {
