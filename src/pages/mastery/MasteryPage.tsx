@@ -12,6 +12,7 @@ import {
     getRegionDisplayName,
     getRegionImage,
     REGION_ORDER,
+    REQUIRED_MASTERY_POINTS,
 } from '../../utils/regionHelpers';
 import FilterBar from './FilterBar';
 import RegionsFilterBar from './RegionsFilterBar';
@@ -86,19 +87,12 @@ export default function MasteryPage() {
 
             if (allRegionCategories) {
                 allRegionCategories.forEach((achievements) => {
-                    const relevant =
-                        goalFilter === 'required'
-                            ? achievements.filter((a) => isRecommended(a.id))
-                            : achievements;
-                    totalInRegion += relevant.length;
+                    totalInRegion += achievements.length;
                     completedInRegion += achievements.filter((a) => a.progress?.done).length;
                 });
-                // If Required Only yields no achievements for this region, fall back to full count
-                if (goalFilter === 'required' && totalInRegion === 0) {
-                    allRegionCategories.forEach((achievements) => {
-                        totalInRegion += achievements.length;
-                    });
-                }
+            }
+            if (goalFilter === 'required') {
+                totalInRegion = REQUIRED_MASTERY_POINTS[region];
             }
 
             // Build EnrichedCategories for this region

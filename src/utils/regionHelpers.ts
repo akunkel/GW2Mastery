@@ -82,6 +82,21 @@ export const getRegionZoneColor = (region: MasteryRegion) => REGION_CONFIG[regio
 export const getRegionImage = (region: MasteryRegion) => REGION_CONFIG[region].image;
 
 /**
+ * Total mastery points needed per region for the "Required Only" goal filter.
+ * https://wiki.guildwars2.com/wiki/Mastery
+ */
+export const REQUIRED_MASTERY_POINTS: Record<MasteryRegion, number> = {
+  Tyria: 49,
+  Maguuma: 144,
+  Desert: 110,
+  Tundra: 63,
+  Jade: 89,
+  Sky: 88,
+  Wild: 90,
+  Magic: 38,
+};
+
+/**
  * The canonical order of regions for display
  */
 export const REGION_ORDER: MasteryRegion[] = [
