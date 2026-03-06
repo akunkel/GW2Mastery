@@ -246,7 +246,6 @@ export const useAppStore = create<AppState>((set, get) => ({
         achievements: allAchievements,
         categories: categories,
         groups: db?.groups || [],
-
         enrichedGroups: eGroups,
         enrichedGroupMap: eGroupMap,
         enrichedCategoryMap: eCategoryMap,

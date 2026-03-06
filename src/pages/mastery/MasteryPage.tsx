@@ -11,6 +11,8 @@ import {
     getRegionColor,
     getRegionDisplayName,
     getRegionImage,
+    getMasteryPointsAcquired,
+    getTotalMasteryPoints,
     REGION_ORDER,
     REQUIRED_MASTERY_POINTS,
 } from '../../utils/regionHelpers';
@@ -54,8 +56,6 @@ export default function MasteryPage() {
         [filteredAchievements]
     );
 
-    // Also group ALL enriched achievements for accurate total counts
-    const allGrouped = useMemo(() => groupByRegionAndCategory(achievements), [achievements]);
 
     // Calculate counts for filter bar
     const { completedCount } = useMemo(() => {
@@ -80,17 +80,10 @@ export default function MasteryPage() {
             const regionCategoriesMap =
                 groupedAchievements.get(region) || new Map<string, EnrichedAchievement[]>();
 
-            // Calculate totals using ALL achievements (unfiltered)
-            const allRegionCategories = allGrouped.get(region);
-            let totalInRegion = 0;
-            let completedInRegion = 0;
+            // Calculate totals using precomputed store counters
+            let totalInRegion = getTotalMasteryPoints(enrichedAchievementMap.values(), region);
+            const completedInRegion = getMasteryPointsAcquired(enrichedAchievementMap.values(), region);
 
-            if (allRegionCategories) {
-                allRegionCategories.forEach((achievements) => {
-                    totalInRegion += achievements.length;
-                    completedInRegion += achievements.filter((a) => a.progress?.done).length;
-                });
-            }
             if (goalFilter === 'required') {
                 totalInRegion = REQUIRED_MASTERY_POINTS[region];
             }
@@ -121,8 +114,6 @@ export default function MasteryPage() {
                             if (aRecommended !== bRecommended) return bRecommended - aRecommended;
                             return aDone - bDone;
                         }),
-                        totalPoints: totalCount, // Approx
-                        earnedPoints: completedCount, // Approx
                         totalCount,
                         completedCount,
                     };
@@ -150,8 +141,6 @@ export default function MasteryPage() {
                 description: '',
                 order: REGION_ORDER.indexOf(region),
                 categories: categoriesList,
-                totalPoints: totalInRegion, // Approx
-                earnedPoints: completedInRegion, // Approx
                 totalCount: totalInRegion,
                 completedCount: completedInRegion,
 
@@ -191,7 +180,7 @@ export default function MasteryPage() {
                 name: getRegionDisplayName(region),
             };
         });
-    }, [groupedAchievements, allGrouped, goalFilter]);
+    }, [groupedAchievements, goalFilter, enrichedAchievementMap]);
 
     // Handle selection state via URL hash
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {

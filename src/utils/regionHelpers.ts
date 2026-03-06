@@ -1,4 +1,4 @@
-import type { MasteryRegion } from '../types/gw2';
+import type { EnrichedAchievement, MasteryRegion } from '../types/gw2';
 
 // Import expansion images
 import centralTyriaImg from '../assets/images/central_tyria.png';
@@ -109,6 +109,50 @@ export const REGION_ORDER: MasteryRegion[] = [
   'Wild',
   'Magic',
 ];
+
+/**
+ * Returns the total number of mastery points available, deduplicating achievements
+ * that share the same mastery reward ID. Optionally scoped to a single region.
+ */
+export function getTotalMasteryPoints(
+  achievements: Iterable<EnrichedAchievement>,
+  region?: MasteryRegion
+): number {
+  let count = 0;
+  const seenMasteryIds = new Set<number>();
+  for (const a of achievements) {
+    if (!a.masteryRegion) continue;
+    if (region && a.masteryRegion !== region) continue;
+    if (a.masteryId !== undefined) {
+      if (seenMasteryIds.has(a.masteryId)) continue;
+      seenMasteryIds.add(a.masteryId);
+    }
+    count++;
+  }
+  return count;
+}
+
+/**
+ * Returns the number of earned mastery points, deduplicating achievements
+ * that share the same mastery reward ID. Optionally scoped to a single region.
+ */
+export function getMasteryPointsAcquired(
+  achievements: Iterable<EnrichedAchievement>,
+  region?: MasteryRegion
+): number {
+  let count = 0;
+  const seenMasteryIds = new Set<number>();
+  for (const a of achievements) {
+    if (!a.masteryRegion || !a.progress?.done) continue;
+    if (region && a.masteryRegion !== region) continue;
+    if (a.masteryId !== undefined) {
+      if (seenMasteryIds.has(a.masteryId)) continue;
+      seenMasteryIds.add(a.masteryId);
+    }
+    count++;
+  }
+  return count;
+}
 
 export const REGION_ZONES = {
   Tyria: [

@@ -85,16 +85,12 @@ export interface Achievement extends Omit<
 
 export interface EnrichedCategory extends Omit<AchievementCategory, 'achievements'> {
   achievements: EnrichedAchievement[];
-  totalPoints: number;
-  earnedPoints: number;
   totalCount: number;
   completedCount: number;
 }
 
 export interface EnrichedGroup extends Omit<AchievementGroup, 'categories'> {
   categories: EnrichedCategory[];
-  totalPoints: number;
-  earnedPoints: number;
   totalCount: number;
   completedCount: number;
 }
