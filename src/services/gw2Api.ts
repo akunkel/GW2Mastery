@@ -108,9 +108,12 @@ export async function buildAchievementDatabase(
           optimized.icon = raw.icon;
         }
 
-        const region = raw.rewards?.find((r) => r.type === 'Mastery')?.region;
-        if (region) {
-          optimized.masteryRegion = region as MasteryRegion;
+        const masteryReward = raw.rewards?.find((r) => r.type === 'Mastery');
+        if (masteryReward?.region) {
+          optimized.masteryRegion = masteryReward.region as MasteryRegion;
+          if (masteryReward.id !== undefined) {
+            optimized.masteryId = masteryReward.id;
+          }
         }
 
         if (raw.bits && raw.bits.length > 0) {

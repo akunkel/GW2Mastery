@@ -78,6 +78,7 @@ export interface Achievement extends Omit<
   | 'point_cap'
 > {
   masteryRegion?: MasteryRegion | null;
+  masteryId?: number; // the mastery reward ID from the API
   bits?: { text?: string; }[];
   raw?: RawAchievement;
 }
