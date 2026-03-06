@@ -1,7 +1,7 @@
 import { Bug, CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff, Star } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import type { EnrichedAchievement, FilterType } from '../../types/gw2';
+import type { EnrichedAchievement } from '../../types/gw2';
 import { isRecommended } from '../../utils/recommendedAchievements';
 import { Card, CardContent } from '../ui/card';
 
@@ -9,7 +9,7 @@ interface AchievementCardProps {
     achievement: EnrichedAchievement;
     isHidden?: boolean;
     onToggleHidden?: (achievementId: number) => void;
-    filter?: FilterType;
+    showCompletedAchievements?: boolean;
 }
 
 // Helper functions
@@ -26,7 +26,7 @@ export default function AchievementCard({
     achievement,
     isHidden = false,
     onToggleHidden,
-    filter = 'all',
+    showCompletedAchievements = true,
 }: AchievementCardProps) {
     const { name, requirement, icon, progress, bits } = achievement;
     const isCompleted = progress?.done || false;
@@ -37,7 +37,7 @@ export default function AchievementCard({
     // State to track if the parts list is expanded (default: collapsed)
     const [isExpanded, setIsExpanded] = useState(false);
 
-    if (filter === 'incomplete' && isCompleted) {
+    if (!showCompletedAchievements && isCompleted) {
         return null;
     }
 

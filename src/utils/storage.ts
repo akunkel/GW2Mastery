@@ -43,7 +43,7 @@ export function clearApiKey(): void {
  * Saves filter settings to localStorage
  */
 export function saveFilterSettings(
-  hideCompleted: boolean,
+  showCompleted: boolean,
   showHidden: boolean,
   showRecommendedOnly: boolean = false,
   goalFilter: 'all' | 'required' = 'required'
@@ -51,7 +51,7 @@ export function saveFilterSettings(
   try {
     localStorage.setItem(
       FILTER_SETTINGS_KEY,
-      JSON.stringify({ hideCompleted, showHidden, showRecommendedOnly, goalFilter })
+      JSON.stringify({ showCompleted, showHidden, showRecommendedOnly, goalFilter })
     );
   } catch (error) {
     console.error('Failed to save filter settings to localStorage:', error);
@@ -60,10 +60,10 @@ export function saveFilterSettings(
 
 /**
  * Retrieves filter settings from localStorage
- * Defaults to { hideCompleted: false, showHidden: false, showRecommendedOnly: false } if not found
+ * Defaults to { showCompleted: false, showHidden: false, showRecommendedOnly: false } if not found
  */
 export function getFilterSettings(): {
-  hideCompleted: boolean;
+  showCompleted: boolean;
   showHidden: boolean;
   showRecommendedOnly: boolean;
   goalFilter: 'all' | 'required';
@@ -74,16 +74,16 @@ export function getFilterSettings(): {
     if (data) {
       const parsed = JSON.parse(data);
       return {
-        hideCompleted: parsed.hideCompleted ?? false,
+        showCompleted: parsed.showCompleted ?? false,
         showHidden: parsed.showHidden ?? false,
         showRecommendedOnly: parsed.showRecommendedOnly ?? false,
         goalFilter: parsed.goalFilter ?? 'required',
       };
     }
-    return { hideCompleted: false, showHidden: false, showRecommendedOnly: false, goalFilter: 'required' };
+    return { showCompleted: false, showHidden: false, showRecommendedOnly: false, goalFilter: 'required' };
   } catch (error) {
     console.error('Failed to retrieve filter settings from localStorage:', error);
-    return { hideCompleted: false, showHidden: false, showRecommendedOnly: false, goalFilter: 'required' };
+    return { showCompleted: false, showHidden: false, showRecommendedOnly: false, goalFilter: 'required' };
   }
 }
 

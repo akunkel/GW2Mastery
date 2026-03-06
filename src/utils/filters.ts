@@ -7,7 +7,6 @@ import type {
   EnrichedAchievement,
   EnrichedCategory,
   EnrichedGroup,
-  FilterType,
   MasteryRegion,
 } from '../types/gw2';
 
@@ -159,43 +158,23 @@ export function buildEnrichedHierarchy(
  */
 export function filterEnrichedHierarchy(
   groups: EnrichedGroup[],
-  filter: FilterType,
-  masteryRegion?: MasteryRegion, // Optional: Filter by specific mastery region
+  showCompleted: boolean,
+  masteryRegion?: MasteryRegion,
   searchTerm?: string
 ): EnrichedGroup[] {
   return groups
     .map((group) => {
-      // 1. Filter Categories
       const filteredCategories = group.categories
         .map((cat) => {
-          // 2. Filter Achievements
           const filteredAchievements = cat.achievements.filter((ach) => {
-            // Region Filter (if provided, usually at group level, but good to check)
             if (masteryRegion && ach.masteryRegion !== masteryRegion) return false;
-
-            // Completion Filter
-            if (filter === 'incomplete' && ach.progress?.done) return false;
-
-            // Term Filter (Future proofing)
-            if (
-              searchTerm &&
-              !ach.name.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-              return false;
-
+            if (!showCompleted && ach.progress?.done) return false;
+            if (searchTerm && !ach.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
             return true;
           });
 
           if (filteredAchievements.length === 0) return null;
-
-          // Return new category object with filtered achievements
-          return {
-            ...cat,
-            achievements: filteredAchievements,
-            // Note: Counts here should probably reflect the *filtered* counts?
-            // Or keep original totals? Usually UI wants to show "X / Y" where Y is total available.
-            // Let's keep original counts for context, but the *list* is filtered.
-          };
+          return { ...cat, achievements: filteredAchievements };
         })
         .reduce<EnrichedCategory[]>((acc, cat) => {
           if (cat) acc.push(cat);
@@ -203,12 +182,7 @@ export function filterEnrichedHierarchy(
         }, []);
 
       if (filteredCategories.length === 0) return null;
-
-      // Return new group object with filtered categories
-      return {
-        ...group,
-        categories: filteredCategories,
-      };
+      return { ...group, categories: filteredCategories };
     })
     .reduce<EnrichedGroup[]>((acc, group) => {
       if (group) acc.push(group);

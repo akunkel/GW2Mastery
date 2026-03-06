@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import type { EnrichedGroup, FilterType } from '../../types/gw2';
+import type { EnrichedGroup } from '../../types/gw2';
 import AchievementCategory from './AchievementCategory';
 import RegionCard from './RegionCard';
 
@@ -18,7 +18,7 @@ interface AchievementListProps {
     onSelectionChange?: (id: string | null) => void;
     toolbar?: React.ReactNode;
 
-    filter: FilterType;
+    showCompletedAchievements: boolean;
     hiddenAchievements: Set<number>;
     showHidden: boolean;
     onToggleHidden: (achievementId: number) => void;
@@ -29,7 +29,7 @@ export default function AchievementList({
     selectedId,
     onSelectionChange,
     toolbar,
-    filter,
+    showCompletedAchievements,
     hiddenAchievements,
     showHidden,
     onToggleHidden,
@@ -179,14 +179,14 @@ export default function AchievementList({
                         {selectedGroup.categories
                             .filter(
                                 (category) =>
-                                    filter !== 'incomplete' ||
+                                    showCompletedAchievements ||
                                     category.completedCount < category.totalCount
                             )
                             .map((category) => (
                                 <AchievementCategory
                                     key={`${selectedGroup.id}-${category.id}`}
                                     category={category}
-                                    filter={filter}
+                                    showCompletedAchievements={showCompletedAchievements}
                                     hiddenAchievements={hiddenAchievements}
                                     showHidden={showHidden}
                                     onToggleHidden={onToggleHidden}

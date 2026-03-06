@@ -1,12 +1,12 @@
 import { Bug, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import type { EnrichedCategory, FilterType } from '../../types/gw2';
+import type { EnrichedCategory } from '../../types/gw2';
 import AchievementCard from './AchievementCard';
 
 interface AchievementCategoryProps {
     category: EnrichedCategory;
-    filter: FilterType;
+    showCompletedAchievements: boolean;
     hiddenAchievements: Set<number>;
     showHidden: boolean;
     onToggleHidden: (achievementId: number) => void;
@@ -14,7 +14,7 @@ interface AchievementCategoryProps {
 
 export default function AchievementCategory({
     category,
-    filter,
+    showCompletedAchievements,
     hiddenAchievements,
     showHidden,
     onToggleHidden,
@@ -105,7 +105,7 @@ export default function AchievementCategory({
                                 !achievement.progress?.done
                             }
                             onToggleHidden={onToggleHidden}
-                            filter={filter}
+                            showCompletedAchievements={showCompletedAchievements}
                         />
                     ))}
                 </div>

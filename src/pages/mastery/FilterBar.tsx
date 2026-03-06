@@ -8,19 +8,13 @@ interface FilterBarProps {
 
 export default function FilterBar({ completedCount, hiddenCount }: FilterBarProps) {
     const {
-        filter,
+        showCompletedAchievements,
         showHidden,
         showRecommendedOnly,
-        setFilter,
+        setShowCompletedAchievements,
         setShowHidden,
         setShowRecommendedOnly,
     } = useAppStore();
-
-    const showCompleted = filter === 'all';
-
-    const handleFilterCheckboxChange = () => {
-        setFilter(showCompleted ? 'incomplete' : 'all');
-    };
 
     const handleShowHiddenChange = () => {
         setShowHidden(!showHidden);
@@ -32,8 +26,8 @@ export default function FilterBar({ completedCount, hiddenCount }: FilterBarProp
                 <label className="flex items-center gap-1 cursor-pointer group">
                     <input
                         type="checkbox"
-                        checked={showCompleted}
-                        onChange={handleFilterCheckboxChange}
+                        checked={showCompletedAchievements}
+                        onChange={() => setShowCompletedAchievements(!showCompletedAchievements)}
                         className="w-4 h-4 rounded border-2 border-slate-600 bg-slate-700 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all"
                     />
                     <span className="text-slate-300 text-sm font-medium group-hover:text-white transition-colors">

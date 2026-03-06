@@ -22,7 +22,7 @@ import RegionsFilterBar from './RegionsFilterBar';
 export default function MasteryPage() {
     const {
         enrichedAchievementMap,
-        filter,
+        showCompletedAchievements,
         showHidden,
         showRecommendedOnly,
         hiddenAchievements,
@@ -248,7 +248,7 @@ export default function MasteryPage() {
                                 onGoalChange={setGoalFilter}
                             />
                         }
-                        filter={filter}
+                        showCompletedAchievements={showCompletedAchievements}
                         hiddenAchievements={hiddenAchievements}
                         showHidden={showHidden}
                         onToggleHidden={handleToggleHidden}

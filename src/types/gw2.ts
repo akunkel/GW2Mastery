@@ -10,8 +10,6 @@ export type MasteryRegion =
   | 'Wild'
   | 'Magic';
 
-export type FilterType = 'all' | 'incomplete';
-
 
 export interface RawAchievement {
   id: number;
