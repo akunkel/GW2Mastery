@@ -176,16 +176,22 @@ export default function AchievementList({
                 <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
                     {/* Categories List */}
                     <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
-                        {selectedGroup.categories.map((category) => (
-                            <AchievementCategory
-                                key={`${selectedGroup.id}-${category.id}`}
-                                category={category}
-                                filter={filter}
-                                hiddenAchievements={hiddenAchievements}
-                                showHidden={showHidden}
-                                onToggleHidden={onToggleHidden}
-                            />
-                        ))}
+                        {selectedGroup.categories
+                            .filter(
+                                (category) =>
+                                    filter !== 'incomplete' ||
+                                    category.completedCount < category.totalCount
+                            )
+                            .map((category) => (
+                                <AchievementCategory
+                                    key={`${selectedGroup.id}-${category.id}`}
+                                    category={category}
+                                    filter={filter}
+                                    hiddenAchievements={hiddenAchievements}
+                                    showHidden={showHidden}
+                                    onToggleHidden={onToggleHidden}
+                                />
+                            ))}
                     </div>
                     {selectedGroup.id === 'Tundra' && (
                         <p className="text-xs text-slate-400 py-4 px-10">
