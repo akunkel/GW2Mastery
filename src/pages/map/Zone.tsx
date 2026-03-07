@@ -121,7 +121,7 @@ export const Zone = memo(
                     includeCollectiblesInProgress={includeCollectiblesInProgress}
                 >
                     <div
-                        className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background] duration-200 bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)] border border-[color-mix(in_srgb,var(--zone-base-color)_50%,transparent)]"
+                        className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background] duration-200 bg-[color-mix(in_srgb,var(--zone-base-color)_65%,transparent)] hover:bg-[color-mix(in_srgb,var(--zone-base-color)_65%,transparent)] border border-[color-mix(in_srgb,var(--zone-base-color)_65%,transparent)]"
                         style={
                             {
                                 '--zone-base-color': baseColor,
