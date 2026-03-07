@@ -71,7 +71,7 @@ export const Zone = memo(
         // Font size scales with the zone's rendered size (as percentage of viewport)
         // widthPercent is the zone's width as % of map, and map is 100vw wide
         // Use the smaller of width-based or height-based sizing to fit within zone bounds
-        const fontSizeVw = Math.min(widthPercent * 0.12, heightPercent * 0.25);
+        const fontSizeVw = Math.min(widthPercent * 0.105, heightPercent * 0.25);
 
         // Calculate combined progress from all tracked types (sum of completed / sum of total)
         const getCombinedProgress = (): { percentage: number; hasProgress: boolean } => {
