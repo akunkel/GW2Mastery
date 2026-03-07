@@ -130,6 +130,7 @@ export const Zone = memo(
                                 width: `${widthPercent}%`,
                                 height: `${heightPercent}%`,
                                 clipPath: `polygon(${clipPathPoints})`,
+                                opacity: combinedProgress.percentage === 100 ? 0.65 : 1,
                             } as React.CSSProperties
                         }
                         onClick={() => {
