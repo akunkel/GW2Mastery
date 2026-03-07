@@ -44,8 +44,8 @@ export default function AchievementCard({
     return (
         <Card
             className={cn(
-                'w-full max-w-80 flex flex-col border-2 bg-slate-800 min-h-[138px] relative group',
-                isCompleted ? 'border-green-500' : 'border-slate-600',
+                'w-full max-w-80 flex flex-col border-2 min-h-[138px] relative group',
+                isCompleted ? 'border-green-700 bg-[#1a2b2c]' : 'border-slate-600 bg-slate-800',
                 isHidden && 'opacity-50'
             )}
         >
