@@ -104,6 +104,10 @@ export const Zone = memo(
         };
 
         const combinedProgress = getCombinedProgress();
+        const isComplete = combinedProgress.percentage === 100;
+
+        const fillOpacity = isComplete ? 30 : 65;
+        const textOpacity = isComplete ? 0.5 : 1;
 
         // Dialog state for showing full achievement details
         const [dialogOpen, setDialogOpen] = useState(false);
@@ -121,7 +125,7 @@ export const Zone = memo(
                     includeCollectiblesInProgress={includeCollectiblesInProgress}
                 >
                     <div
-                        className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background] duration-200 bg-[color-mix(in_srgb,var(--zone-base-color)_65%,transparent)] hover:bg-[color-mix(in_srgb,var(--zone-base-color)_65%,transparent)] border border-[color-mix(in_srgb,var(--zone-base-color)_65%,transparent)]"
+                        className="absolute pointer-events-auto cursor-pointer flex items-center justify-center transition-[background,border-color] duration-200"
                         style={
                             {
                                 '--zone-base-color': baseColor,
@@ -130,7 +134,10 @@ export const Zone = memo(
                                 width: `${widthPercent}%`,
                                 height: `${heightPercent}%`,
                                 clipPath: `polygon(${clipPathPoints})`,
-                                opacity: combinedProgress.percentage === 100 ? 0.65 : 1,
+                                background: `color-mix(in srgb, var(--zone-base-color) ${fillOpacity}%, transparent)`,
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                borderColor: `color-mix(in srgb, var(--zone-base-color) ${fillOpacity}%, transparent)`,
                             } as React.CSSProperties
                         }
                         onClick={() => {
@@ -157,6 +164,7 @@ export const Zone = memo(
                                     textShadow: getTextStroke(0.08),
                                     WebkitFontSmoothing: 'antialiased',
                                     MozOsxFontSmoothing: 'grayscale',
+                                    opacity: textOpacity,
                                 }}
                             >
                                 {name}
