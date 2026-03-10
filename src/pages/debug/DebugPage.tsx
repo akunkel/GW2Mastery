@@ -13,6 +13,7 @@ import { achievementsView } from './views/achievements';
 import { continentFloorView } from './views/continentFloor';
 import { continentsView } from './views/continents';
 import { mapsView } from './views/maps';
+import { mountTypesView } from './views/mountTypes';
 
 const ALL_VIEWS: DebugViewConfig[] = [
     achievementDbView,
@@ -23,6 +24,7 @@ const ALL_VIEWS: DebugViewConfig[] = [
     continentsView,
     continentFloorView,
     mapsView,
+    mountTypesView,
 ];
 
 function deepContains(value: unknown, term: string): boolean {

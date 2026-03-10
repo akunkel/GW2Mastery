@@ -8,6 +8,7 @@ import {
   getDatabaseStatus,
   getDbAchievements,
 } from '../services/gw2Api';
+import { queryAccountMountTypes } from '../services/mountsApi';
 import type {
   AccountAchievement,
   Achievement,
@@ -44,6 +45,9 @@ interface AppState {
   accountProgress: Map<number, AccountAchievement>;
   groups: AchievementGroup[];
   categories: AchievementCategory[];
+
+  // Mount Data
+  unlockedMountTypes: string[];
 
   // Map Completion Data
   continentData: ContinentDatabase | null;
@@ -101,6 +105,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   enrichedAchievementMap: new Map(),
   accountProgress: new Map(),
   groups: [],
+  unlockedMountTypes: [],
   continentData: null,
   mapLoading: false,
   mapBuildProgress: null,
@@ -271,6 +276,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       hasStoredKey: false,
       apiKey: null,
       accountProgress: new Map(),
+      unlockedMountTypes: [],
       error: null,
     });
   },
@@ -343,7 +349,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const accountData = await fetchAccountAchievements(apiKey);
+      const [accountData, mountTypes] = await Promise.all([
+        fetchAccountAchievements(apiKey),
+        (queryAccountMountTypes({ access_token: apiKey }) as Promise<string[]>).catch(() => [] as string[]),
+      ]);
 
       // Create a map of account progress for quick lookup
       const progressMap = new Map<number, AccountAchievement>();
@@ -363,6 +372,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       set({
         accountProgress: progressMap,
+        unlockedMountTypes: mountTypes,
         enrichedGroups: eGroups,
         enrichedGroupMap: eGroupMap,
         enrichedCategoryMap: eCategoryMap,

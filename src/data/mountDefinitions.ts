@@ -14,6 +14,8 @@ export interface MountDefinition {
   name: string;
   image?: string;
   region: MasteryRegion;
+  // The API:2/account/mounts/types ID for this mount (if applicable).
+  mountTypeId?: string;
   // The achievement that determines whether a mount is considered unlocked.
   unlockAchievementId: number;
   // The achievements tracked when opening this mount's section. May or may not be the same as the
@@ -28,6 +30,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Raptor',
     image: raptorImg,
     region: 'Desert',
+    mountTypeId: 'raptor',
     unlockAchievementId: 3806,
     achievementIds: [3806],
   },
@@ -36,6 +39,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Springer',
     image: springerImg,
     region: 'Desert',
+    mountTypeId: 'springer',
     unlockAchievementId: 3567,
     achievementIds: [3567],
   },
@@ -44,6 +48,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Skimmer',
     image: skimmerImg,
     region: 'Desert',
+    mountTypeId: 'skimmer',
     unlockAchievementId: 3627,
     achievementIds: [3627],
   },
@@ -52,6 +57,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Jackal',
     image: jackalImg,
     region: 'Desert',
+    mountTypeId: 'jackal',
     unlockAchievementId: 3818,
     achievementIds: [3818],
   },
@@ -60,6 +66,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Griffon',
     image: griffonImg,
     region: 'Desert',
+    mountTypeId: 'griffon',
     unlockAchievementId: 3867,
     achievementIds: [3736, 3662, 3867],
   },
@@ -69,6 +76,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Roller Beetle',
     image: rollerBeetleImg,
     region: 'Desert',
+    mountTypeId: 'roller_beetle',
     unlockAchievementId: 4270,
     achievementIds: [4270],
   },
@@ -77,6 +85,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Skyscale',
     image: skyscaleImg,
     region: 'Desert',
+    mountTypeId: 'skyscale',
     unlockAchievementId: 4745,
     achievementIds: [4745],
   },
@@ -86,6 +95,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Warclaw',
     image: warclawImg,
     region: 'Tundra',
+    mountTypeId: 'warclaw',
     unlockAchievementId: 4642,
     achievementIds: [4642],
   },
@@ -95,6 +105,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Siege Turtle',
     image: siegeTurtleImg,
     region: 'Jade',
+    mountTypeId: 'turtle',
     unlockAchievementId: 6176,
     achievementIds: [6176],
   },
