@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import AchievementList, { type UIAchievementGroup } from '../../components/common/AchievementList';
+import AchievementList, { type UIAchievementSection } from '../../components/common/AchievementList';
 import { useAppStore } from '../../store/useAppStore';
 
 import type { EnrichedAchievement } from '../../types/gw2';
@@ -74,7 +74,7 @@ export default function MasteryPage() {
     // Note: We are creating "synthetic" EnrichedGroups here because Mastery Regions don't map directly to API groups.
     // This is fine, as long as the shape matches.
 
-    const displayGroups: UIAchievementGroup[] = useMemo(() => {
+    const displaySections: UIAchievementSection[] = useMemo(() => {
         return REGION_ORDER.map((region) => {
             // Get categories for this region
             const regionCategoriesMap =
@@ -183,7 +183,7 @@ export default function MasteryPage() {
     }, [groupedAchievements, goalFilter, enrichedAchievementMap]);
 
     // Handle selection state via URL hash
-    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() => {
+    const [selectedSectionId, setSelectedSectionId] = useState<string | null>(() => {
         const hash = window.location.hash.replace('#', '');
         return hash || null;
     });
@@ -191,14 +191,14 @@ export default function MasteryPage() {
     useEffect(() => {
         const handlePopState = () => {
             const hash = window.location.hash.replace('#', '');
-            setSelectedGroupId(hash || null);
+            setSelectedSectionId(hash || null);
         };
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
     const handleSelectionChange = (id: string | null) => {
-        setSelectedGroupId(id);
+        setSelectedSectionId(id);
         if (id) {
             window.history.pushState({ expansion: id }, '', `#${id}`);
         } else {
@@ -219,7 +219,7 @@ export default function MasteryPage() {
             </div>
 
             {/* Filter Controls - only when a region is selected */}
-            {achievements.length > 0 && selectedGroupId && (
+            {achievements.length > 0 && selectedSectionId && (
                 <div className="mb-4 px-4 sm:px-6 lg:px-8">
                     <FilterBar
                         completedCount={completedCount}
@@ -239,8 +239,8 @@ export default function MasteryPage() {
             {achievements.length > 0 && (
                 <AnimatePresence mode="wait">
                     <AchievementList
-                        groups={displayGroups}
-                        selectedId={selectedGroupId}
+                        sections={displaySections}
+                        selectedId={selectedSectionId}
                         onSelectionChange={handleSelectionChange}
                         toolbar={
                             <RegionsFilterBar

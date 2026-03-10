@@ -1,25 +1,20 @@
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import type { CardProps } from './AchievementList';
 
-interface RegionCardProps {
-    title: string;
-    image?: string;
-    color?: string; // Hex color string
-    completed: number;
-    total: number;
-    isComplete: boolean;
-    onClick: () => void;
-}
+export default function RegionCard({ section, onClick }: CardProps) {
+    const {
+        title,
+        name,
+        image,
+        color,
+        completedCount,
+        totalCount,
+        isComplete: isCompleteProp,
+    } = section;
+    const displayTitle = title || name;
+    const isComplete = isCompleteProp ?? (totalCount > 0 && completedCount >= totalCount);
 
-export default function RegionCard({
-    title,
-    image,
-    color,
-    completed,
-    total,
-    isComplete,
-    onClick,
-}: RegionCardProps) {
     return (
         <button
             onClick={onClick}
@@ -41,13 +36,13 @@ export default function RegionCard({
             {/* Image on left */}
             {image && (
                 <div className="flex-shrink-0 relative z-10">
-                    <img src={image} alt={title} className="w-24 h-24 object-contain" />
+                    <img src={image} alt={displayTitle} className="w-24 h-24 object-contain" />
                 </div>
             )}
 
             {/* Content section on right */}
             <div className="flex-1 flex flex-col items-start relative z-10">
-                <h2 className="text-2xl font-bold text-white mb-2 text-left">{title}</h2>
+                <h2 className="text-2xl font-bold text-white mb-2 text-left">{displayTitle}</h2>
                 <div className="flex items-center gap-3">
                     {isComplete && <CheckCircle2 className="w-6 h-6 text-green-400" />}
                     <span
@@ -56,7 +51,7 @@ export default function RegionCard({
                             isComplete ? 'text-green-400' : 'text-white'
                         )}
                     >
-                        {completed} / {total}
+                        {completedCount} / {totalCount}
                     </span>
                 </div>
             </div>

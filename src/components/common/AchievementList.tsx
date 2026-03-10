@@ -5,43 +5,50 @@ import type { EnrichedGroup } from '../../types/gw2';
 import AchievementCategory from './AchievementCategory';
 import RegionCard from './RegionCard';
 
-export interface UIAchievementGroup extends EnrichedGroup {
+export interface UIAchievementSection extends EnrichedGroup {
     title?: string; // Optional override for display
     image?: string;
     color?: string;
     isComplete?: boolean;
 }
 
+export interface CardProps {
+    section: UIAchievementSection;
+    onClick: () => void;
+}
+
 interface AchievementListProps {
-    groups: UIAchievementGroup[];
+    sections: UIAchievementSection[];
     selectedId?: string | null;
     onSelectionChange?: (id: string | null) => void;
     toolbar?: React.ReactNode;
+    sectionComponent?: React.ComponentType<CardProps>;
 
     showCompletedAchievements: boolean;
-    hiddenAchievements: Set<number>;
-    showHidden: boolean;
-    onToggleHidden: (achievementId: number) => void;
+    hiddenAchievements?: Set<number>;
+    showHidden?: boolean;
+    onToggleHidden?: (achievementId: number) => void;
 }
 
 export default function AchievementList({
-    groups,
+    sections,
     selectedId,
     onSelectionChange,
     toolbar,
+    sectionComponent,
     showCompletedAchievements,
-    hiddenAchievements,
-    showHidden,
-    onToggleHidden,
+    hiddenAchievements = new Set(),
+    showHidden = false,
+    onToggleHidden = () => {},
 }: AchievementListProps) {
-    // State to track selected group for uncontrolled mode
+    // State to track selected section for uncontrolled mode
     const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
 
     // Determine current selection based on controlled vs uncontrolled
     const isControlled = selectedId !== undefined;
     const currentSelectedId = isControlled ? selectedId : internalSelectedId;
 
-    const handleGroupSelect = (id: string | null) => {
+    const handleSectionSelect = (id: string | null) => {
         if (!isControlled) {
             setInternalSelectedId(id);
         }
@@ -62,7 +69,7 @@ export default function AchievementList({
         window.scrollTo(0, 0);
     }, [currentSelectedId]);
 
-    if (groups.length === 0) {
+    if (sections.length === 0) {
         return (
             <div className="text-center py-16">
                 <div className="text-6xl mb-4">🎯</div>
@@ -71,11 +78,12 @@ export default function AchievementList({
         );
     }
 
-    // If no group is selected, show ProgressCards
+    // If no section is selected, show the grid
     if (currentSelectedId === null) {
+        const SectionComp = sectionComponent ?? RegionCard;
         return (
             <motion.div
-                key="group-selection"
+                key="section-selection"
                 initial="initial"
                 animate="animate"
                 exit="exit"
@@ -95,40 +103,29 @@ export default function AchievementList({
                             {toolbar}
                         </div>
                     )}
-                    {groups.map((group) => {
-                        const isComplete =
-                            group.isComplete ??
-                            (group.totalCount > 0 && group.completedCount >= group.totalCount);
-
-                        return (
-                            <div key={group.id} className="h-[130px]">
-                                <RegionCard
-                                    title={group.title || group.name}
-                                    image={group.image}
-                                    color={group.color || '#1e293b'}
-                                    completed={group.completedCount}
-                                    total={group.totalCount}
-                                    isComplete={isComplete}
-                                    onClick={() => handleGroupSelect(group.id)}
-                                />
-                            </div>
-                        );
-                    })}
+                    {sections.map((section) => (
+                        <div key={section.id} className="h-[130px]">
+                            <SectionComp
+                                section={section}
+                                onClick={() => handleSectionSelect(section.id)}
+                            />
+                        </div>
+                    ))}
                 </div>
             </motion.div>
         );
     }
 
-    // Show details for selected group
-    const selectedGroup = groups.find((g) => g.id === currentSelectedId);
+    // Show details for selected section
+    const selectedSection = sections.find((s) => s.id === currentSelectedId);
 
-    const isGroupComplete = selectedGroup
-        ? (selectedGroup.isComplete ??
-          (selectedGroup.totalCount > 0 &&
-              selectedGroup.completedCount >= selectedGroup.totalCount))
+    const isSectionComplete = selectedSection
+        ? (selectedSection.isComplete ??
+          (selectedSection.totalCount > 0 &&
+              selectedSection.completedCount >= selectedSection.totalCount))
         : false;
 
-    if (!selectedGroup) {
+    if (!selectedSection) {
         // Fallback if selection is invalid
         return null;
     }
@@ -146,28 +143,28 @@ export default function AchievementList({
             <div className="mb-4">
                 {/* Sticky Header */}
                 <div
-                    className={`sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md ${isGroupComplete ? 'border-b-2 border-green-500' : ''}`}
+                    className={`sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md ${isSectionComplete ? 'border-b-2 border-green-500' : ''}`}
                     style={{
-                        backgroundColor: selectedGroup.color || '#1e293b', // Fallback color
+                        backgroundColor: selectedSection.color || '#1e293b',
                         color: '#ffffff',
                     }}
                 >
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => handleGroupSelect(null)}
+                            onClick={() => handleSectionSelect(null)}
                             className="flex items-center justify-center w-10 h-10 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
                             aria-label="Back to overview"
                         >
                             <ArrowLeft className="w-6 h-6" />
                         </button>
                         <h3 className="text-xl font-bold">
-                            {selectedGroup.title || selectedGroup.name}
+                            {selectedSection.title || selectedSection.name}
                         </h3>
                     </div>
                     <div className="flex items-center gap-3">
-                        {isGroupComplete && <CheckCircle2 className="w-5 h-5 text-green-400" />}
+                        {isSectionComplete && <CheckCircle2 className="w-5 h-5 text-green-400" />}
                         <span className="font-bold text-base">
-                            {selectedGroup.completedCount} / {selectedGroup.totalCount}
+                            {selectedSection.completedCount} / {selectedSection.totalCount}
                         </span>
                     </div>
                 </div>
@@ -176,7 +173,7 @@ export default function AchievementList({
                 <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
                     {/* Categories List */}
                     <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
-                        {selectedGroup.categories
+                        {selectedSection.categories
                             .filter(
                                 (category) =>
                                     showCompletedAchievements ||
@@ -184,7 +181,7 @@ export default function AchievementList({
                             )
                             .map((category) => (
                                 <AchievementCategory
-                                    key={`${selectedGroup.id}-${category.id}`}
+                                    key={`${selectedSection.id}-${category.id}`}
                                     category={category}
                                     showCompletedAchievements={showCompletedAchievements}
                                     hiddenAchievements={hiddenAchievements}
@@ -193,7 +190,7 @@ export default function AchievementList({
                                 />
                             ))}
                     </div>
-                    {selectedGroup.id === 'Tundra' && (
+                    {selectedSection.id === 'Tundra' && (
                         <p className="text-xs text-slate-400 py-4 px-10">
                             Credit to{' '}
                             <a
