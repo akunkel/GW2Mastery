@@ -1,5 +1,6 @@
 import { Bug, RefreshCw, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAppStore } from '../../store/useAppStore';
 import { Button } from '../ui/button';
 import NavTabs from './NavTabs';
 
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
     const navigate = useNavigate();
+    const hasStoredKey = useAppStore((s) => s.hasStoredKey);
 
     return (
         <header className="w-full bg-slate-900 border-b border-slate-800 px-4 py-0 sm:px-6 lg:px-8 shadow-md h-12 flex items-center gap-4 sticky top-0 z-50">
@@ -56,7 +58,15 @@ export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
                         className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"
                         title="Open Setup"
                     >
-                        <Settings className="w-4 h-4" />
+                        <span className="relative">
+                            <Settings className="w-4 h-4" />
+                            {!hasStoredKey && (
+                                <>
+                                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-400 rounded-full" />
+                                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-400 rounded-full animate-ping" />
+                                </>
+                            )}
+                        </span>
                         <span className="hidden sm:inline">Setup</span>
                     </Button>
                 </div>

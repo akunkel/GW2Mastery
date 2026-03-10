@@ -1,17 +1,19 @@
 import { AnimatePresence } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import AchievementList, { type UIAchievementSection } from '../../components/common/AchievementList';
+import AchievementList, {
+    type UIAchievementSection,
+} from '../../components/common/AchievementList';
 import { useAppStore } from '../../store/useAppStore';
 
 import type { EnrichedAchievement } from '../../types/gw2';
 import { groupByRegionAndCategory } from '../../utils/filters';
 import { isRecommended } from '../../utils/recommendedAchievements';
 import {
+    getMasteryPointsAcquired,
     getRegionColor,
     getRegionDisplayName,
     getRegionImage,
-    getMasteryPointsAcquired,
     getTotalMasteryPoints,
     REGION_ORDER,
     REQUIRED_MASTERY_POINTS,
@@ -56,7 +58,6 @@ export default function MasteryPage() {
         [filteredAchievements]
     );
 
-
     // Calculate counts for filter bar
     const { completedCount } = useMemo(() => {
         const complete = achievements.filter((a) => a.progress?.done).length;
@@ -82,7 +83,10 @@ export default function MasteryPage() {
 
             // Calculate totals using precomputed store counters
             let totalInRegion = getTotalMasteryPoints(enrichedAchievementMap.values(), region);
-            const completedInRegion = getMasteryPointsAcquired(enrichedAchievementMap.values(), region);
+            const completedInRegion = getMasteryPointsAcquired(
+                enrichedAchievementMap.values(),
+                region
+            );
 
             if (goalFilter === 'required') {
                 totalInRegion = REQUIRED_MASTERY_POINTS[region];
@@ -210,10 +214,8 @@ export default function MasteryPage() {
         <>
             {/* Page Title */}
             <div className="text-center mb-8 mt-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
-                    GW2Mastery
-                </h1>
-                <p className="text-slate-400 lg:text-lg md:text-base text-sm">
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">GW2Mastery</h1>
+                <p className="text-slate-400 md:text-base text-sm">
                     Just the mastery points, please.
                 </p>
             </div>

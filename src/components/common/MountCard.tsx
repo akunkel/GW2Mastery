@@ -1,10 +1,14 @@
 import { CheckCircle2 } from 'lucide-react';
+import { useAppStore } from '../../store/useAppStore';
 import type { CardProps } from './AchievementList';
 
 export default function MountCard({ section, onClick }: CardProps) {
-    const { title, name, image, color, completedCount, totalCount, isComplete: isCompleteProp } = section;
+    const { title, name, image, color, completedCount, totalCount, isComplete: isCompleteProp, mountTypeId } = section;
     const displayTitle = title || name;
     const isComplete = isCompleteProp ?? (totalCount > 0 && completedCount >= totalCount);
+
+    const unlockedMountTypes = useAppStore((s) => s.unlockedMountTypes);
+    const isUnlocked = mountTypeId ? unlockedMountTypes.includes(mountTypeId) : false;
 
     return (
         <button
@@ -26,8 +30,8 @@ export default function MountCard({ section, onClick }: CardProps) {
             {/* Content on right */}
             <div className="flex-1 flex flex-col items-start relative z-10">
                 <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold text-white text-left">{displayTitle}</h2>
-                    {isComplete && <CheckCircle2 className="w-6 h-6 text-green-400 flex-shrink-0" />}
+                    <h2 className="text-2xl font-bold text-white text-left leading-none">{displayTitle}</h2>
+                    {isUnlocked && <CheckCircle2 className="w-6 h-6 text-green-400 flex-shrink-0 translate-y-0.5" />}
                 </div>
             </div>
         </button>

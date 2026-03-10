@@ -50,6 +50,7 @@ function buildSections(
             isComplete,
             color: regionConfig.color,
             image: mount.image ?? regionConfig.image,
+            mountTypeId: mount.mountTypeId,
         };
     });
 }
@@ -98,18 +99,15 @@ export default function MountsPage() {
         selectedId: selectedSectionId,
         onSelectionChange: handleSelectionChange,
         showCompletedAchievements: true,
+        flatList: true,
     };
 
     return (
         <>
             {/* Page Title */}
             <div className="text-center mb-8 mt-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
-                    Mounts
-                </h1>
-                <p className="text-slate-400 lg:text-lg md:text-base text-sm">
-                    Track your mount unlocks.
-                </p>
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Mounts</h1>
+                <p className="text-slate-400 md:text-base text-sm">You can never have too many.</p>
             </div>
 
             {!isLoaded && <LoadingSpinner message="Loading…" />}
@@ -120,15 +118,27 @@ export default function MountsPage() {
                         <AchievementList sections={displaySections} {...sharedListProps} />
                     </AnimatePresence>
 
-                    {!selectedSectionId && (
-                        <h2 className="text-xl font-bold text-slate-300 px-4 sm:px-6 lg:px-8 mt-8 mb-4">
-                            General Masteries
-                        </h2>
-                    )}
-
                     <AnimatePresence mode="wait">
-                        <AchievementList sections={generalSections} {...sharedListProps} />
+                        <AchievementList
+                            sections={generalSections}
+                            {...sharedListProps}
+                            toolbar={
+                                <h2 className="text-xl font-bold text-slate-300 mt-4">
+                                    General Masteries
+                                </h2>
+                            }
+                        />
                     </AnimatePresence>
+
+                    {!selectedSectionId && (
+                        <ul className="[list-style-type:'*__'] list-inside text-sm text-slate-400 px-4 sm:px-6 lg:px-8 mt-8 mb-4 space-y-1">
+                            <li>
+                                Checkmarks indicate mount ownership (requires "inventories"
+                                permissions on the API key).
+                            </li>
+                            <li>Green borders indicate the mastery track is unlocked.</li>
+                        </ul>
+                    )}
                 </>
             )}
         </>

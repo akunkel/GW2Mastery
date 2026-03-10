@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import type { EnrichedGroup } from '../../types/gw2';
+import AchievementCard from './AchievementCard';
 import AchievementCategory from './AchievementCategory';
 import RegionCard from './RegionCard';
 
@@ -10,6 +11,7 @@ export interface UIAchievementSection extends EnrichedGroup {
     image?: string;
     color?: string;
     isComplete?: boolean;
+    mountTypeId?: string;
 }
 
 export interface CardProps {
@@ -25,6 +27,7 @@ interface AchievementListProps {
     sectionComponent?: React.ComponentType<CardProps>;
 
     showCompletedAchievements: boolean;
+    flatList?: boolean;
     hiddenAchievements?: Set<number>;
     showHidden?: boolean;
     onToggleHidden?: (achievementId: number) => void;
@@ -37,6 +40,7 @@ export default function AchievementList({
     toolbar,
     sectionComponent,
     showCompletedAchievements,
+    flatList = false,
     hiddenAchievements = new Set(),
     showHidden = false,
     onToggleHidden = () => {},
@@ -99,7 +103,7 @@ export default function AchievementList({
                     }}
                 >
                     {toolbar && (
-                        <div style={{ gridColumn: '1 / -1' }} className="flex justify-end">
+                        <div style={{ gridColumn: '1 / -1' }} className="flex">
                             {toolbar}
                         </div>
                     )}
@@ -169,42 +173,70 @@ export default function AchievementList({
                     </div>
                 </div>
 
-                {/* Categories List */}
-                <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
-                    {/* Categories List */}
-                    <div className="mt-4 space-y-3 px-4 sm:px-6 lg:px-8">
-                        {selectedSection.categories
-                            .filter(
-                                (category) =>
-                                    showCompletedAchievements ||
-                                    category.completedCount < category.totalCount
-                            )
-                            .map((category) => (
-                                <AchievementCategory
-                                    key={`${selectedSection.id}-${category.id}`}
-                                    category={category}
-                                    showCompletedAchievements={showCompletedAchievements}
-                                    hiddenAchievements={hiddenAchievements}
-                                    showHidden={showHidden}
-                                    onToggleHidden={onToggleHidden}
-                                />
-                            ))}
-                    </div>
-                    {selectedSection.id === 'Tundra' && (
-                        <p className="text-xs text-slate-400 py-4 px-10">
-                            Credit to{' '}
-                            <a
-                                href="https://www.reddit.com/r/Guildwars2/comments/j1ya99/icebrood_saga_logo_recolored_from_one_of_the/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline hover:text-slate-300 transition-colors"
-                            >
-                                u/KortasEE
-                            </a>{' '}
-                            for the Icebrood Saga artwork!
-                        </p>
+                <div className="mt-4 px-4 sm:px-6 lg:px-8">
+                    {flatList ? (
+                        <div className="flex flex-wrap gap-4 justify-center">
+                            {selectedSection.categories
+                                .flatMap((c) => c.achievements)
+                                .filter((a) => {
+                                    if (!showCompletedAchievements && a.progress?.done)
+                                        return false;
+                                    if (showHidden) return true;
+                                    return !hiddenAchievements.has(a.id);
+                                })
+                                .sort((a, b) => {
+                                    const aDone = a.progress?.done ? 1 : 0;
+                                    const bDone = b.progress?.done ? 1 : 0;
+                                    return aDone - bDone;
+                                })
+                                .map((achievement) => (
+                                    <AchievementCard
+                                        key={achievement.id}
+                                        achievement={achievement}
+                                        isHidden={
+                                            hiddenAchievements.has(achievement.id) &&
+                                            !achievement.progress?.done
+                                        }
+                                        onToggleHidden={onToggleHidden}
+                                        showCompletedAchievements={showCompletedAchievements}
+                                    />
+                                ))}
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {selectedSection.categories
+                                .filter(
+                                    (category) =>
+                                        showCompletedAchievements ||
+                                        category.completedCount < category.totalCount
+                                )
+                                .map((category) => (
+                                    <AchievementCategory
+                                        key={`${selectedSection.id}-${category.id}`}
+                                        category={category}
+                                        showCompletedAchievements={showCompletedAchievements}
+                                        hiddenAchievements={hiddenAchievements}
+                                        showHidden={showHidden}
+                                        onToggleHidden={onToggleHidden}
+                                    />
+                                ))}
+                        </div>
                     )}
                 </div>
+                {selectedSection.id === 'Tundra' && (
+                    <p className="text-xs text-slate-400 py-4 px-10">
+                        Credit to{' '}
+                        <a
+                            href="https://www.reddit.com/r/Guildwars2/comments/j1ya99/icebrood_saga_logo_recolored_from_one_of_the/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-slate-300 transition-colors"
+                        >
+                            u/KortasEE
+                        </a>{' '}
+                        for the Icebrood Saga artwork!
+                    </p>
+                )}
             </div>
         </motion.div>
     );
