@@ -10,6 +10,7 @@ interface AchievementCardProps {
     isHidden?: boolean;
     onToggleHidden?: (achievementId: number) => void;
     showCompletedAchievements?: boolean;
+    showRecommended?: boolean;
 }
 
 // Helper functions
@@ -27,6 +28,7 @@ export default function AchievementCard({
     isHidden = false,
     onToggleHidden,
     showCompletedAchievements = true,
+    showRecommended = true,
 }: AchievementCardProps) {
     const { name, requirement, icon, progress, bits } = achievement;
     const isCompleted = progress?.done || false;
@@ -108,7 +110,7 @@ export default function AchievementCard({
                     <div className="flex-shrink-0">
                         {isCompleted ? (
                             <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        ) : isRecommended(achievement.id) ? (
+                        ) : showRecommended && isRecommended(achievement.id) ? (
                             <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                         ) : null}
                     </div>

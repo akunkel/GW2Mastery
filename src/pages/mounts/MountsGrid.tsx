@@ -150,6 +150,7 @@ export default function MountsGrid({
                                         key={achievement.id}
                                         achievement={achievement}
                                         showCompletedAchievements={true}
+                                        showRecommended={false}
                                     />
                                 ))}
                             </div>
