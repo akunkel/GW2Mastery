@@ -18,9 +18,8 @@ export interface MountDefinition {
   mountTypeId?: string;
   // The achievement that determines whether a mount is considered unlocked.
   unlockAchievementId: number;
-  // The achievements tracked when opening this mount's section. May or may not be the same as the
-  // unlock criteria.
-  achievementIds: number[];
+  // Achievements grouped by step. Each inner array is one step shown in the detail view.
+  achievementIdsSteps: number[][];
 }
 
 export const MOUNT_DEFINITIONS: MountDefinition[] = [
@@ -32,7 +31,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Desert',
     mountTypeId: 'raptor',
     unlockAchievementId: 3806,
-    achievementIds: [3806],
+    achievementIdsSteps: [[3806]],
   },
   {
     id: 'springer',
@@ -41,7 +40,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Desert',
     mountTypeId: 'springer',
     unlockAchievementId: 3567,
-    achievementIds: [3567],
+    achievementIdsSteps: [[3567]],
   },
   {
     id: 'skimmer',
@@ -50,7 +49,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Desert',
     mountTypeId: 'skimmer',
     unlockAchievementId: 3627,
-    achievementIds: [3627],
+    achievementIdsSteps: [[3627]],
   },
   {
     id: 'jackal',
@@ -59,7 +58,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Desert',
     mountTypeId: 'jackal',
     unlockAchievementId: 3818,
-    achievementIds: [3818],
+    achievementIdsSteps: [[3818]],
   },
   {
     id: 'griffon',
@@ -68,7 +67,12 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Desert',
     mountTypeId: 'griffon',
     unlockAchievementId: 3867,
-    achievementIds: [3736, 3662, 3867],
+    achievementIdsSteps: [
+      // Open Skies: Sunspear Sanctuary
+      [3736, 3634, 3686, 3834, 3856, 3758],
+      // Open Skies: On Wings and a Prayer
+      [3867, 3662],
+    ],
   },
   // Living World Season 4
   {
@@ -78,7 +82,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Desert',
     mountTypeId: 'roller_beetle',
     unlockAchievementId: 4270,
-    achievementIds: [4270],
+    achievementIdsSteps: [[4265, 4205, 4270]],
   },
   {
     id: 'skyscale',
@@ -87,7 +91,18 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Desert',
     mountTypeId: 'skyscale',
     unlockAchievementId: 4745,
-    achievementIds: [4745],
+    achievementIdsSteps: [
+      // Newborn Skyscales
+      [4714, 4707, 4719, 4667, 4666],
+      // Saving Skyscales
+      [4712, 4704, 4694, 4678, 4680, 4746, 4730, 4684, 4711, 4695, 4724, 4736, 4665],
+      // Raising Skyscales
+      [4693, 4671, 4725, 4733],
+      // Troublesome Skyscales
+      [4675, 4692, 4662, 4710,],
+      // Riding Skyscales
+      [4745, 4709, 4668],
+    ],
   },
   // Icebrood Saga
   {
@@ -97,7 +112,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Tundra',
     mountTypeId: 'warclaw',
     unlockAchievementId: 4642,
-    achievementIds: [4642],
+    achievementIdsSteps: [[4642]],
   },
   // End of Dragons
   {
@@ -107,7 +122,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
     region: 'Jade',
     mountTypeId: 'turtle',
     unlockAchievementId: 6176,
-    achievementIds: [6176],
+    achievementIdsSteps: [[6176, 6408, 6066, 6099]],
   },
   // TODO: General masteries: Crystal Champion, United Legions Waystation Synchronization
 ];
@@ -118,8 +133,8 @@ export const GENERAL_MOUNT_DEFINITIONS: MountDefinition[] = [
     id: 'flight-training',
     name: 'Flight Training',
     region: 'Sky',
-    unlockAchievementId: 7225,
-    achievementIds: [7225],
+    unlockAchievementId: 7175,
+    achievementIdsSteps: [[7175, 7225]],
   },
   // Visions of Eternity
   {
@@ -127,6 +142,6 @@ export const GENERAL_MOUNT_DEFINITIONS: MountDefinition[] = [
     name: 'Skimmer Adaptation',
     region: 'Magic',
     unlockAchievementId: 8990,
-    achievementIds: [8990],
+    achievementIdsSteps: [[8990]],
   },
 ];

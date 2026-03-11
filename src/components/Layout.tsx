@@ -24,7 +24,7 @@ export default function Layout() {
 
             {/* Page Content */}
             <div className="flex-1 min-h-0 overflow-y-auto">
-                <div className="max-w-[1800px] mx-auto w-full h-full">
+                <div className="max-w-[1800px] mx-auto w-full">
                     <Outlet />
                 </div>
             </div>

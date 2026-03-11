@@ -211,9 +211,9 @@ export default function MasteryPage() {
     };
 
     return (
-        <>
+        <div className="pb-4">
             {/* Page Title */}
-            <div className="text-center mb-8 mt-4">
+            <div className="text-center mb-4 mt-4">
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">GW2Mastery</h1>
                 <p className="text-slate-400 md:text-base text-sm">
                     Just the mastery points, please.
@@ -257,6 +257,6 @@ export default function MasteryPage() {
                     />
                 </AnimatePresence>
             )}
-        </>
+        </div>
     );
 }

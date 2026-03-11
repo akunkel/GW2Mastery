@@ -1,72 +1,12 @@
 import { AnimatePresence } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import AchievementList, {
-    type UIAchievementSection,
-} from '../../components/common/AchievementList';
-import MountCard from '../../components/common/MountCard';
-import type { MountDefinition } from '../../data/mountDefinitions';
 import { GENERAL_MOUNT_DEFINITIONS, MOUNT_DEFINITIONS } from '../../data/mountDefinitions';
 import { useAppStore } from '../../store/useAppStore';
-
-import type { EnrichedAchievement, EnrichedCategory } from '../../types/gw2';
-import { getRegionConfig } from '../../utils/regionHelpers';
-
-function buildSections(
-    definitions: MountDefinition[],
-    enrichedAchievementMap: Map<number, EnrichedAchievement>
-): UIAchievementSection[] {
-    return definitions.map((mount) => {
-        const achievements: EnrichedAchievement[] = mount.achievementIds
-            .map((id) => enrichedAchievementMap.get(id))
-            .filter((a): a is EnrichedAchievement => a !== undefined);
-
-        const totalCount = achievements.length;
-        const completedCount = achievements.filter((a) => a.progress?.done).length;
-        const isComplete =
-            enrichedAchievementMap.get(mount.unlockAchievementId)?.progress?.done === true;
-
-        const category: EnrichedCategory = {
-            id: 0,
-            name: mount.name,
-            description: '',
-            order: 0,
-            achievements,
-            totalCount,
-            completedCount,
-        };
-
-        const regionConfig = getRegionConfig(mount.region);
-
-        return {
-            id: mount.id,
-            name: mount.name,
-            title: mount.name,
-            description: '',
-            order: 0,
-            categories: [category],
-            totalCount,
-            completedCount,
-            isComplete,
-            color: regionConfig.color,
-            image: mount.image ?? regionConfig.image,
-            mountTypeId: mount.mountTypeId,
-        };
-    });
-}
+import MountsGrid from './MountsGrid';
 
 export default function MountsPage() {
-    const { enrichedAchievementMap } = useAppStore();
-
-    const displaySections = useMemo(
-        () => buildSections(MOUNT_DEFINITIONS, enrichedAchievementMap),
-        [enrichedAchievementMap]
-    );
-
-    const generalSections = useMemo(
-        () => buildSections(GENERAL_MOUNT_DEFINITIONS, enrichedAchievementMap),
-        [enrichedAchievementMap]
-    );
+    const enrichedAchievementMap = useAppStore((s) => s.enrichedAchievementMap);
 
     // Handle selection state via URL hash
     const [selectedSectionId, setSelectedSectionId] = useState<string | null>(() => {
@@ -94,19 +34,11 @@ export default function MountsPage() {
 
     const isLoaded = enrichedAchievementMap.size > 0;
 
-    const sharedListProps = {
-        sectionComponent: MountCard,
-        selectedId: selectedSectionId,
-        onSelectionChange: handleSelectionChange,
-        showCompletedAchievements: true,
-        flatList: true,
-    };
-
     return (
-        <>
+        <div className="pb-4">
             {/* Page Title */}
-            <div className="text-center mb-8 mt-4">
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Mounts</h1>
+            <div className="text-center mb-2 mt-4">
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Mounts</h1>
                 <p className="text-slate-400 md:text-base text-sm">You can never have too many.</p>
             </div>
 
@@ -115,13 +47,23 @@ export default function MountsPage() {
             {isLoaded && (
                 <>
                     <AnimatePresence mode="wait">
-                        <AchievementList sections={displaySections} {...sharedListProps} />
+                        <MountsGrid
+                            mounts={MOUNT_DEFINITIONS}
+                            selectedId={selectedSectionId}
+                            onSelectionChange={handleSelectionChange}
+                            toolbar={
+                                <h2 className="text-xl font-bold text-slate-300 mt-4">
+                                    Mount Masteries
+                                </h2>
+                            }
+                        />
                     </AnimatePresence>
 
                     <AnimatePresence mode="wait">
-                        <AchievementList
-                            sections={generalSections}
-                            {...sharedListProps}
+                        <MountsGrid
+                            mounts={GENERAL_MOUNT_DEFINITIONS}
+                            selectedId={selectedSectionId}
+                            onSelectionChange={handleSelectionChange}
                             toolbar={
                                 <h2 className="text-xl font-bold text-slate-300 mt-4">
                                     General Masteries
@@ -141,6 +83,6 @@ export default function MountsPage() {
                     )}
                 </>
             )}
-        </>
+        </div>
     );
 }
