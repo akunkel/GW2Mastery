@@ -99,7 +99,7 @@ export default function MountsGrid({
             <div className="mb-4">
                 {/* Sticky Header */}
                 <div
-                    className={`sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 shadow-md ${isComplete ? 'border-b-2 border-green-500' : ''}`}
+                    className={`group sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 mt-4 shadow-md ${isComplete ? 'border-b-2 border-green-500' : ''}`}
                     style={{ backgroundColor: color || '#1e293b', color: '#ffffff' }}
                 >
                     <div className="flex items-center gap-3">
@@ -110,7 +110,20 @@ export default function MountsGrid({
                         >
                             <ArrowLeft className="w-6 h-6" />
                         </button>
-                        <h3 className="text-xl font-bold">{selectedMount.name}</h3>
+                        <h3 className="text-xl font-bold">
+                            {selectedMount.wikiUrl ? (
+                                <a
+                                    href={selectedMount.wikiUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group-hover:underline"
+                                >
+                                    {selectedMount.name}
+                                </a>
+                            ) : (
+                                selectedMount.name
+                            )}
+                        </h3>
                     </div>
                     {isComplete && <CheckCircle2 className="w-5 h-5 text-green-400" />}
                 </div>

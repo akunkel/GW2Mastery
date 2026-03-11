@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { OTHER_MOUNT_DEFINITIONS, MOUNT_DEFINITIONS } from '../../data/mountDefinitions';
+import { MOUNT_DEFINITIONS, OTHER_MOUNT_DEFINITIONS } from '../../data/mountDefinitions';
 import { useAppStore } from '../../store/useAppStore';
 import MountsGrid from './MountsGrid';
 
@@ -37,7 +37,7 @@ export default function MountsPage() {
     return (
         <div className="pb-4">
             {/* Page Title */}
-            <div className="text-center mb-2 mt-4">
+            <div className="text-center mt-4">
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Mounts</h1>
                 <p className="text-slate-400 md:text-base text-sm">You can never have too many.</p>
             </div>

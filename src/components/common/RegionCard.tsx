@@ -42,7 +42,9 @@ export default function RegionCard({ section, onClick }: CardProps) {
 
             {/* Content section on right */}
             <div className="flex-1 flex flex-col items-start relative z-10">
-                <h2 className="text-2xl font-bold text-white mb-2 text-left">{displayTitle}</h2>
+                <h2 className="text-2xl font-bold text-white leading-none mb-2 text-left">
+                    {displayTitle}
+                </h2>
                 <div className="flex items-center gap-3">
                     {isComplete && <CheckCircle2 className="w-6 h-6 text-green-400" />}
                     <span

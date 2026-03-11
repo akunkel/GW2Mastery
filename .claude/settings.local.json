@@ -1,18 +1,36 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(npm install:*)",
-      "Bash(npx tailwindcss:*)",
-      "Bash(npm run build:*)",
-      "Bash(npm run dev:*)",
-      "Bash(timeout:*)",
-      "Bash(curl:*)",
-      "Bash(node -e:*)",
-      "Bash(npm run lint)",
-      "Bash(npx tsc:*)",
-      "WebFetch(domain:wiki.guildwars2.com)",
-      "WebFetch(domain:api.guildwars2.com)",
-      "WebFetch(domain:github.com)"
-    ]
-  }
+    "permissions": {
+        "allow": [
+            "Bash(npm install:*)",
+            "Bash(npx tailwindcss:*)",
+            "Bash(npm run build:*)",
+            "Bash(npm run dev:*)",
+            "Bash(timeout:*)",
+            "Bash(curl:*)",
+            "Bash(node -e:*)",
+            "Bash(npm run lint)",
+            "Bash(npx tsc:*)",
+            "Bash(npm test)",
+            "Bash(npm run test:*)",
+            "Bash(npx prettier:*)",
+            "Bash(npx eslint:*)",
+            "Bash(npx jest:*)",
+            "Bash(npx vitest:*)",
+            "Bash(ls:*)",
+            "Bash(cat:*)",
+            "Bash(grep:*)",
+            "Bash(find:*)",
+            "Bash(tree:*)",
+            "Bash(pwd)",
+            "Bash(echo:*)",
+            "Bash(git status)",
+            "Bash(git diff:*)",
+            "Bash(git log:*)",
+            "Bash(git show:*)",
+            "Bash(git branch:*)",
+            "WebFetch(domain:wiki.guildwars2.com)",
+            "WebFetch(domain:api.guildwars2.com)",
+            "WebFetch(domain:github.com)"
+        ]
+    }
 }

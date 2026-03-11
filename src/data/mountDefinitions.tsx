@@ -13,6 +13,8 @@ import type { MasteryRegion } from '../types/gw2';
 export interface MountDefinition {
     id: string;
     name: string;
+    // Optional custom title node for the card. This allows us to insert <br> for better formatting.
+    cardTitle?: ReactNode;
     image?: string;
     region: MasteryRegion;
     // The API:2/account/mounts/types ID for this mount (if applicable).
@@ -23,6 +25,8 @@ export interface MountDefinition {
     achievementIdsSteps: number[][];
     // Optional note displayed above the achievement list in the detail view.
     note?: ReactNode;
+    // Optional wiki URL. When provided, the header text becomes a hyperlink.
+    wikiUrl?: string;
 }
 
 export const MOUNT_DEFINITIONS: MountDefinition[] = [
@@ -35,6 +39,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
         mountTypeId: 'raptor',
         unlockAchievementId: 3806,
         achievementIdsSteps: [[3806]],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Raptor#Related_masteries',
     },
     {
         id: 'springer',
@@ -44,6 +49,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
         mountTypeId: 'springer',
         unlockAchievementId: 3567,
         achievementIdsSteps: [[3567]],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Springer#Related_masteries',
     },
     {
         id: 'skimmer',
@@ -53,6 +59,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
         mountTypeId: 'skimmer',
         unlockAchievementId: 3627,
         achievementIdsSteps: [[3627]],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Skimmer#Related_masteries',
     },
     {
         id: 'jackal',
@@ -62,6 +69,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
         mountTypeId: 'jackal',
         unlockAchievementId: 3818,
         achievementIdsSteps: [[3818]],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Jackal#Related_masteries',
     },
     {
         id: 'griffon',
@@ -76,6 +84,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
             // Open Skies: On Wings and a Prayer
             [3867, 3662],
         ],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Griffon#Related_masteries',
     },
     // Living World Season 4
     {
@@ -86,6 +95,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
         mountTypeId: 'roller_beetle',
         unlockAchievementId: 4270,
         achievementIdsSteps: [[4265, 4205, 4270]],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Roller_Beetle#Related_masteries',
     },
     {
         id: 'skyscale',
@@ -106,7 +116,8 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
             // Riding Skyscales
             [4745, 4709, 4668],
         ],
-        note: 'See "Flight Training" mastery for the faster route to unlock a Skyscale mount through SotO, although it won\'t unlock this mastery track.',
+        note: 'These achievements unlock the LWS4 mastery track and the mount. See "Flight Training" mastery for the faster route to unlock the mount through SotO, although it won\'t unlock this mastery track.',
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Skyscale#Related_masteries',
     },
     // End of Dragons
     {
@@ -117,6 +128,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
         mountTypeId: 'turtle',
         unlockAchievementId: 6176,
         achievementIdsSteps: [[6176, 6408, 6066, 6099]],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Siege_Turtle#Related_masteries',
     },
     // Janthir Wilds
     {
@@ -128,6 +140,7 @@ export const MOUNT_DEFINITIONS: MountDefinition[] = [
         unlockAchievementId: 8223,
         achievementIdsSteps: [[8223]],
         note: 'This achievement unlocks the PvE mastery track. The mount itself can be unlocked simply by owning PoF and entering a WvW map.',
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Warclaw#Related_masteries',
     },
     // TODO: General masteries: Crystal Champion, United Legions Waystation Synchronization
 ];
@@ -138,16 +151,27 @@ export const OTHER_MOUNT_DEFINITIONS: MountDefinition[] = [
         id: 'flight-training',
         name: 'Flight Training',
         region: 'Sky',
+        mountTypeId: 'skyscale',
         unlockAchievementId: 7175,
         achievementIdsSteps: [[7175, 7225]],
         note: '"Hell Breaks Loose" unlocks this mastery track, while "A New Friend" unlocks the Skyscale mount.',
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Flight_Training',
     },
     // Visions of Eternity
     {
         id: 'skimmer-adaptation',
         name: 'Skimmer Adaptation',
+        cardTitle: (
+            <>
+                Skimmer
+                <br />
+                Adaptation
+            </>
+        ),
         region: 'Magic',
+        mountTypeId: 'skimmer',
         unlockAchievementId: 8990,
         achievementIdsSteps: [[8990]],
+        wikiUrl: 'https://wiki.guildwars2.com/wiki/Skimmer_Adaptation',
     },
 ];

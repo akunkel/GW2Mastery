@@ -15,7 +15,8 @@ export default function MountCard({ mount, onClick }: MountCardProps) {
     const regionConfig = getRegionConfig(mount.region);
     const color = regionConfig.color;
     const image = mount.image ?? regionConfig.image;
-    const isComplete = enrichedAchievementMap.get(mount.unlockAchievementId)?.progress?.done === true;
+    const isComplete =
+        enrichedAchievementMap.get(mount.unlockAchievementId)?.progress?.done === true;
     const isUnlocked = mount.mountTypeId ? unlockedMountTypes.includes(mount.mountTypeId) : false;
 
     return (
@@ -36,11 +37,11 @@ export default function MountCard({ mount, onClick }: MountCardProps) {
             )}
 
             {/* Content on right */}
-            <div className="flex-1 flex flex-col items-start relative z-10">
-                <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold text-white text-left leading-none">{mount.name}</h2>
-                    {isUnlocked && <CheckCircle2 className="w-6 h-6 text-green-400 flex-shrink-0 translate-y-0.5" />}
-                </div>
+            <div className="flex-1 flex items-center gap-2 relative z-10">
+                <h2 className="text-2xl font-bold text-white leading-none">{mount.cardTitle ?? mount.name}</h2>
+                {isUnlocked && (
+                    <CheckCircle2 className="shrink-0 w-6 h-6 text-green-400 translate-y-0.5" />
+                )}
             </div>
         </button>
     );
