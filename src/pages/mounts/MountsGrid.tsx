@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
-import React, { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import AchievementCard from '../../components/common/AchievementCard';
 import MountCard from '../../components/common/MountCard';
 import type { MountDefinition } from '../../data/mountDefinitions';
@@ -11,7 +11,7 @@ interface MountsGridProps {
     mounts: MountDefinition[];
     selectedId: string | null;
     onSelectionChange: (id: string | null) => void;
-    toolbar?: React.ReactNode;
+    toolbar?: ReactNode;
 }
 
 const pageVariants = {
@@ -114,6 +114,13 @@ export default function MountsGrid({
                     </div>
                     {isComplete && <CheckCircle2 className="w-5 h-5 text-green-400" />}
                 </div>
+
+                {/* Note */}
+                {selectedMount.note && (
+                    <div className="mt-4 px-4 sm:px-6 lg:px-8 text-sm text-slate-500">
+                        {selectedMount.note}
+                    </div>
+                )}
 
                 {/* Steps */}
                 <div className="mt-4 px-4 sm:px-6 lg:px-8 space-y-3">

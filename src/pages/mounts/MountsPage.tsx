@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { GENERAL_MOUNT_DEFINITIONS, MOUNT_DEFINITIONS } from '../../data/mountDefinitions';
+import { OTHER_MOUNT_DEFINITIONS, MOUNT_DEFINITIONS } from '../../data/mountDefinitions';
 import { useAppStore } from '../../store/useAppStore';
 import MountsGrid from './MountsGrid';
 
@@ -61,12 +61,12 @@ export default function MountsPage() {
 
                     <AnimatePresence mode="wait">
                         <MountsGrid
-                            mounts={GENERAL_MOUNT_DEFINITIONS}
+                            mounts={OTHER_MOUNT_DEFINITIONS}
                             selectedId={selectedSectionId}
                             onSelectionChange={handleSelectionChange}
                             toolbar={
                                 <h2 className="text-xl font-bold text-slate-300 mt-4">
-                                    General Masteries
+                                    Other Masteries
                                 </h2>
                             }
                         />
