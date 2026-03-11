@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import checker from 'vite-plugin-checker';
+import { cloudflare } from '@cloudflare/vite-plugin';
 
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
+        cloudflare(),
         react(),
         checker({
             typescript: true,
