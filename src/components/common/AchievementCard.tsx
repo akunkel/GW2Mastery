@@ -38,6 +38,9 @@ export default function AchievementCard({
 
     // State to track if the parts list is expanded (default: collapsed)
     const [isExpanded, setIsExpanded] = useState(false);
+    const completedBits = hasMultipleParts
+        ? bits.filter((_, i) => isCompleted || (progress?.bits?.includes(i) ?? false)).length
+        : 0;
 
     if (!showCompletedAchievements && isCompleted) {
         return null;
@@ -134,7 +137,7 @@ export default function AchievementCard({
                                 <ChevronDown className="w-3 h-3" />
                             )}
                             <span className="font-medium">
-                                {isExpanded ? 'Hide' : 'Show'} objectives ({bits.length})
+                                {isExpanded ? 'Hide' : 'Show'} objectives ({completedBits}/{bits.length})
                             </span>
                         </button>
 
