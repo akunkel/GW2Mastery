@@ -1,6 +1,7 @@
 import achievementDb from '../data/achievementDb.json';
 import continentDb from '../data/continentDb.json';
 import historicalAchievements from '../data/historicalAchievements.json';
+import itemNameDb from '../data/itemNameDb.json';
 
 import type {
   AccountAchievement,
@@ -121,8 +122,9 @@ export async function buildAchievementDatabase(
             const bit: { text?: string; } = {};
             if (b.text) {
               bit.text = b.text;
+            } else if (b.type === 'Item') {
+              bit.text = (itemNameDb as Record<string, string>)[String(b.id)] ?? `${b.type} ${index + 1}`;
             } else {
-              // When there is no text, use the type instead.
               bit.text = `${b.type} ${index + 1}`;
             }
             return bit;

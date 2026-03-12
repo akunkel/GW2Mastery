@@ -14,6 +14,8 @@ export interface DebugViewConfig {
   description: string;
   queryFn: (params: Record<string, string>) => Promise<unknown>;
   params: ParamConfig[];
+  /** When true, auto-fetch on select. */
+  autoFetch?: boolean;
 }
 
 export const LANG_OPTIONS: { value: string; label: string; }[] = [

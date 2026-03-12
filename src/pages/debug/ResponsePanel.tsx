@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { ObjectView } from 'react-obj-view';
 import 'react-obj-view/dist/react-obj-view.css';
 
@@ -26,6 +26,13 @@ export function ResponsePanel({
     onToggleExpand,
 }: Props) {
     const valueGetter = useCallback(() => filteredResponse, [filteredResponse]);
+    const [copied, setCopied] = useState(false);
+
+    async function handleCopyMinified() {
+        await navigator.clipboard.writeText(JSON.stringify(filteredResponse));
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    }
 
     return (
         <div className="flex flex-col gap-2 flex-1 min-h-0">
@@ -34,12 +41,20 @@ export function ResponsePanel({
                     Response
                 </h2>
                 {response !== null && !error && (
-                    <button
-                        onClick={onToggleExpand}
-                        className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
-                    >
-                        {expandAll ? 'Collapse All' : 'Expand All'}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleCopyMinified}
+                            className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                        >
+                            {copied ? 'Copied!' : 'Copy Minified'}
+                        </button>
+                        <button
+                            onClick={onToggleExpand}
+                            className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                        >
+                            {expandAll ? 'Collapse All' : 'Expand All'}
+                        </button>
+                    </div>
                 )}
             </div>
 

@@ -5,15 +5,18 @@ import { useAppStore } from '../../store/useAppStore';
 import { ParamsPanel } from './ParamsPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { ViewSelector } from './ViewSelector';
-import { accountAchievementsView } from './views/accountAchievements';
-import { achievementCategoriesView } from './views/achievementCategories';
-import { achievementDbView } from './views/achievementDb';
-import { achievementGroupsView } from './views/achievementGroups';
-import { achievementsView } from './views/achievements';
-import { continentFloorView } from './views/continentFloor';
-import { continentsView } from './views/continents';
-import { mapsView } from './views/maps';
-import { mountTypesView } from './views/mountTypes';
+import { accountAchievementsView } from './views/accountAchievementsView';
+import { achievementCategoriesView } from './views/achievementCategoriesView';
+import { achievementDbBuilderView } from './views/achievementDbBuilderView';
+import { achievementDbView } from './views/achievementDbView';
+import { achievementGroupsView } from './views/achievementGroupsView';
+import { achievementsView } from './views/achievementsView';
+import { continentFloorView } from './views/continentFloorView';
+import { continentsView } from './views/continentsView';
+import { itemNameDbBuilderView } from './views/itemNameDbBuilderView';
+import { itemsView } from './views/itemsView';
+import { mapsView } from './views/mapsView';
+import { mountTypesView } from './views/mountTypesView';
 
 const ALL_VIEWS: DebugViewConfig[] = [
     achievementDbView,
@@ -25,6 +28,9 @@ const ALL_VIEWS: DebugViewConfig[] = [
     continentFloorView,
     mapsView,
     mountTypesView,
+    itemsView,
+    achievementDbBuilderView,
+    itemNameDbBuilderView,
 ];
 
 function deepContains(value: unknown, term: string): boolean {
@@ -79,24 +85,9 @@ export default function DebugPage() {
 
     const requestUrl = buildUrl(view, paramValues);
 
-    // Auto-fetch local views whenever their params change.
+    // Auto-fetch on select when autoFetch is true.
     useEffect(() => {
-        if (view.endpointPath) return;
-        setLoading(true);
-        setError(null);
-        setResponse(null);
-        view.queryFn(paramValues)
-            .then(setResponse)
-            .catch((err: unknown) => {
-                setError(err instanceof Error ? err.message : String(err));
-            })
-            .finally(() => setLoading(false));
-    }, [view, paramValues]);
-
-    // Auto-fetch endpoint views on initial load and whenever the view changes.
-    // Uses default param values so param edits don't re-trigger — use Send Request for those.
-    useEffect(() => {
-        if (!view.endpointPath) return;
+        if (view.autoFetch !== true) return;
         setLoading(true);
         setError(null);
         setResponse(null);
