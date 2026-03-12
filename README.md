@@ -1,22 +1,12 @@
-# Guild Wars 2 Achievement Tracker
+# GW2Mastery
 
 A web application for tracking Guild Wars 2 achievements that award Mastery Points. Enter your API key to view and filter your progress across all mastery point achievements.
 
-## Features
+## Discord Channel
 
-- View all achievements that award Mastery Points
-- Filter achievements by completion status (All, Completed, Incomplete)
-- Group achievements by mastery region (Core Tyria, Heart of Thorns, Path of Fire, etc.)
-- Track progress with visual progress bars
-- Store API key locally in browser for convenience
-- Responsive design for mobile, tablet, and desktop
+Want to make a bug report or feature request? Stop by the GW2 Development Community discord: https://discord.com/channels/384735285197537290/1481708473354948819
 
 ## Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher recommended)
-- A Guild Wars 2 API key with "account" and "progression" permissions
 
 ### Installation
 
@@ -35,73 +25,16 @@ A web application for tracking Guild Wars 2 achievements that award Mastery Poin
 
 4. Open http://localhost:5173 in your browser
 
-### Building for Production
+## Achievement Database
 
-```bash
-npm run build
-```
+The Setup modal allows users to regenerate the achievement database using the latest data from the
+GW2 API. However, achievementDb.json already contains the latest achievement data as of the time of
+development, so users will only have to rebuild it themselves if new content is released and the app
+hasn't been updated recently. The app will use whichever of the two is newer.
 
-The built files will be in the `dist/` directory, ready for deployment to any static hosting service.
-
-## How to Use
-
-1. **Database Initialization**
-    - The app comes with a **bundled database** for instant start.
-    - You only need to use "Build Database" if you want to update to the absolute latest data from the API manually.
-    - The build process indexes all ~8,000 GW2 achievements to find mastery points and saves it locally.
-
-2. **Generate an API Key**
-    - Go to https://account.arena.net/applications
-    - Create a new API key with "account" and "progression" permissions
-    - Copy the generated key
-
-3. **Enter Your API Key**
-    - Paste your API key into the input field
-    - Optionally check "Remember API key" to save it in your browser
-    - Click "Load Achievements"
-    - Loads instantly after database is built!
-
-4. **View and Filter**
-    - Browse achievements grouped by mastery region
-    - Use the filter buttons to show All, Completed, or Incomplete achievements
-    - Track your overall progress with the summary at the top
-
-## Security
-
-- Your API key is stored locally in your browser using localStorage
-- The key is never sent to any third-party servers
-- All API calls are made directly from your browser to the official Guild Wars 2 API
-- You can clear your stored API key at any time using the "Clear Key" button
-
-## Technology Stack
-
-- React 19 with TypeScript
-- Vite for fast development and optimized builds
-- Tailwind CSS for styling
-- Guild Wars 2 API v2
-
-## API Endpoints Used
-
-- `GET /v2/achievements` - Get all achievement IDs (database build only)
-- `GET /v2/achievements?ids=1,2,3...` - Fetch achievement details in batches
-- `GET /v2/account/achievements?access_token=KEY` - Fetch account achievement progress
-
-### Performance Optimization
-
-The app uses a smart two-phase approach:
-
-**Phase 1: Database (Hybrid Strategy)**
-
-- Uses **bundled JSON data** for instant load times (zero overhead).
-- Optional: Can rebuild locally to update data without redeploying.
-- Stores optimized data in localStorage for subsequent visits.
-
-**Phase 2: Load Your Achievements (Fast!)**
-
-- Fetches only YOUR account's achievements
-- Uses cached mastery IDs to filter instantly
-- Fetches details for only ~50-100 mastery achievements you have
-- **Loads in 1-2 seconds** instead of 30+ seconds!
+rawAchievementDb.json is a manual dump of the actual raw response from the achievements API, for use
+in debugging/development, since the main achievement DB strips out fields and achievements it
+doesn't need.
 
 ## License
 
@@ -109,4 +42,4 @@ MIT
 
 ## Disclaimer
 
-This is a fan-made tool and is not affiliated with or endorsed by ArenaNet or NCSOFT. Guild Wars 2 is a registered trademark of ArenaNet, LLC.
+This is a fan-made tool and is not affiliated with or endorsed by ArenaNet or NCSOFT.
