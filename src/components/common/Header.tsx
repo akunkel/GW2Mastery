@@ -1,4 +1,4 @@
-import { Bug, RefreshCw, Settings } from 'lucide-react';
+import { Bug, Info, RefreshCw, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { Button } from '../ui/button';
@@ -6,18 +6,19 @@ import NavTabs from './NavTabs';
 
 interface HeaderProps {
     onRefresh: () => void;
-    onSetup: () => void;
     loading?: boolean;
 }
 
-export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
+export default function Header({ onRefresh, loading }: HeaderProps) {
     const navigate = useNavigate();
     const hasStoredKey = useAppStore((s) => s.hasStoredKey);
+    const setSetupModalOpen = useAppStore((s) => s.setSetupModalOpen);
+    const setAboutModalOpen = useAppStore((s) => s.setAboutModalOpen);
 
     return (
         <header className="w-full bg-slate-900 border-b border-slate-800 px-4 py-0 sm:px-6 lg:px-8 shadow-md h-12 flex items-center gap-4 sticky top-0 z-50">
             <div className="max-w-[1800px] w-full mx-auto flex items-center justify-between h-full">
-                {/* Left: Refresh Button */}
+                {/* Left: Refresh + About Buttons */}
                 <div className="flex-shrink-0 flex gap-2">
                     <Button
                         onClick={onRefresh}
@@ -28,12 +29,22 @@ export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
                         title="Refresh Account Progress"
                     >
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">Refresh</span>
+                        <span className="hidden lg:inline">Refresh</span>
+                    </Button>
+                    <Button
+                        onClick={() => setAboutModalOpen(true)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"
+                        title="About"
+                    >
+                        <Info className="w-4 h-4" />
+                        <span className="hidden lg:inline">About</span>
                     </Button>
                 </div>
 
                 {/* Center: Tabs (Desktop Only) */}
-                <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 h-full">
+                <div className="hidden sm:flex absolute left-1/2 -translate-x-1/2 h-full">
                     <NavTabs className="gap-8 h-full" itemClassName="px-2 h-full" />
                 </div>
 
@@ -45,18 +56,18 @@ export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
                             variant="ghost"
                             size="sm"
                             className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"
-                            title="Open Debug"
+                            title="Debug"
                         >
                             <Bug className="w-4 h-4" />
-                            <span className="hidden sm:inline">Debug</span>
+                            <span className="hidden lg:inline">Debug</span>
                         </Button>
                     )}
                     <Button
-                        onClick={onSetup}
+                        onClick={() => setSetupModalOpen(true)}
                         variant="ghost"
                         size="sm"
                         className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"
-                        title="Open Setup"
+                        title="Setup"
                     >
                         <span className="relative">
                             <Settings className="w-4 h-4" />
@@ -67,7 +78,7 @@ export default function Header({ onRefresh, onSetup, loading }: HeaderProps) {
                                 </>
                             )}
                         </span>
-                        <span className="hidden sm:inline">Setup</span>
+                        <span className="hidden lg:inline">Setup</span>
                     </Button>
                 </div>
             </div>

@@ -9,7 +9,7 @@ export default function Navigation({ className }: NavigationProps) {
     return (
         <div
             className={cn(
-                'w-full bg-slate-900 border-b border-slate-800 shadow-sm md:hidden',
+                'w-full bg-slate-900 border-b border-slate-800 shadow-sm sm:hidden',
                 className
             )}
         >

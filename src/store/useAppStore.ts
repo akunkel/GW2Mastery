@@ -61,6 +61,7 @@ interface AppState {
   error: string | null;
   databaseError: string | null;
   setupModalOpen: boolean;
+  aboutModalOpen: boolean;
   isInitialized: boolean;
 
   // User Preferences
@@ -78,6 +79,7 @@ interface AppState {
   // Actions
   initialize: () => void;
   setSetupModalOpen: (open: boolean) => void;
+  setAboutModalOpen: (open: boolean) => void;
   setShowCompletedAchievements: (show: boolean) => void;
   setShowHidden: (show: boolean) => void;
   setShowRecommendedOnly: (show: boolean) => void;
@@ -115,6 +117,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   error: null,
   databaseError: null,
   setupModalOpen: false,
+  aboutModalOpen: false,
   isInitialized: false,
   apiKey: null,
   hasStoredKey: false,
@@ -164,6 +167,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setSetupModalOpen: (open) => set({ setupModalOpen: open }),
+  setAboutModalOpen: (open) => set({ aboutModalOpen: open }),
 
   setShowCompletedAchievements: (show) => {
     set({ showCompletedAchievements: show });
