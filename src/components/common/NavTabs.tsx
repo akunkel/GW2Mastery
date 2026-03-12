@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
 interface NavTabsProps {
@@ -8,7 +8,6 @@ interface NavTabsProps {
 }
 
 export default function NavTabs({ className, itemClassName, activeClassName }: NavTabsProps) {
-    const navigate = useNavigate();
     const location = useLocation();
 
     const tabs = [
@@ -22,9 +21,9 @@ export default function NavTabs({ className, itemClassName, activeClassName }: N
             {tabs.map((tab) => {
                 const isActive = location.pathname === tab.path;
                 return (
-                    <button
+                    <Link
                         key={tab.name}
-                        onClick={() => navigate(tab.path)}
+                        to={tab.path}
                         className={cn(
                             'whitespace-nowrap font-medium text-sm transition-all relative flex flex-col items-center justify-center',
                             isActive
@@ -38,7 +37,7 @@ export default function NavTabs({ className, itemClassName, activeClassName }: N
                         {isActive && (
                             <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500 rounded-t-full w-full" />
                         )}
-                    </button>
+                    </Link>
                 );
             })}
         </nav>
