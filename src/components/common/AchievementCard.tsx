@@ -143,7 +143,7 @@ export default function AchievementCard({
                                 <ul className="space-y-1">
                                     {bits.map((bit, index) => {
                                         const bitCompleted =
-                                            progress?.bits?.includes(index) ?? false;
+                                            isCompleted || (progress?.bits?.includes(index) ?? false);
                                         return (
                                             <li
                                                 key={index}
