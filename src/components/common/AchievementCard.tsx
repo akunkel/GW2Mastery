@@ -1,5 +1,6 @@
 import { Bug, CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff, Star } from 'lucide-react';
 import { useState } from 'react';
+import { ACHIEVEMENT_LINKS } from '../../data/achievementLinks';
 import { cn } from '../../lib/utils';
 import type { EnrichedAchievement } from '../../types/gw2';
 import { isRecommended } from '../../utils/recommendedAchievements';
@@ -101,7 +102,10 @@ export default function AchievementCard({
                     )}
                     <div className="flex-1 min-w-0">
                         <a
-                            href={`https://wiki.guildwars2.com/wiki/${encodeURIComponent(name)}`}
+                            href={
+                                ACHIEVEMENT_LINKS[achievement.id] ??
+                                `https://wiki.guildwars2.com/wiki/${encodeURIComponent(name)}`
+                            }
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
@@ -137,7 +141,8 @@ export default function AchievementCard({
                                 <ChevronDown className="w-3 h-3" />
                             )}
                             <span className="font-medium">
-                                {isExpanded ? 'Hide' : 'Show'} objectives ({completedBits}/{bits.length})
+                                {isExpanded ? 'Hide' : 'Show'} objectives ({completedBits}/
+                                {bits.length})
                             </span>
                         </button>
 
@@ -146,7 +151,8 @@ export default function AchievementCard({
                                 <ul className="space-y-1">
                                     {bits.map((bit, index) => {
                                         const bitCompleted =
-                                            isCompleted || (progress?.bits?.includes(index) ?? false);
+                                            isCompleted ||
+                                            (progress?.bits?.includes(index) ?? false);
                                         return (
                                             <li
                                                 key={index}
