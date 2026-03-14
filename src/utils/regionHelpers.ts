@@ -1,4 +1,5 @@
-import type { EnrichedAchievement, MasteryRegion } from '../types/gw2';
+import type { EnrichedAchievement } from '../types/enriched';
+import type { MasteryRegion } from '../types/mastery';
 
 // Import expansion images
 import centralTyriaImg from '../assets/images/central_tyria.png';

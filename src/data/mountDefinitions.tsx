@@ -8,7 +8,7 @@ import skimmerImg from '../assets/images/mounts/skimmer.png';
 import skyscaleImg from '../assets/images/mounts/skyscale.png';
 import springerImg from '../assets/images/mounts/springer.png';
 import warclawImg from '../assets/images/mounts/warclaw.png';
-import type { MasteryRegion } from '../types/gw2';
+import type { MasteryRegion } from '../types/mastery';
 
 export interface MountDefinition {
     id: string;

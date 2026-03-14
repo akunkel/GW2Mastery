@@ -1,7 +1,7 @@
 import { Bug, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import type { EnrichedCategory } from '../../types/gw2';
+import type { EnrichedCategory } from '../../types/enriched';
 import AchievementCard from './AchievementCard';
 
 interface AchievementCategoryProps {

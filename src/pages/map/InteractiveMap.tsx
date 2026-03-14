@@ -1,7 +1,7 @@
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import worldMapSmall from '../../assets/images/world_map_small.webp';
 import type { CollectibleAchievementProgress, ZoneExplorerProgress, ZoneInsightProgress } from '../../hooks/useExplorerProgress';
-import type { RenderedZone } from '../../types/gw2';
+import type { RenderedZone } from '../../types/map';
 import { Zone } from './Zone';
 
 interface InteractiveMapProps {

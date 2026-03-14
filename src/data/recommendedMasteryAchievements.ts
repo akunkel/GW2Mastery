@@ -1,4 +1,4 @@
-import type { MasteryRegion } from '../types/gw2';
+import type { MasteryRegion } from '../types/mastery';
 
 export const RECOMMENDED_ACHIEVEMENT_IDS: Record<MasteryRegion, number[]> = {
   Tyria: [

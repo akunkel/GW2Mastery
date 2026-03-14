@@ -6,7 +6,7 @@ import AchievementList, {
 } from '../../components/common/AchievementList';
 import { useAppStore } from '../../store/useAppStore';
 
-import type { EnrichedAchievement } from '../../types/gw2';
+import type { EnrichedAchievement } from '../../types/enriched';
 import { groupByRegionAndCategory } from '../../utils/filters';
 import { isRecommended } from '../../utils/recommendedAchievements';
 import {

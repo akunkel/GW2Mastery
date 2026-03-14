@@ -6,7 +6,7 @@ import type {
     ZoneInsightProgress,
 } from '../../hooks/useExplorerProgress';
 import { getTextStroke } from '../../lib/utils';
-import type { MasteryRegion } from '../../types/gw2';
+import type { MasteryRegion } from '../../types/mastery';
 import { IMAGE_HEIGHT, IMAGE_WIDTH } from '../../utils/mapCoordinates';
 import { getRegionZoneColor } from '../../utils/regionHelpers';
 import { ZoneDetailsModal } from './ZoneDetailsModal';

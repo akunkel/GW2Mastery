@@ -4,7 +4,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
 import { useExplorerProgress } from '../../hooks/useExplorerProgress';
 import { useAppStore } from '../../store/useAppStore';
-import type { RenderedZone } from '../../types/gw2';
+import type { RenderedZone } from '../../types/map';
 import { applyMapAdjustments } from '../../utils/mapConfig';
 import { getZoneCenter, mapRectToPolygon } from '../../utils/mapCoordinates';
 import InteractiveMap from './InteractiveMap';

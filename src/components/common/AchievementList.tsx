@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import type { EnrichedGroup } from '../../types/gw2';
+import type { EnrichedGroup } from '../../types/enriched';
 import AchievementCard from './AchievementCard';
 import AchievementCategory from './AchievementCategory';
 import RegionCard from './RegionCard';

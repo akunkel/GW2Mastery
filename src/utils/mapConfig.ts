@@ -4,7 +4,7 @@
 // - Explorer achievement ID for progress tracking
 // - Mastery insight achievement IDs
 
-import type { MasteryRegion } from '../types/gw2';
+import type { MasteryRegion } from '../types/mastery';
 
 export interface ZoneConfig {
   // Visual adjustments

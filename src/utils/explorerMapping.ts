@@ -1,4 +1,4 @@
-import type { EnrichedAchievement } from '../types/gw2';
+import type { EnrichedAchievement } from '../types/enriched';
 import { zoneConfigs } from './mapConfig';
 
 export interface ExplorerAchievementInfo {

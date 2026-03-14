@@ -8,13 +8,10 @@ import type {
   Achievement,
   AchievementCategory,
   AchievementDatabase,
-  ContinentDatabase,
-  ContinentFloor,
-  ContinentMapData,
-  GW2Map,
-  MasteryRegion,
   RawAchievement,
-} from '../types/gw2';
+} from '../types/achievement';
+import type { ContinentDatabase, ContinentFloor, ContinentMapData, GW2Map } from '../types/map';
+import type { MasteryRegion } from '../types/mastery';
 import { getRegionDisplayName, REGION_ZONES } from '../utils/regionHelpers';
 import {
   getAchievementDatabase,

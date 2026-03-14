@@ -1,7 +1,7 @@
 import { Bug, CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff, Star } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import type { EnrichedAchievement } from '../../types/gw2';
+import type { EnrichedAchievement } from '../../types/enriched';
 import { isRecommended } from '../../utils/recommendedAchievements';
 import { Card, CardContent } from '../ui/card';
 

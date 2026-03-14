@@ -14,11 +14,9 @@ import type {
   Achievement,
   AchievementCategory,
   AchievementGroup,
-  ContinentDatabase,
-  EnrichedAchievement,
-  EnrichedCategory,
-  EnrichedGroup,
-} from '../types/gw2';
+} from '../types/achievement';
+import type { EnrichedAchievement, EnrichedCategory, EnrichedGroup } from '../types/enriched';
+import type { ContinentDatabase } from '../types/map';
 import { buildEnrichedHierarchy } from '../utils/filters';
 import {
   clearApiKey,

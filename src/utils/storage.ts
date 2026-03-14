@@ -141,7 +141,8 @@ const DB_NAME = 'GW2MasteryDB';
 const DB_VERSION = 1;
 const DB_STORE_NAME = 'achievements';
 
-import type { AchievementDatabase, ContinentDatabase } from '../types/gw2';
+import type { AchievementDatabase } from '../types/achievement';
+import type { ContinentDatabase } from '../types/map';
 
 /**
  * Open IndexedDB database

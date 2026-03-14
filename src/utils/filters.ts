@@ -5,11 +5,9 @@ import type {
   Achievement,
   AchievementCategory,
   AchievementGroup,
-  EnrichedAchievement,
-  EnrichedCategory,
-  EnrichedGroup,
-  MasteryRegion,
-} from '../types/gw2';
+} from '../types/achievement';
+import type { EnrichedAchievement, EnrichedCategory, EnrichedGroup } from '../types/enriched';
+import type { MasteryRegion } from '../types/mastery';
 
 /**
  * Groups enriched achievements by region and then by category
