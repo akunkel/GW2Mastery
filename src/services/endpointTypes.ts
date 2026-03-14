@@ -19,10 +19,9 @@ export interface DebugViewConfig {
 }
 
 export const LANG_OPTIONS: { value: string; label: string; }[] = [
-  { value: '', label: 'Default (en)' },
   { value: 'en', label: 'English (en)' },
-  { value: 'de', label: 'German (de)' },
-  { value: 'es', label: 'Spanish (es)' },
-  { value: 'fr', label: 'French (fr)' },
-  { value: 'zh', label: 'Chinese (zh)' },
+  { value: 'de', label: 'Deutsch (de)' },
+  { value: 'es', label: 'Español (es)' },
+  { value: 'fr', label: 'Français (fr)' },
+  { value: 'zh', label: '中文 (zh)' },
 ];

@@ -23,10 +23,12 @@ import { buildEnrichedHierarchy } from '../utils/filters';
 import {
   clearApiKey,
   getApiKey,
+  getDatabaseLanguage,
   getFilterSettings,
   getHiddenAchievements,
   getMapFilterSettings,
   saveApiKey,
+  saveDatabaseLanguage,
   saveFilterSettings,
   saveHiddenAchievements,
   saveMapFilterSettings,
@@ -75,6 +77,7 @@ interface AppState {
   showRecommendedOnly: boolean;
   goalFilter: 'all' | 'required';
   databaseTimestamp: number | null;
+  databaseLanguage: string;
 
   // Actions
   initialize: () => void;
@@ -90,6 +93,7 @@ interface AppState {
   handleApiKeySubmit: (key: string, remember: boolean) => Promise<void>;
   handleClearKey: () => void;
   handleToggleHidden: (achievementId: number) => void;
+  setDatabaseLanguage: (lang: string) => void;
   handleBuildDatabase: () => Promise<void>;
   refreshAccountProgress: () => Promise<void>;
 
@@ -129,6 +133,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   showRecommendedOnly: false,
   goalFilter: 'required',
   databaseTimestamp: null,
+  databaseLanguage: getDatabaseLanguage(),
 
   // Actions
   initialize: async () => {
@@ -168,6 +173,11 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setSetupModalOpen: (open) => set({ setupModalOpen: open }),
   setAboutModalOpen: (open) => set({ aboutModalOpen: open }),
+
+  setDatabaseLanguage: (lang) => {
+    saveDatabaseLanguage(lang);
+    set({ databaseLanguage: lang });
+  },
 
   setShowCompletedAchievements: (show) => {
     set({ showCompletedAchievements: show });
@@ -303,9 +313,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       // Build achievement database
+      const { databaseLanguage } = get();
       const db = await buildAchievementDatabase((current, total) => {
         set({ loadingProgress: { current, total } });
-      });
+      }, databaseLanguage);
       const { accountProgress } = get();
 
       const {
@@ -332,7 +343,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       });
 
       // Also build continent/map database
-      const continentDb = await buildContinentDatabase();
+      const continentDb = await buildContinentDatabase({ lang: databaseLanguage });
       set({ continentData: continentDb });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to build database';

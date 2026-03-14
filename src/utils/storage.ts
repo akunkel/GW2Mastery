@@ -1,7 +1,24 @@
+const DATABASE_LANGUAGE_KEY = 'gw2_database_language';
 const API_KEY_STORAGE_KEY = 'gw2_api_key';
 const FILTER_SETTINGS_KEY = 'gw2_filter_settings';
 const MAP_FILTER_SETTINGS_KEY = 'gw2_map_filter_settings';
 const HIDDEN_ACHIEVEMENTS_KEY = 'gw2_hidden_achievements';
+
+export function saveDatabaseLanguage(lang: string): void {
+  try {
+    localStorage.setItem(DATABASE_LANGUAGE_KEY, lang);
+  } catch (error) {
+    console.error('Failed to save database language:', error);
+  }
+}
+
+export function getDatabaseLanguage(): string {
+  try {
+    return localStorage.getItem(DATABASE_LANGUAGE_KEY) || 'en';
+  } catch {
+    return 'en';
+  }
+}
 
 /**
  * Saves the API key to localStorage

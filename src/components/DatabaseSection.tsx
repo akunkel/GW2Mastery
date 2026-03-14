@@ -1,9 +1,13 @@
+import { LANG_OPTIONS } from '../services/endpointTypes';
+
 interface DatabaseSectionProps {
     databaseTimestamp: number | null;
     buildingDatabase: boolean;
     onBuildDatabase: () => Promise<void>;
     loadingProgress: { current: number; total: number } | null;
     error: string | null;
+    databaseLanguage: string;
+    onDatabaseLanguageChange: (lang: string) => void;
 }
 
 export default function DatabaseSection({
@@ -12,6 +16,8 @@ export default function DatabaseSection({
     onBuildDatabase,
     loadingProgress,
     error,
+    databaseLanguage,
+    onDatabaseLanguageChange,
 }: DatabaseSectionProps) {
     const handleBuildDatabase = async () => {
         await onBuildDatabase();
@@ -49,6 +55,13 @@ export default function DatabaseSection({
                         </>
                     )}
                 </div>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+                Rebuilding the database re-downloads all achievements in the game, which will take a
+                while. You likely don't need to do this unless new achievements have been added
+                since the last time this app was updated, or you want to change the language.
+            </p>
+            <div className="flex items-center gap-2 mt-3">
                 <button
                     onClick={handleBuildDatabase}
                     disabled={buildingDatabase}
@@ -56,12 +69,19 @@ export default function DatabaseSection({
                 >
                     {buildingDatabase ? 'Rebuilding…' : 'Rebuild Database'}
                 </button>
+                <select
+                    value={databaseLanguage}
+                    onChange={(e) => onDatabaseLanguageChange(e.target.value)}
+                    disabled={buildingDatabase}
+                    className="px-2 py-0.5 bg-slate-700 text-white text-xs rounded border border-slate-600 disabled:cursor-not-allowed"
+                >
+                    {LANG_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
-                Rebuilding the database re-downloads all achievements in the game, which will take a
-                while. You likely don't need to do this unless new achievements have been added
-                since the last time this app was updated.
-            </p>
         </div>
     );
 }

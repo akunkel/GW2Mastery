@@ -19,6 +19,8 @@ export default function SetupModal() {
         databaseTimestamp,
         loadingProgress,
         achievements,
+        databaseLanguage,
+        setDatabaseLanguage,
     } = useAppStore();
 
     const hasAchievements = achievements.length > 0;
@@ -70,6 +72,8 @@ export default function SetupModal() {
                         onBuildDatabase={onBuildDatabase}
                         loadingProgress={loadingProgress}
                         error={databaseError}
+                        databaseLanguage={databaseLanguage}
+                        onDatabaseLanguageChange={setDatabaseLanguage}
                     />
                 </div>
             </DialogContent>

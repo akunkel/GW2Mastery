@@ -49,14 +49,15 @@ const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (
  * This should be called manually via the "Build Database" button
  */
 export async function buildAchievementDatabase(
-  onProgress?: (current: number, total: number) => void
+  onProgress?: (current: number, total: number) => void,
+  lang: string = 'en'
 ): Promise<AchievementDatabase> {
   // 1. Start fetching categories (don't await yet)
-  const categoriesPromise = fetchAchievementCategories();
+  const categoriesPromise = fetchAchievementCategories(lang);
 
   // 2. Fetch Achievements
   // Get all achievement IDs
-  const idsResponse = await fetch(`${BASE_URL}/achievements`);
+  const idsResponse = await fetch(`${BASE_URL}/achievements?lang=${lang}`);
   if (!idsResponse.ok) {
     throw new Error(`Failed to fetch achievement IDs: ${idsResponse.statusText}`);
   }
@@ -81,7 +82,7 @@ export async function buildAchievementDatabase(
     // Fetch multiple batches in parallel
     const results = await Promise.all(
       parallelBatches.map(async (batchIds) => {
-        const response = await fetch(`${BASE_URL}/achievements?ids=${batchIds.join(',')}`);
+        const response = await fetch(`${BASE_URL}/achievements?ids=${batchIds.join(',')}&lang=${lang}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch achievements batch: ${response.statusText}`);
         }
@@ -282,10 +283,10 @@ export async function fetchAccountAchievements(apiKey: string): Promise<AccountA
 /**
  * Fetches all achievement categories
  */
-export async function fetchAchievementCategories(): Promise<AchievementCategory[]> {
+export async function fetchAchievementCategories(lang: string = 'en'): Promise<AchievementCategory[]> {
   try {
     // Get all category IDs
-    const idsResponse = await fetch(`${BASE_URL}/achievements/categories`);
+    const idsResponse = await fetch(`${BASE_URL}/achievements/categories?lang=${lang}`);
     if (!idsResponse.ok) {
       throw new Error(`Failed to fetch category IDs: ${idsResponse.statusText}`);
     }
@@ -308,7 +309,7 @@ export async function fetchAchievementCategories(): Promise<AchievementCategory[
       const results = await Promise.all(
         parallelBatches.map(async (batchIds) => {
           const response = await fetch(
-            `${BASE_URL}/achievements/categories?ids=${batchIds.join(',')}`
+            `${BASE_URL}/achievements/categories?ids=${batchIds.join(',')}&lang=${lang}`
           );
           if (!response.ok) {
             throw new Error(`Failed to fetch categories: ${response.statusText}`);
@@ -346,10 +347,11 @@ export function getMasteryRegion(achievement: Achievement): string | null {
  */
 export async function fetchContinentFloor(
   continentId: number,
-  floorId: number
+  floorId: number,
+  lang: string = 'en'
 ): Promise<ContinentFloor> {
   try {
-    const response = await fetch(`${BASE_URL}/continents/${continentId}/floors/${floorId}`);
+    const response = await fetch(`${BASE_URL}/continents/${continentId}/floors/${floorId}?lang=${lang}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch continent floor: ${response.statusText}`);
     }
@@ -365,7 +367,8 @@ export async function fetchContinentFloor(
  */
 async function fetchMapTypes(
   floor: ContinentFloor,
-  onProgress?: (message: string) => void
+  onProgress?: (message: string) => void,
+  lang: string = 'en'
 ): Promise<Record<number, string>> {
   // Extract all map IDs from floor data
   const mapIds: number[] = [];
@@ -392,7 +395,7 @@ async function fetchMapTypes(
 
     const results = await Promise.all(
       parallelBatches.map(async (batchIds) => {
-        const response = await fetch(`${BASE_URL}/maps?ids=${batchIds.join(',')}`);
+        const response = await fetch(`${BASE_URL}/maps?ids=${batchIds.join(',')}&lang=${lang}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch maps: ${response.statusText}`);
         }
@@ -428,10 +431,11 @@ function findMasteryRegion(mapName: string): MasteryRegion | undefined {
  */
 async function enrichAndFilterFloorData(
   floor: ContinentFloor,
-  onProgress?: (message: string) => void
+  onProgress?: (message: string) => void,
+  lang: string = 'en'
 ): Promise<ContinentFloor> {
   // First, fetch map types for all maps
-  const mapTypes = await fetchMapTypes(floor, onProgress);
+  const mapTypes = await fetchMapTypes(floor, onProgress, lang);
 
   // Maps to exclude from the database (non-explorable or special instances)
   const excludedMapNames = ['', "Arborstone", "Noble's Folly", "Labyrinthine Cliffs", "Lion's Arch Aerodrome", "Spiritvale", "The Wizard's Tower", "Windswept Haven"];
@@ -527,9 +531,13 @@ function mergeFloorData(floors: ContinentFloor[]): ContinentFloor {
  * Builds the continent database by fetching continent floor data
  * This creates a pre-bundled JSON file for fast loading
  */
-export async function buildContinentDatabase(
-  onProgress?: (message: string) => void
-): Promise<ContinentDatabase> {
+export async function buildContinentDatabase({
+  onProgress,
+  lang = 'en',
+}: {
+  onProgress?: (message: string) => void;
+  lang?: string;
+} = {}): Promise<ContinentDatabase> {
   try {
     // For Tyria continent (ID 1)
     const continentId = 1;
@@ -539,7 +547,7 @@ export async function buildContinentDatabase(
     if (onProgress) onProgress('Fetching continent data...');
 
     // Fetch the continent metadata first to get dimensions
-    const continentResponse = await fetch(`${BASE_URL}/continents/${continentId}`);
+    const continentResponse = await fetch(`${BASE_URL}/continents/${continentId}?lang=${lang}`);
     if (!continentResponse.ok) {
       throw new Error(`Failed to fetch continent: ${continentResponse.statusText}`);
     }
@@ -550,8 +558,8 @@ export async function buildContinentDatabase(
     const enrichedFloors: ContinentFloor[] = [];
     for (const floorId of floorIds) {
       if (onProgress) onProgress(`Fetching floor ${floorId} data...`);
-      const floorRaw = await fetchContinentFloor(continentId, floorId);
-      const enriched = await enrichAndFilterFloorData(floorRaw, onProgress);
+      const floorRaw = await fetchContinentFloor(continentId, floorId, lang);
+      const enriched = await enrichAndFilterFloorData(floorRaw, onProgress, lang);
       enrichedFloors.push(enriched);
     }
 
