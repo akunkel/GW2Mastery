@@ -17,7 +17,7 @@ import type {
 } from '../types/achievement';
 import type { EnrichedAchievement, EnrichedCategory, EnrichedGroup } from '../types/enriched';
 import type { ContinentDatabase } from '../types/map';
-import { buildEnrichedHierarchy } from '../utils/filters';
+import { buildEnrichedHierarchy } from '../utils/enriched';
 import {
   clearApiKey,
   getApiKey,
