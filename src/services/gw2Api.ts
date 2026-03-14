@@ -1,6 +1,6 @@
 import achievementDb from '../data/achievementDb.json';
 import continentDb from '../data/continentDb.json';
-import historicalAchievements from '../data/historicalAchievements.json';
+import historicalCategories from '../data/historicalCategories.json';
 import itemNameDb from '../data/itemNameDb.json';
 
 import type {
@@ -22,6 +22,8 @@ import {
 import { BASE_URL } from './apiConfig';
 
 const includeDebugFields = import.meta.env.DEV;
+
+const historicalCategoryIds = new Set(historicalCategories.categories);
 
 /**
  * Returns the status of the achievement database (timestamps)
@@ -68,9 +70,7 @@ export async function buildAchievementDatabase(
   }
 
   const totalBatches = batches.length;
-  const ids: number[] = [];
-  const achievements: Achievement[] = [];
-  const rawAchievements: RawAchievement[] = [];
+  const allRawAchievements: RawAchievement[] = [];
 
   // Process batches in parallel groups to stay under rate limits
   for (let i = 0; i < batches.length; i += PARALLEL_REQUESTS) {
@@ -87,51 +87,9 @@ export async function buildAchievementDatabase(
       })
     );
 
-    // Process results
+    // Collect results
     results.forEach((batchData) => {
-      batchData.forEach((raw) => {
-        // Skip achievements without the Permanent flag
-        if (!raw.flags?.includes('Permanent')) return;
-
-        ids.push(raw.id);
-
-        // Optimize: Map raw API data to our optimized structure
-        const optimized: Achievement = {
-          id: raw.id,
-          name: raw.name,
-          requirement: raw.requirement,
-          flags: raw.flags,
-        };
-
-        if (raw.icon) {
-          optimized.icon = raw.icon;
-        }
-
-        const masteryReward = raw.rewards?.find((r) => r.type === 'Mastery');
-        if (masteryReward?.region) {
-          optimized.masteryRegion = masteryReward.region as MasteryRegion;
-          if (masteryReward.id !== undefined) {
-            optimized.masteryId = masteryReward.id;
-          }
-        }
-
-        if (raw.bits && raw.bits.length > 0) {
-          optimized.bits = raw.bits.map((b, index) => {
-            const bit: { text?: string; } = {};
-            if (b.text) {
-              bit.text = b.text;
-            } else if (b.type === 'Item') {
-              bit.text = (itemNameDb as Record<string, string>)[String(b.id)] ?? `${b.type} ${index + 1}`;
-            } else {
-              bit.text = `${b.type} ${index + 1}`;
-            }
-            return bit;
-          });
-        }
-
-        rawAchievements.push(raw);
-        achievements.push(optimized);
-      });
+      allRawAchievements.push(...batchData);
     });
 
     // Report progress
@@ -141,24 +99,66 @@ export async function buildAchievementDatabase(
     }
   }
 
-  // Await categories fetch to complete
-  const categories = await categoriesPromise;
-
-  // Filter out achievements belonging to historical categories
-  const historicalCategoryIds = new Set(historicalAchievements.categories);
+  // Strip out historical categories.
+  const allCategories = await categoriesPromise;
+  const categories = allCategories.filter((cat) => !historicalCategoryIds.has(cat.id));
   const historicalAchievementIds = new Set(
-    categories
-      .filter((cat) => historicalCategoryIds.has(cat.id))
-      .flatMap((cat) => cat.achievements)
+    allCategories.filter((cat) => historicalCategoryIds.has(cat.id)).flatMap((cat) => cat.achievements)
   );
-  const filteredAchievements = achievements.filter((a) => !historicalAchievementIds.has(a.id));
-  const filteredCategories = categories.filter((cat) => !historicalCategoryIds.has(cat.id));
+
+  const rawAchievements = allRawAchievements
+    // Strip out historical achievements.
+    .filter((a) => !historicalAchievementIds.has(a.id))
+    // Strip out non-permanent achievements.
+    .filter((a) => a.flags?.includes('Permanent'));
+
+  // Map filtered raw achievements to optimized structure
+  const ids: number[] = [];
+  const achievements: Achievement[] = [];
+  for (const raw of rawAchievements) {
+    ids.push(raw.id);
+
+    const optimized: Achievement = {
+      id: raw.id,
+      name: raw.name,
+      requirement: raw.requirement,
+      flags: raw.flags,
+    };
+
+    if (raw.icon) {
+      optimized.icon = raw.icon;
+    }
+
+    const masteryReward = raw.rewards?.find((r) => r.type === 'Mastery');
+    if (masteryReward?.region) {
+      optimized.masteryRegion = masteryReward.region as MasteryRegion;
+      if (masteryReward.id !== undefined) {
+        optimized.masteryId = masteryReward.id;
+      }
+    }
+
+    if (raw.bits && raw.bits.length > 0) {
+      optimized.bits = raw.bits.map((b, index) => {
+        const bit: { text?: string; } = {};
+        if (b.text) {
+          bit.text = b.text;
+        } else if (b.type === 'Item') {
+          bit.text = (itemNameDb as Record<string, string>)[String(b.id)] ?? `${b.type} ${index + 1}`;
+        } else {
+          bit.text = `${b.type} ${index + 1}`;
+        }
+        return bit;
+      });
+    }
+
+    achievements.push(optimized);
+  }
 
   // Create database object with timestamp
   const db: AchievementDatabase = {
     timestamp: Date.now(),
-    achievements: filteredAchievements,
-    categories: filteredCategories,
+    achievements,
+    categories,
     groups: [],
   };
 
