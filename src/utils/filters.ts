@@ -1,3 +1,4 @@
+import { ACHIEVEMENT_METADATA } from '../data/achievementMetadata';
 import { getMasteryRegion } from '../services/gw2Api';
 import type {
   AccountAchievement,
@@ -59,11 +60,20 @@ export function buildEnrichedHierarchy(
 
   // 1. Build Enriched Achievements Map (Initial pass, no category/group info yet)
   allAchievements.forEach((ach) => {
-    const progress = accountProgress.get(ach.id);
+    let progress = accountProgress.get(ach.id);
+    const metadata = ACHIEVEMENT_METADATA[ach.id];
+    const meetsThreshold = metadata?.doneCount != null && (progress?.current ?? 0) >= metadata.doneCount;
+    if (progress && meetsThreshold && !progress.done) {
+      progress = { ...progress, done: true };
+    }
     achievementMap.set(ach.id, {
       ...ach,
       progress,
       masteryRegion: getMasteryRegion(ach) as MasteryRegion,
+      wikiUrl: metadata?.wikiUrl,
+      note: metadata?.note,
+      doneCount: metadata?.doneCount,
+      masteryPoints: metadata?.masteryPoints,
     });
   });
 

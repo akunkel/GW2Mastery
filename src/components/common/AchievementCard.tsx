@@ -1,6 +1,5 @@
 import { Bug, CheckCircle2, ChevronDown, ChevronUp, Circle, Eye, EyeOff, Star } from 'lucide-react';
 import { useState } from 'react';
-import { ACHIEVEMENT_LINKS } from '../../data/achievementLinks';
 import { cn } from '../../lib/utils';
 import type { EnrichedAchievement } from '../../types/gw2';
 import { isRecommended } from '../../utils/recommendedAchievements';
@@ -103,7 +102,7 @@ export default function AchievementCard({
                     <div className="flex-1 min-w-0">
                         <a
                             href={
-                                ACHIEVEMENT_LINKS[achievement.id] ??
+                                achievement.wikiUrl ??
                                 `https://wiki.guildwars2.com/wiki/${encodeURIComponent(name)}`
                             }
                             target="_blank"
@@ -127,6 +126,13 @@ export default function AchievementCard({
                 <p className={cn('text-xs text-slate-300 mb-2', isCompleted && 'line-clamp-3')}>
                     {cleanDescription(requirement)}
                 </p>
+
+                {/* Note from metadata */}
+                {achievement.note && (
+                    <p className="text-xs text-slate-400 italic mb-2">
+                        {achievement.note}
+                    </p>
+                )}
 
                 {/* Multi-part achievement objectives */}
                 {hasMultipleParts && (

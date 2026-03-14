@@ -127,7 +127,7 @@ export function getTotalMasteryPoints(
       if (seenMasteryIds.has(a.masteryId)) continue;
       seenMasteryIds.add(a.masteryId);
     }
-    count++;
+    count += a.masteryPoints ?? 1;
   }
   return count;
 }
@@ -149,7 +149,7 @@ export function getMasteryPointsAcquired(
       if (seenMasteryIds.has(a.masteryId)) continue;
       seenMasteryIds.add(a.masteryId);
     }
-    count++;
+    count += a.masteryPoints ?? 1;
   }
   return count;
 }

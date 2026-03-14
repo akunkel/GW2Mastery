@@ -102,6 +102,14 @@ export interface EnrichedAchievement extends Achievement {
   groupId?: string;
   groupName?: string;
   groupOrder?: number;
+  /** Override wiki link from achievement metadata */
+  wikiUrl?: string;
+  /** Note from achievement metadata */
+  note?: string;
+  /** Threshold from metadata to treat achievement as done */
+  doneCount?: number;
+  /** Override the number of mastery points this achievement is worth */
+  masteryPoints?: number;
 }
 
 export interface AccountAchievement {
