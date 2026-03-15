@@ -178,18 +178,11 @@ export function useExplorerProgress(): {
         if (!achievement) continue;
 
         const progress = accountProgress.get(achievementId);
-        // Bit-less achievements (simple done/not-done) count as 1 item
-        const totalBits = achievement.bits?.length || 1;
+        const isComplete = progress?.done ?? false;
 
-        let completedBits = 0;
-        let isComplete = false;
-
-        if (progress?.done) {
-          completedBits = totalBits;
-          isComplete = true;
-        } else if (progress) {
-          completedBits = progress.bits?.length ?? 0;
-        }
+        // "Other" achievements always count as 1 item (done or not done)
+        const totalBits = 1;
+        const completedBits = isComplete ? 1 : 0;
 
         achievements.push({
           achievementId,

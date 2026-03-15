@@ -14,6 +14,7 @@ import { achievementsView } from './views/achievementsView';
 import { continentFloorView } from './views/continentFloorView';
 import { continentsView } from './views/continentsView';
 import { itemNameDbBuilderView } from './views/itemNameDbBuilderView';
+import { mapAchievementsBuilderView } from './views/mapAchievementsBuilderView';
 import { itemsView } from './views/itemsView';
 import { mapsView } from './views/mapsView';
 import { mountTypesView } from './views/mountTypesView';
@@ -31,6 +32,7 @@ const ALL_VIEWS: DebugViewConfig[] = [
     itemsView,
     achievementDbBuilderView,
     itemNameDbBuilderView,
+    mapAchievementsBuilderView,
 ];
 
 function deepContains(value: unknown, term: string): boolean {

@@ -1,5 +1,4 @@
 import achievementDb from '../data/achievementDb.json';
-import continentDb from '../data/continentDb.json';
 import historicalCategories from '../data/historicalCategories.json';
 import itemNameDb from '../data/itemNameDb.json';
 
@@ -12,7 +11,7 @@ import type {
 } from '../types/achievement';
 import type { ContinentDatabase, ContinentFloor, ContinentMapData, GW2Map } from '../types/map';
 import type { MasteryRegion } from '../types/mastery';
-import { getRegionDisplayName, REGION_ZONES } from '../utils/regionHelpers';
+import { REGION_ZONES } from '../utils/regionHelpers';
 import {
   getAchievementDatabase,
   getContinentDatabase,
@@ -23,7 +22,9 @@ import { BASE_URL } from './apiConfig';
 
 const includeDebugFields = import.meta.env.DEV;
 
+const excludedAchievementNames = ['Daily', 'Weekly'];
 const historicalCategoryIds = new Set(historicalCategories.categories);
+const excludedCategoryNames = ['Retired Achievements', 'Adventure Guide:'];
 
 /**
  * Returns the status of the achievement database (timestamps)
@@ -105,10 +106,19 @@ export async function buildAchievementDatabase(
   const historicalAchievementIds = new Set(
     allCategories.filter((cat) => historicalCategoryIds.has(cat.id)).flatMap((cat) => cat.achievements)
   );
+  const excludedCategoryAchievementIds = new Set(
+    allCategories
+      .filter((cat) => excludedCategoryNames.some((ex) => cat.name.includes(ex)))
+      .flatMap((cat) => cat.achievements)
+  );
 
   const rawAchievements = allRawAchievements
+    // Strip out achievements excluded by partial name.
+    .filter((a) => !excludedAchievementNames.some((ex) => a.name.includes(ex)))
     // Strip out historical achievements.
     .filter((a) => !historicalAchievementIds.has(a.id))
+    // Strip out excluded category achievements.
+    .filter((a) => !excludedCategoryAchievementIds.has(a.id))
     // Strip out non-permanent achievements.
     .filter((a) => a.flags?.includes('Permanent'));
 
@@ -166,59 +176,6 @@ export async function buildAchievementDatabase(
   await saveAchievementDatabase(db);
 
   console.log('=== Database Build Complete ===');
-  if (includeDebugFields) {
-    console.log(`Raw achievements: ${rawAchievements.length}`);
-    console.log(
-      JSON.stringify({
-        ...db,
-        achievements: rawAchievements,
-      })
-    );
-
-    // Build map of map name -> achievement IDs using ALL maps from continentDb
-    const allMapNames: string[] = [];
-    const continentData = continentDb as unknown as ContinentDatabase;
-    Object.values(continentData.floor.regions).forEach((region) => {
-      Object.values(region.maps).forEach((map) => {
-        if (map.name) allMapNames.push(map.name);
-      });
-    });
-
-    const mapAchievementIds: Record<string, number[]> = {};
-    for (const mapName of allMapNames) {
-      const escaped = mapName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
-
-      const matchingIds = rawAchievements
-        .filter((raw) => {
-          // Check if map name is mentioned in title, description, or requirement
-          const searchText = `${raw.name || ''} ${raw.description || ''} ${raw.requirement || ''}`;
-          return regex.test(searchText);
-        })
-        .map((raw) => raw.id);
-
-      if (matchingIds.length > 0) {
-        mapAchievementIds[mapName] = matchingIds;
-      }
-    }
-
-    console.log(`Map achievement IDs (${Object.keys(mapAchievementIds).length} maps):`);
-    console.log(JSON.stringify(mapAchievementIds, null, 2));
-
-    // Build mastery achievement name-to-ID mapping keyed by region display name
-    const masteryByRegion: Record<string, Record<string, number>> = {};
-    for (const achievement of achievements) {
-      if (achievement.masteryRegion) {
-        const displayName = getRegionDisplayName(achievement.masteryRegion);
-        if (!masteryByRegion[displayName]) {
-          masteryByRegion[displayName] = {};
-        }
-        masteryByRegion[displayName][achievement.name] = achievement.id;
-      }
-    }
-    console.log('Mastery achievements by region:');
-    console.log(JSON.stringify(masteryByRegion, null, 2));
-  }
   console.log(`Achievements: ${achievements.length}`);
   console.log(JSON.stringify(db));
 
