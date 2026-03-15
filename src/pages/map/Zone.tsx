@@ -105,9 +105,11 @@ export const Zone = memo(
 
         const combinedProgress = getCombinedProgress();
         const isComplete = combinedProgress.percentage === 100;
+        const noTrackedProgress =
+            !combinedProgress.hasProgress && !explorerProgress && !insightProgress;
 
-        const fillOpacity = isComplete ? 30 : 65;
-        const textOpacity = isComplete ? 0.5 : 1;
+        const fillOpacity = isComplete || noTrackedProgress ? 30 : 65;
+        const textOpacity = isComplete || noTrackedProgress ? 0.5 : 1;
 
         // Dialog state for showing full achievement details
         const [dialogOpen, setDialogOpen] = useState(false);
