@@ -20,8 +20,6 @@ import {
 } from '../utils/storage';
 import { BASE_URL } from './apiConfig';
 
-const includeDebugFields = import.meta.env.DEV;
-
 const excludedAchievementNames = ['Daily', 'Weekly'];
 const historicalCategoryIds = new Set(historicalCategories.categories);
 const excludedCategoryNames = ['Retired Achievements', 'Adventure Guide:'];
