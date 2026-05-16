@@ -1,5 +1,5 @@
 import type { DebugViewConfig } from '../../../services/endpointTypes';
-import { buildAchievementDatabase } from '../../../services/gw2Api';
+import { buildAchievementDatabase } from '../../../database/buildAchievementDatabase';
 
 export const achievementDbBuilderView: DebugViewConfig = {
   label: 'Achievement DB Builder',

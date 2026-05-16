@@ -1,13 +1,10 @@
 import achievementDb from '../data/achievementDb.json';
-import historicalCategories from '../data/historicalCategories.json';
-import itemNameDb from '../data/itemNameDb.json';
 
 import type {
   AccountAchievement,
   Achievement,
   AchievementCategory,
   AchievementDatabase,
-  RawAchievement,
 } from '../types/achievement';
 import type { ContinentDatabase, ContinentFloor, ContinentMapData, GW2Map } from '../types/map';
 import type { MasteryRegion } from '../types/mastery';
@@ -15,14 +12,9 @@ import { REGION_ZONES } from '../utils/regionHelpers';
 import {
   getAchievementDatabase,
   getContinentDatabase,
-  saveAchievementDatabase,
   saveContinentDatabase,
 } from '../utils/storage';
 import { BASE_URL } from './apiConfig';
-
-const excludedAchievementNames = ['Daily', 'Weekly'];
-const historicalCategoryIds = new Set(historicalCategories.categories);
-const excludedCategoryNames = ['Retired Achievements', 'Adventure Guide:'];
 
 /**
  * Returns the status of the achievement database (timestamps)
@@ -41,174 +33,6 @@ export async function getDatabaseStatus() {
 }
 
 const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (5/sec)
-
-/**
- * Builds the achievement database by fetching all achievements
- * This should be called manually via the "Build Database" button
- */
-export async function buildAchievementDatabase(
-  onProgress?: (current: number, total: number) => void,
-  lang: string = 'en'
-): Promise<AchievementDatabase> {
-  // 1. Start fetching categories (don't await yet)
-  const categoriesPromise = fetchAchievementCategories(lang);
-
-  // 2. Fetch Achievements
-  // Get all achievement IDs
-  const idsResponse = await fetch(`${BASE_URL}/achievements?lang=${lang}`);
-  if (!idsResponse.ok) {
-    throw new Error(`Failed to fetch achievement IDs: ${idsResponse.statusText}`);
-  }
-  const allIds = (await idsResponse.json()) as number[];
-
-  // Create batches of achievement IDs
-  const batchSize = 200;
-  const batches: number[][] = [];
-  for (let i = 0; i < allIds.length; i += batchSize) {
-    batches.push(allIds.slice(i, i + batchSize));
-  }
-
-  const totalBatches = batches.length;
-  const allRawAchievements: RawAchievement[] = [];
-
-  // Process batches in parallel groups to stay under rate limits
-  for (let i = 0; i < batches.length; i += PARALLEL_REQUESTS) {
-    const parallelBatches = batches.slice(i, i + PARALLEL_REQUESTS);
-
-    // Fetch multiple batches in parallel
-    const results = await Promise.all(
-      parallelBatches.map(async (batchIds) => {
-        const response = await fetch(`${BASE_URL}/achievements?ids=${batchIds.join(',')}&lang=${lang}`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch achievements batch: ${response.statusText}`);
-        }
-        return (await response.json()) as RawAchievement[];
-      })
-    );
-
-    // Collect results
-    results.forEach((batchData) => {
-      allRawAchievements.push(...batchData);
-    });
-
-    // Report progress
-    const currentBatch = Math.min(i + PARALLEL_REQUESTS, totalBatches);
-    if (onProgress) {
-      onProgress(currentBatch, totalBatches);
-    }
-  }
-
-  // Strip out historical categories.
-  const allCategories = await categoriesPromise;
-  const categories = allCategories.filter((cat) => !historicalCategoryIds.has(cat.id));
-  const historicalAchievementIds = new Set(
-    allCategories.filter((cat) => historicalCategoryIds.has(cat.id)).flatMap((cat) => cat.achievements)
-  );
-  const excludedCategoryAchievementIds = new Set(
-    allCategories
-      .filter((cat) => excludedCategoryNames.some((ex) => cat.name.includes(ex)))
-      .flatMap((cat) => cat.achievements)
-  );
-
-  const rawAchievements = allRawAchievements
-    // Strip out achievements excluded by partial name.
-    .filter((a) => !excludedAchievementNames.some((ex) => a.name.includes(ex)))
-    // Strip out historical achievements.
-    .filter((a) => !historicalAchievementIds.has(a.id))
-    // Strip out excluded category achievements.
-    .filter((a) => !excludedCategoryAchievementIds.has(a.id))
-    // Strip out non-permanent achievements.
-    .filter((a) => a.flags?.includes('Permanent'));
-
-  // Map filtered raw achievements to optimized structure
-  const ids: number[] = [];
-  const achievements: Achievement[] = [];
-  for (const raw of rawAchievements) {
-    ids.push(raw.id);
-
-    const optimized: Achievement = {
-      id: raw.id,
-      name: raw.name,
-      requirement: raw.requirement,
-      flags: raw.flags,
-    };
-
-    if (raw.icon) {
-      optimized.icon = raw.icon;
-    }
-
-    const masteryReward = raw.rewards?.find((r) => r.type === 'Mastery');
-    if (masteryReward?.region) {
-      optimized.masteryRegion = masteryReward.region as MasteryRegion;
-      if (masteryReward.id !== undefined) {
-        optimized.masteryId = masteryReward.id;
-      }
-    }
-
-    if (raw.bits && raw.bits.length > 0) {
-      optimized.bits = raw.bits.map((b, index) => {
-        const bit: { text?: string; } = {};
-        if (b.text) {
-          bit.text = b.text;
-        } else if (b.type === 'Item') {
-          bit.text = (itemNameDb as Record<string, string>)[String(b.id)] ?? `${b.type} ${index + 1}`;
-        } else {
-          bit.text = `${b.type} ${index + 1}`;
-        }
-        return bit;
-      });
-    }
-
-    achievements.push(optimized);
-  }
-
-  // Create database object with timestamp
-  const db: AchievementDatabase = {
-    timestamp: Date.now(),
-    achievements,
-    categories,
-    groups: [],
-  };
-
-  // Save to localStorage for immediate use
-  await saveAchievementDatabase(db);
-
-  console.log('=== Database Build Complete ===');
-  console.log(`Achievements: ${achievements.length}`);
-  console.log(JSON.stringify(db));
-
-  return db;
-}
-
-/**
- * Gets ALL achievements from the database, either from local storage or json, whichever is newer.
- */
-export async function getDbAchievements(): Promise<AchievementDatabase | null> {
-  // 1. Get local storage version
-  const localDb = await getAchievementDatabase();
-
-  // 2. Get bundled version
-  // We handle the potential type mismatch if the JSON is empty stub
-  const bundledDb = achievementDb as unknown as AchievementDatabase;
-
-  // 3. Compare timestamps
-  let activeDb: AchievementDatabase;
-
-  const localTs = localDb?.timestamp || 0;
-  const bundledTs = bundledDb?.timestamp || 0;
-
-  if (localTs > bundledTs) {
-    activeDb = localDb!;
-  } else if (bundledTs > 0) {
-    activeDb = bundledDb;
-  } else {
-    // Both are empty/invalid
-    console.warn('No valid achievement database found.');
-    return null;
-  }
-
-  return activeDb;
-}
 
 /**
  * Fetches account-specific achievement progress
