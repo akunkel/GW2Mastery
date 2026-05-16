@@ -1,18 +1,19 @@
+import type { AccountAchievement } from '../types/achievement';
 import { BASE_URL } from './apiConfig';
 
-export interface AccountAchievementsParams {
-  access_token?: string;
-}
-
-export async function queryAccountAchievements({ access_token }: AccountAchievementsParams): Promise<unknown> {
-  const params: Record<string, string> = {};
-  if (access_token) params.access_token = access_token;
-  const query = new URLSearchParams(params).toString();
-  const url = `${BASE_URL}/account/achievements${query ? `?${query}` : ''}`;
-  const response = await fetch(url);
+export async function queryAccountAchievements(apiKey: string): Promise<AccountAchievement[]> {
+  const response = await fetch(`${BASE_URL}/account/achievements?access_token=${apiKey}`);
   if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('Invalid API key or insufficient permissions');
+    }
     const text = await response.text();
     throw new Error(`${response.status} ${response.statusText}: ${text}`);
   }
-  return response.json();
+  const data = await response.json() as AccountAchievement[];
+  if (data.length === 0) {
+    throw new Error('Achievements API returned no achievement data. Try using a different API key.');
+  }
+  console.log(`Loaded data for ${data.length} achievements, ${data.filter((a) => a.done).length} completed.`);
+  return data;
 }

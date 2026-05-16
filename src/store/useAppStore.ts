@@ -4,10 +4,8 @@ import { buildContinentDatabase } from '../database/buildContinentDatabase';
 import { getContinentData } from '../database/getContinentData';
 import { getDatabaseStatus } from '../database/getDatabaseStatus';
 import { getDbAchievements } from '../database/getDbAchievements';
-import {
-  fetchAccountAchievements,
-  fetchAchievementCategories,
-} from '../services/gw2Api';
+import { queryAccountAchievements } from '../services/accountAchievementsApi';
+import { queryAchievementCategories } from '../services/achievementsApi';
 import { queryAccountMountTypes } from '../services/mountsApi';
 import type {
   AccountAchievement,
@@ -237,11 +235,11 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (db.categories && db.categories.length > 0) {
           categories = db.categories;
         } else {
-          categories = await fetchAchievementCategories();
+          categories = await queryAchievementCategories({});
         }
       } else {
         // Should not happen if DB logic returns empty array on failure, but handling null
-        categories = await fetchAchievementCategories();
+        categories = await queryAchievementCategories({});
       }
 
       // Build full hierarchy logic
@@ -363,7 +361,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       const [accountData, mountTypes] = await Promise.all([
-        fetchAccountAchievements(apiKey),
+        queryAccountAchievements(apiKey),
         (queryAccountMountTypes({ access_token: apiKey }) as Promise<string[]>).catch(() => [] as string[]),
       ]);
 

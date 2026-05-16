@@ -2,7 +2,7 @@ import historicalCategories from '../data/historicalCategories.json';
 import itemNameDb from '../data/itemNameDb.json';
 
 import { BASE_URL } from '../services/apiConfig';
-import { fetchAchievementCategories } from '../services/gw2Api';
+import { queryAchievementCategories } from '../services/achievementsApi';
 import type {
   Achievement,
   AchievementDatabase,
@@ -27,7 +27,7 @@ export async function buildAchievementDatabase(
   lang: string = 'en'
 ): Promise<AchievementDatabase> {
   // 1. Start fetching categories (don't await yet)
-  const categoriesPromise = fetchAchievementCategories(lang);
+  const categoriesPromise = queryAchievementCategories({ lang });
 
   // 2. Fetch Achievements
   // Get all achievement IDs
