@@ -1,5 +1,5 @@
 import { ACHIEVEMENT_METADATA } from '../data/achievementMetadata';
-import { getMasteryRegion } from '../services/gw2Api';
+import { getMasteryRegion } from '../utils/regionHelpers';
 import type {
   AccountAchievement,
   Achievement,

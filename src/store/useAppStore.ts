@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import { buildAchievementDatabase } from '../database/buildAchievementDatabase';
 import { buildContinentDatabase } from '../database/buildContinentDatabase';
 import { getContinentData } from '../database/getContinentData';
+import { getDatabaseStatus } from '../database/getDatabaseStatus';
 import { getDbAchievements } from '../database/getDbAchievements';
 import {
   fetchAccountAchievements,
   fetchAchievementCategories,
-  getDatabaseStatus,
 } from '../services/gw2Api';
 import { queryAccountMountTypes } from '../services/mountsApi';
 import type {

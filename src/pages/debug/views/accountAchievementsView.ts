@@ -1,4 +1,4 @@
-import { queryAccountAchievements } from '../../../services/accountApi';
+import { queryAccountAchievements } from '../../../services/accountAchievementsApi';
 import type { DebugViewConfig } from '../../../services/endpointTypes';
 
 export const accountAchievementsView: DebugViewConfig = {

@@ -1,29 +1,8 @@
-import achievementDb from '../data/achievementDb.json';
-
 import type {
   AccountAchievement,
-  Achievement,
   AchievementCategory,
-  AchievementDatabase,
 } from '../types/achievement';
-import { getAchievementDatabase } from '../utils/storage';
 import { BASE_URL } from './apiConfig';
-
-/**
- * Returns the status of the achievement database (timestamps)
- */
-export async function getDatabaseStatus() {
-  const localDb = await getAchievementDatabase();
-  const bundledDb = achievementDb as unknown as AchievementDatabase;
-  const localTs = localDb?.timestamp || 0;
-  const bundledTs = bundledDb?.timestamp || 0;
-
-  return {
-    localTs,
-    bundledTs,
-    activeTs: Math.max(localTs, bundledTs),
-  };
-}
 
 const PARALLEL_REQUESTS = 4; // Parallel requests to stay under API rate limit (5/sec)
 
@@ -98,12 +77,5 @@ export async function fetchAchievementCategories(lang: string = 'en'): Promise<A
     console.error('Failed to fetch achievement categories:', error);
     throw error;
   }
-}
-
-/**
- * Gets the mastery region for an achievement
- */
-export function getMasteryRegion(achievement: Achievement): string | null {
-  return achievement.masteryRegion || null;
 }
 

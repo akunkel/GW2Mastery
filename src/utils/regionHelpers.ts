@@ -1,3 +1,4 @@
+import type { Achievement } from '../types/achievement';
 import type { EnrichedAchievement } from '../types/enriched';
 import type { MasteryRegion } from '../types/mastery';
 
@@ -153,6 +154,10 @@ export function getMasteryPointsAcquired(
     count += a.masteryPoints ?? 1;
   }
   return count;
+}
+
+export function getMasteryRegion(achievement: Achievement): string | null {
+  return achievement.masteryRegion || null;
 }
 
 export const REGION_ZONES = {
