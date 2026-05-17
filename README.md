@@ -44,6 +44,10 @@ doesn't need.
 4. Open "Item Name DB Builder" view, run it, and copy into `itemNameDb.json`.
 5. Open "Map Achievements Builder" view, run it, and copy into `mapAchievements.json`.
 
+## Hosting / Deployments
+
+This project is hosted on Cloudflare Pages, and auto-deploys pushes to the `main` branch.
+
 ## License
 
 MIT
