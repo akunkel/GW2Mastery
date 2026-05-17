@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BASE_URL } from '../../services/apiConfig';
 import type { DebugViewConfig } from '../../services/endpointTypes';
 import { useAppStore } from '../../store/useAppStore';
@@ -14,8 +15,8 @@ import { achievementsView } from './views/achievementsView';
 import { continentFloorView } from './views/continentFloorView';
 import { continentsView } from './views/continentsView';
 import { itemNameDbBuilderView } from './views/itemNameDbBuilderView';
-import { mapAchievementsBuilderView } from './views/mapAchievementsBuilderView';
 import { itemsView } from './views/itemsView';
+import { mapAchievementsBuilderView } from './views/mapAchievementsBuilderView';
 import { mapsView } from './views/mapsView';
 import { mountTypesView } from './views/mountTypesView';
 
@@ -73,10 +74,15 @@ function defaultParamValues(view: DebugViewConfig, apiKey: string | null): Recor
 
 export default function DebugPage() {
     const apiKey = useAppStore((s) => s.apiKey);
-    const [selectedLabel, setSelectedLabel] = useState(ALL_VIEWS[0].label);
-    const [paramValues, setParamValues] = useState<Record<string, string>>(() =>
-        defaultParamValues(ALL_VIEWS[0], apiKey)
-    );
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const selectedLabel =
+        ALL_VIEWS.find((v) => v.label === searchParams.get('view'))?.label ?? ALL_VIEWS[0].label;
+
+    const [paramValues, setParamValues] = useState<Record<string, string>>(() => {
+        const initialView = ALL_VIEWS.find((v) => v.label === selectedLabel) ?? ALL_VIEWS[0];
+        return defaultParamValues(initialView, apiKey);
+    });
     const [response, setResponse] = useState<unknown>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [expandAll, setExpandAll] = useState(false);
@@ -126,7 +132,7 @@ export default function DebugPage() {
 
     function handleViewChange(label: string) {
         const next = ALL_VIEWS.find((e) => e.label === label)!;
-        setSelectedLabel(label);
+        setSearchParams({ view: label }, { replace: true });
         setParamValues(defaultParamValues(next, apiKey));
         setResponse(null);
         setSearchTerm('');

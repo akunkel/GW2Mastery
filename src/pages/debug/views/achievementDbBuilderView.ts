@@ -6,8 +6,8 @@ export const achievementDbBuilderView: DebugViewConfig = {
   description:
     'Runs buildAchievementDatabase() and outputs the full JSON result.',
   queryFn: async (params) => {
-    const { db, rawAchievements } = await buildAchievementDatabase();
-    return params['raw'] === 'true' ? rawAchievements : db;
+    const { db, rawDb } = await buildAchievementDatabase();
+    return params['raw'] === 'true' ? rawDb : db;
   },
   params: [
     {

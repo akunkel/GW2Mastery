@@ -35,6 +35,13 @@ export interface AchievementDatabase {
   groups: AchievementGroup[];
 }
 
+export interface RawAchievementDatabase {
+  timestamp: number;
+  achievements: RawAchievement[];
+  categories: AchievementCategory[];
+  groups: AchievementGroup[];
+}
+
 export interface AchievementGroup {
   id: string;
   name: string;

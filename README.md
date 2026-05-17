@@ -36,6 +36,14 @@ rawAchievementDb.json is a manual dump of the actual raw response from the achie
 in debugging/development, since the main achievement DB strips out fields and achievements it
 doesn't need.
 
+## Updating Achievement DB Jsons
+
+1. Open Debug page and open the "Achievement DB Builder" view.
+2. Run with the Raw checkbox toggled, and copy the results into `rawAchievementDb.json`.
+3. Run again with the checkbox untoggled, and copy the results into `achievementDb.json`.
+4. Open "Item Name DB Builder" view, run it, and copy into `itemNameDb.json`.
+5. Open "Map Achievements Builder" view, run it, and copy into `mapAchievements.json`.
+
 ## License
 
 MIT

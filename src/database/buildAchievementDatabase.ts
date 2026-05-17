@@ -1,12 +1,13 @@
 import historicalCategories from '../data/historicalCategories.json';
 import itemNameDb from '../data/itemNameDb.json';
 
-import { BASE_URL } from '../services/apiConfig';
 import { queryAchievementCategories } from '../services/achievementsApi';
+import { BASE_URL } from '../services/apiConfig';
 import type {
   Achievement,
   AchievementDatabase,
   RawAchievement,
+  RawAchievementDatabase,
 } from '../types/achievement';
 import type { MasteryRegion } from '../types/mastery';
 import { saveAchievementDatabase } from '../utils/storage';
@@ -25,7 +26,7 @@ const PARALLEL_REQUESTS = 4;
 export async function buildAchievementDatabase(
   onProgress?: (current: number, total: number) => void,
   lang: string = 'en'
-): Promise<{ db: AchievementDatabase; rawAchievements: RawAchievement[] }> {
+): Promise<{ db: AchievementDatabase; rawDb: RawAchievementDatabase; }> {
   // 1. Start fetching categories (don't await yet)
   const categoriesPromise = queryAchievementCategories({ lang });
 
@@ -153,5 +154,6 @@ export async function buildAchievementDatabase(
   console.log(`Achievements: ${achievements.length}`);
   console.log(JSON.stringify(db));
 
-  return { db, rawAchievements };
+  const rawDb = { timestamp: db.timestamp, achievements: rawAchievements, categories: db.categories, groups: db.groups };
+  return { db, rawDb };
 }
