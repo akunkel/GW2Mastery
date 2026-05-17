@@ -310,7 +310,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       // Build achievement database
       const { databaseLanguage } = get();
-      const db = await buildAchievementDatabase((current, total) => {
+      const { db } = await buildAchievementDatabase((current, total) => {
         set({ loadingProgress: { current, total } });
       }, databaseLanguage);
       const { accountProgress } = get();

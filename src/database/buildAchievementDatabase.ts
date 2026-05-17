@@ -25,7 +25,7 @@ const PARALLEL_REQUESTS = 4;
 export async function buildAchievementDatabase(
   onProgress?: (current: number, total: number) => void,
   lang: string = 'en'
-): Promise<AchievementDatabase> {
+): Promise<{ db: AchievementDatabase; rawAchievements: RawAchievement[] }> {
   // 1. Start fetching categories (don't await yet)
   const categoriesPromise = queryAchievementCategories({ lang });
 
@@ -153,5 +153,5 @@ export async function buildAchievementDatabase(
   console.log(`Achievements: ${achievements.length}`);
   console.log(JSON.stringify(db));
 
-  return db;
+  return { db, rawAchievements };
 }

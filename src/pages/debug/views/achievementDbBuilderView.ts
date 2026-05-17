@@ -1,13 +1,21 @@
-import type { DebugViewConfig } from '../../../services/endpointTypes';
 import { buildAchievementDatabase } from '../../../database/buildAchievementDatabase';
+import type { DebugViewConfig } from '../../../services/endpointTypes';
 
 export const achievementDbBuilderView: DebugViewConfig = {
   label: 'Achievement DB Builder',
   description:
     'Runs buildAchievementDatabase() and outputs the full JSON result.',
-  queryFn: async () => {
-    const db = await buildAchievementDatabase();
-    return db;
+  queryFn: async (params) => {
+    const { db, rawAchievements } = await buildAchievementDatabase();
+    return params['raw'] === 'true' ? rawAchievements : db;
   },
-  params: [],
+  params: [
+    {
+      name: 'raw',
+      label: 'Raw',
+      type: 'checkbox',
+      description: 'Outputs raw achievements instead of the processed database. Irrelevant achievements are still filtered out.',
+      defaultValue: 'false',
+    },
+  ],
 };
