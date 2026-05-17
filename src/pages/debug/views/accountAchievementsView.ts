@@ -5,7 +5,7 @@ export const accountAchievementsView: DebugViewConfig = {
   label: 'Account Achievements',
   endpointPath: '/account/achievements',
   description: "Returns the account's achievement progress. Requires an API key.",
-  queryFn: queryAccountAchievements,
+  queryFn: (params) => queryAccountAchievements(params['access_token'] ?? ''),
   params: [
     {
       name: 'access_token',
