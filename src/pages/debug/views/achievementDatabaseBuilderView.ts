@@ -1,5 +1,5 @@
 import { buildAchievementDatabase } from '../../../database/buildAchievementDatabase';
-import type { DebugViewConfig } from '../../../services/endpointTypes';
+import type { DebugViewConfig } from '../types';
 
 export const achievementDatabaseBuilderView: DebugViewConfig = {
   label: 'Achievement DB Builder',

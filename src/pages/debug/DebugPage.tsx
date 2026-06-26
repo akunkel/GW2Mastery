@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BASE_URL } from '../../services/apiConfig';
-import type { DebugViewConfig } from '../../services/endpointTypes';
+import type { DebugViewConfig } from './types';
 import { useAppStore } from '../../store/useAppStore';
 import { ParamsPanel } from './ParamsPanel';
 import { ResponsePanel } from './ResponsePanel';

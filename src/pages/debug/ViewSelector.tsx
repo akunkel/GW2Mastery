@@ -1,4 +1,4 @@
-import type { DebugViewConfig } from '../../services/endpointTypes';
+import type { DebugViewConfig } from './types';
 
 interface Props {
     views: DebugViewConfig[];

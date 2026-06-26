@@ -1,5 +1,6 @@
 import { queryAchievementCategories } from '../../../services/achievementsApi';
-import { LANG_OPTIONS, type DebugViewConfig } from '../../../services/endpointTypes';
+import { LANG_OPTIONS } from '../../../services/languages';
+import type { DebugViewConfig } from '../types';
 
 export const achievementCategoriesView: DebugViewConfig = {
   label: 'Achievement Categories',

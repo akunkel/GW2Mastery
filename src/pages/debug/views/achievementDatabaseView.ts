@@ -1,5 +1,5 @@
 import rawAchievementDb from '../../../data/rawAchievementDb.json';
-import type { DebugViewConfig } from '../../../services/endpointTypes';
+import type { DebugViewConfig } from '../types';
 import { useAppStore } from '../../../store/useAppStore';
 
 export const achievementDatabaseView: DebugViewConfig = {

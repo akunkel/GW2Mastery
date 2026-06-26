@@ -1,6 +1,6 @@
 import rawAchievementDb from '../../../data/rawAchievementDb.json';
 import { BASE_URL } from '../../../services/apiConfig';
-import type { DebugViewConfig } from '../../../services/endpointTypes';
+import type { DebugViewConfig } from '../types';
 
 interface AchievementBit {
   type: string;

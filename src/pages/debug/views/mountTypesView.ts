@@ -1,4 +1,4 @@
-import type { DebugViewConfig } from '../../../services/endpointTypes';
+import type { DebugViewConfig } from '../types';
 import { queryAccountMountTypes } from '../../../services/mountsApi';
 
 export const mountTypesView: DebugViewConfig = {
