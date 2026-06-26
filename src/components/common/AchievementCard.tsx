@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import type { EnrichedAchievement } from '../../types/enriched';
 import { isRecommended } from '../../utils/recommendedAchievements';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent } from '../ui/Card';
 
 interface AchievementCardProps {
     achievement: EnrichedAchievement;
