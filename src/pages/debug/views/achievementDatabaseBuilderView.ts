@@ -1,7 +1,7 @@
 import { buildAchievementDatabase } from '../../../database/buildAchievementDatabase';
 import type { DebugViewConfig } from '../../../services/endpointTypes';
 
-export const achievementDbBuilderView: DebugViewConfig = {
+export const achievementDatabaseBuilderView: DebugViewConfig = {
   label: 'Achievement DB Builder',
   description:
     'Runs buildAchievementDatabase() and outputs the full JSON result.',

@@ -2,7 +2,7 @@ import rawAchievementDb from '../../../data/rawAchievementDb.json';
 import type { DebugViewConfig } from '../../../services/endpointTypes';
 import { useAppStore } from '../../../store/useAppStore';
 
-export const achievementDbView: DebugViewConfig = {
+export const achievementDatabaseView: DebugViewConfig = {
   label: 'Achievement DB (Local)',
   description: 'Shows the active achievement database from the store.',
   autoFetch: true,

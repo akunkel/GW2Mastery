@@ -6,7 +6,7 @@ import { getAchievementDatabase } from '../utils/storage';
 /**
  * Gets ALL achievements from the database, either from local storage or json, whichever is newer.
  */
-export async function getDbAchievements(): Promise<AchievementDatabase | null> {
+export async function getDatabaseAchievements(): Promise<AchievementDatabase | null> {
   // 1. Get local storage version
   const localDb = await getAchievementDatabase();
 
