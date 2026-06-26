@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Swords, Skull, Crown, Ghost } from 'lucide-react';
+import './guides.css';
 import {
     FRACTALS,
     RAIDS,
