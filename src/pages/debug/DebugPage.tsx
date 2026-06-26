@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BASE_URL } from '../../services/apiConfig';
-import type { DebugViewConfig } from '../../services/endpointTypes';
+import type { DebugViewConfig } from './types';
 import { useAppStore } from '../../store/useAppStore';
 import { ParamsPanel } from './ParamsPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { ViewSelector } from './ViewSelector';
 import { accountAchievementsView } from './views/accountAchievementsView';
 import { achievementCategoriesView } from './views/achievementCategoriesView';
-import { achievementDbBuilderView } from './views/achievementDbBuilderView';
-import { achievementDbView } from './views/achievementDbView';
+import { achievementDatabaseBuilderView } from './views/achievementDatabaseBuilderView';
+import { achievementDatabaseView } from './views/achievementDatabaseView';
 import { achievementGroupsView } from './views/achievementGroupsView';
 import { achievementsView } from './views/achievementsView';
 import { continentFloorView } from './views/continentFloorView';
 import { continentsView } from './views/continentsView';
-import { itemNameDbBuilderView } from './views/itemNameDbBuilderView';
+import { itemNameDatabaseBuilderView } from './views/itemNameDatabaseBuilderView';
 import { itemsView } from './views/itemsView';
 import { mapAchievementsBuilderView } from './views/mapAchievementsBuilderView';
 import { mapsView } from './views/mapsView';
 import { mountTypesView } from './views/mountTypesView';
 
 const ALL_VIEWS: DebugViewConfig[] = [
-    achievementDbView,
+    achievementDatabaseView,
     achievementGroupsView,
     achievementCategoriesView,
     achievementsView,
@@ -31,8 +31,8 @@ const ALL_VIEWS: DebugViewConfig[] = [
     mapsView,
     mountTypesView,
     itemsView,
-    achievementDbBuilderView,
-    itemNameDbBuilderView,
+    achievementDatabaseBuilderView,
+    itemNameDatabaseBuilderView,
     mapAchievementsBuilderView,
 ];
 

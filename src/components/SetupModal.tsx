@@ -1,7 +1,7 @@
 import ApiKeyForm from './ApiKeyForm';
 import { useAppStore } from '../store/useAppStore';
 import DatabaseSection from './DatabaseSection';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
 
 export default function SetupModal() {
     const {

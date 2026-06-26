@@ -17,11 +17,3 @@ export interface DebugViewConfig {
   /** When true, auto-fetch on select. */
   autoFetch?: boolean;
 }
-
-export const LANG_OPTIONS: { value: string; label: string; }[] = [
-  { value: 'en', label: 'English (en)' },
-  { value: 'de', label: 'Deutsch (de)' },
-  { value: 'es', label: 'Español (es)' },
-  { value: 'fr', label: 'Français (fr)' },
-  { value: 'zh', label: '中文 (zh)' },
-];

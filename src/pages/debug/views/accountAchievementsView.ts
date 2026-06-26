@@ -1,5 +1,5 @@
 import { queryAccountAchievements } from '../../../services/accountAchievementsApi';
-import type { DebugViewConfig } from '../../../services/endpointTypes';
+import type { DebugViewConfig } from '../types';
 
 export const accountAchievementsView: DebugViewConfig = {
   label: 'Account Achievements',

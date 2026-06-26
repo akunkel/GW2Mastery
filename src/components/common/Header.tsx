@@ -1,7 +1,7 @@
 import { Bug, Info, RefreshCw, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import NavTabs from './NavTabs';
 
 interface HeaderProps {

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
-import { TooltipProvider } from './components/ui/tooltip';
+import { TooltipProvider } from './components/ui/Tooltip';
 import DebugPage from './pages/debug/DebugPage';
 import MapPage from './pages/map/MapPage';
 import MasteryPage from './pages/mastery/MasteryPage';

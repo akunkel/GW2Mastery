@@ -1,4 +1,4 @@
-import { LANG_OPTIONS } from '../services/endpointTypes';
+import { LANG_OPTIONS } from '../services/languages';
 
 interface DatabaseSectionProps {
     databaseTimestamp: number | null;

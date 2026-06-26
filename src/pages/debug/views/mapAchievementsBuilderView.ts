@@ -1,6 +1,6 @@
 import continentDb from '../../../data/continentDb.json';
 import rawAchievementDb from '../../../data/rawAchievementDb.json';
-import type { DebugViewConfig } from '../../../services/endpointTypes';
+import type { DebugViewConfig } from '../types';
 import type { RawAchievement } from '../../../types/achievement';
 import type { ContinentDatabase } from '../../../types/map';
 

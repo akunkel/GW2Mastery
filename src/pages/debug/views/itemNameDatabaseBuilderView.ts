@@ -1,6 +1,6 @@
 import rawAchievementDb from '../../../data/rawAchievementDb.json';
 import { BASE_URL } from '../../../services/apiConfig';
-import type { DebugViewConfig } from '../../../services/endpointTypes';
+import type { DebugViewConfig } from '../types';
 
 interface AchievementBit {
   type: string;
@@ -11,7 +11,7 @@ interface RawAchievement {
   bits?: AchievementBit[];
 }
 
-async function buildItemNameDb(): Promise<unknown> {
+async function buildItemNameDatabase(): Promise<unknown> {
   const ids = new Set<number>();
   for (const achievement of (rawAchievementDb as { achievements: RawAchievement[]; }).achievements) {
     for (const bit of achievement.bits ?? []) {
@@ -53,10 +53,10 @@ async function buildItemNameDb(): Promise<unknown> {
   return idToName;
 }
 
-export const itemNameDbBuilderView: DebugViewConfig = {
+export const itemNameDatabaseBuilderView: DebugViewConfig = {
   label: 'Item Name DB Builder',
   description:
     'Parses rawAchievementDb.json for all achievement bits of type "Item", fetches them from the API, and returns an ID-to-name mapping.',
-  queryFn: buildItemNameDb,
+  queryFn: buildItemNameDatabase,
   params: [],
 };

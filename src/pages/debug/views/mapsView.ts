@@ -1,4 +1,5 @@
-import { LANG_OPTIONS, type DebugViewConfig } from '../../../services/endpointTypes';
+import { LANG_OPTIONS } from '../../../services/languages';
+import type { DebugViewConfig } from '../types';
 import { queryMaps } from '../../../services/mapsApi';
 
 export const mapsView: DebugViewConfig = {

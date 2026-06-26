@@ -1,5 +1,6 @@
 import { queryContinentFloor } from '../../../services/continentsApi';
-import { LANG_OPTIONS, type DebugViewConfig } from '../../../services/endpointTypes';
+import { LANG_OPTIONS } from '../../../services/languages';
+import type { DebugViewConfig } from '../types';
 
 export const continentFloorView: DebugViewConfig = {
   label: 'Continent Floors',

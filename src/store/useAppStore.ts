@@ -3,7 +3,7 @@ import { buildAchievementDatabase } from '../database/buildAchievementDatabase';
 import { buildContinentDatabase } from '../database/buildContinentDatabase';
 import { getContinentData } from '../database/getContinentData';
 import { getDatabaseStatus } from '../database/getDatabaseStatus';
-import { getDbAchievements } from '../database/getDbAchievements';
+import { getDatabaseAchievements } from '../database/getDatabaseAchievements';
 import { queryAccountAchievements } from '../services/accountAchievementsApi';
 import { queryAchievementCategories } from '../services/achievementsApi';
 import { queryAccountMountTypes } from '../services/mountsApi';
@@ -224,7 +224,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       // Fetch DB (legacy or v2)
-      const db = await getDbAchievements();
+      const db = await getDatabaseAchievements();
 
       let allAchievements: Achievement[] = [];
       let categories: AchievementCategory[] = [];

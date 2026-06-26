@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
 
 export default function AboutModal() {
     const open = useAppStore((s) => s.aboutModalOpen);

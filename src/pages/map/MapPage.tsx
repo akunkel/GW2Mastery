@@ -1,7 +1,7 @@
 import { Info } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/Tooltip';
 import { useExplorerProgress } from '../../hooks/useExplorerProgress';
 import { useAppStore } from '../../store/useAppStore';
 import type { RenderedZone } from '../../types/map';
