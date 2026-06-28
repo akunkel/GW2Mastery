@@ -52,7 +52,7 @@ export default function ApiKeyForm({
                             account.arena.net/applications
                         </a>{' '}
                         (requires "account" and "progression" permissions, and optionally "unlocks"
-                        for mounts)
+                        and "inventories" for mounts)
                     </p>
                     <div className="flex items-center gap-2 mb-2">
                         <input
