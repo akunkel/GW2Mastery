@@ -1,16 +1,15 @@
 import historicalCategories from '../data/historicalCategories.json';
-import itemNameDb from '../data/itemNameDb.json';
 
+import { buildItemNameDatabase } from './buildItemNameDatabase';
 import { queryAchievementCategories } from '../services/achievementsApi';
 import { BASE_URL } from '../services/apiConfig';
 import type {
   Achievement,
+  AchievementCategory,
   AchievementDatabase,
   RawAchievement,
-  RawAchievementDatabase,
 } from '../types/achievement';
 import type { MasteryRegion } from '../types/mastery';
-import { saveAchievementDatabase } from '../utils/storage';
 
 const excludedAchievementNames = ['Daily', 'Weekly'];
 const historicalCategoryIds = new Set(historicalCategories.categories);
@@ -19,19 +18,28 @@ const excludedCategoryNames = ['Retired Achievements', 'Adventure Guide:'];
 // Parallel requests to stay under API rate limit (5/sec)
 const PARALLEL_REQUESTS = 4;
 
+export interface AchievementFetchResult {
+  /** Relevant raw achievements after historical/excluded/non-permanent filtering. */
+  rawAchievements: RawAchievement[];
+  /** Categories with historical ones stripped (what the app displays). */
+  categories: AchievementCategory[];
+  /** The unfiltered category list, for diagnostics (e.g. detecting new historical categories). */
+  allCategories: AchievementCategory[];
+}
+
 /**
- * Builds the achievement database by fetching all achievements from the API. This is run manually
- * by the user, which usually is not needed if the newest achievement JSON has been updated.
+ * Fetches all achievements and categories from the API and applies the relevance filters
+ * (drops Daily/Weekly, historical-category achievements, excluded-category achievements, and
+ * non-permanent achievements). Returns the filtered raw data without persisting anything.
  */
-export async function buildAchievementDatabase(
-  onProgress?: (current: number, total: number) => void,
-  lang: string = 'en'
-): Promise<{ db: AchievementDatabase; rawDb: RawAchievementDatabase; }> {
+export async function fetchAchievementData(
+  lang: string = 'en',
+  onProgress?: (current: number, total: number) => void
+): Promise<AchievementFetchResult> {
   // 1. Start fetching categories (don't await yet)
   const categoriesPromise = queryAchievementCategories({ lang });
 
-  // 2. Fetch Achievements
-  // Get all achievement IDs
+  // 2. Fetch all achievement IDs
   const idsResponse = await fetch(`${BASE_URL}/achievements?lang=${lang}`);
   if (!idsResponse.ok) {
     throw new Error(`Failed to fetch achievement IDs: ${idsResponse.statusText}`);
@@ -52,7 +60,6 @@ export async function buildAchievementDatabase(
   for (let i = 0; i < batches.length; i += PARALLEL_REQUESTS) {
     const parallelBatches = batches.slice(i, i + PARALLEL_REQUESTS);
 
-    // Fetch multiple batches in parallel
     const results = await Promise.all(
       parallelBatches.map(async (batchIds) => {
         const response = await fetch(`${BASE_URL}/achievements?ids=${batchIds.join(',')}&lang=${lang}`);
@@ -63,12 +70,10 @@ export async function buildAchievementDatabase(
       })
     );
 
-    // Collect results
     results.forEach((batchData) => {
       allRawAchievements.push(...batchData);
     });
 
-    // Report progress
     const currentBatch = Math.min(i + PARALLEL_REQUESTS, totalBatches);
     if (onProgress) {
       onProgress(currentBatch, totalBatches);
@@ -97,12 +102,21 @@ export async function buildAchievementDatabase(
     // Strip out non-permanent achievements.
     .filter((a) => a.flags?.includes('Permanent'));
 
-  // Map filtered raw achievements to optimized structure
-  const ids: number[] = [];
+  return { rawAchievements, categories, allCategories };
+}
+
+/**
+ * Transforms filtered raw achievements into the optimized, bundled database structure.
+ * `itemNames` resolves the display text of `Item`-type achievement bits; bits whose item ID
+ * is missing fall back to a generic `Item N` label.
+ */
+export function toAchievementDatabase(
+  rawAchievements: RawAchievement[],
+  categories: AchievementCategory[],
+  itemNames: Record<number, string>
+): AchievementDatabase {
   const achievements: Achievement[] = [];
   for (const raw of rawAchievements) {
-    ids.push(raw.id);
-
     const optimized: Achievement = {
       id: raw.id,
       name: raw.name,
@@ -127,8 +141,8 @@ export async function buildAchievementDatabase(
         const bit: { text?: string; } = {};
         if (b.text) {
           bit.text = b.text;
-        } else if (b.type === 'Item') {
-          bit.text = (itemNameDb as Record<string, string>)[String(b.id)] ?? `${b.type} ${index + 1}`;
+        } else if (b.type === 'Item' && b.id != null) {
+          bit.text = itemNames[b.id] ?? `${b.type} ${index + 1}`;
         } else {
           bit.text = `${b.type} ${index + 1}`;
         }
@@ -139,21 +153,26 @@ export async function buildAchievementDatabase(
     achievements.push(optimized);
   }
 
-  // Create database object with timestamp
-  const db: AchievementDatabase = {
+  return {
     timestamp: Date.now(),
     achievements,
     categories,
     groups: [],
   };
+}
 
-  // Save to localStorage for immediate use
-  await saveAchievementDatabase(db);
-
-  console.log('=== Database Build Complete ===');
-  console.log(`Achievements: ${achievements.length}`);
-  console.log(JSON.stringify(db));
-
-  const rawDb = { timestamp: db.timestamp, achievements: rawAchievements, categories: db.categories, groups: db.groups };
-  return { db, rawDb };
+/**
+ * Builds the achievement database end to end: fetches and filters achievements, resolves item
+ * bit names from the live /items endpoint, and returns the optimized database. Does not persist —
+ * callers (the store) own persistence. The build-data script composes the lower-level
+ * `fetchAchievementData` / `buildItemNameDatabase` / `toAchievementDatabase` directly when it
+ * also needs the raw achievements.
+ */
+export async function buildAchievementDatabase(
+  onProgress?: (current: number, total: number) => void,
+  lang: string = 'en'
+): Promise<AchievementDatabase> {
+  const { rawAchievements, categories } = await fetchAchievementData(lang, onProgress);
+  const { names } = await buildItemNameDatabase(rawAchievements);
+  return toAchievementDatabase(rawAchievements, categories, names);
 }

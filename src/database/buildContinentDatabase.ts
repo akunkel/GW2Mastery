@@ -6,8 +6,7 @@ import type {
   GW2Map,
 } from '../types/map';
 import type { MasteryRegion } from '../types/mastery';
-import { REGION_ZONES } from '../utils/regionHelpers';
-import { saveContinentDatabase } from '../utils/storage';
+import { REGION_ZONES } from '../utils/regionZones';
 
 // Parallel requests to stay under API rate limit (5/sec)
 const PARALLEL_REQUESTS = 4;
@@ -257,16 +256,12 @@ export async function buildContinentDatabase({
       floor,
     };
 
-    // Save to IndexedDB
-    await saveContinentDatabase(db);
-
     if (onProgress) onProgress('Complete!');
 
     console.log('=== Continent Database Build Complete ===');
     console.log(`Continent ID: ${continentId}, Floors: ${floorIds.join(', ')}`);
     console.log(`Dimensions: ${continentDims[0]} x ${continentDims[1]}`);
     console.log(`Public maps: ${totalMaps}`);
-    console.log(JSON.stringify(db));
 
     return db;
   } catch (error) {

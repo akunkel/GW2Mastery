@@ -1,6 +1,7 @@
 import { Bug, Info, RefreshCw, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
+import { SHOW_DEBUG } from '../../utils/environment';
 import { Button } from '../ui/Button';
 import NavTabs from './NavTabs';
 
@@ -50,7 +51,7 @@ export default function Header({ onRefresh, loading }: HeaderProps) {
 
                 {/* Right: Debug + Setup Buttons */}
                 <div className="flex-shrink-0 flex gap-2">
-                    {import.meta.env.DEV && (
+                    {SHOW_DEBUG && (
                         <Button
                             onClick={() => navigate('/debug')}
                             variant="ghost"

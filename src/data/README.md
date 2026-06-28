@@ -1,66 +1,42 @@
-# Achievement Database
+# Bundled data
 
-This directory contains the bundled achievement data for the application.
+This directory holds the data the app loads at startup. Three files are **generated** from
+the live GW2 API; the rest are **hand-maintained**.
 
-## Updating the Database
+## Generated (do not edit by hand)
 
-When Guild Wars 2 adds new achievements or you want to refresh the data:
+| File | Contents |
+| --- | --- |
+| `achievementDb.json` | Processed achievements + categories (the main database). |
+| `continentDb.json` | Public maps/regions with mastery regions, for the world map. |
+| `mapAchievements.json` | Zone name → achievement IDs (heuristic text match). |
 
-1. Open the application in development mode
-2. Open the browser console (F12)
-3. Go to Setup and click "Build Database"
-4. Wait for the build to complete
-5. The console will display the full minified JSON object
-6. Copy the entire JSON output
-7. Paste it into `src/data/achievementDb.json`
-8. Commit and deploy the changes
+### Refreshing them after a game update
 
-## File Format
-
-The `achievementDb.json` file contains a timestamped object with the achievement data:
-
-```json
-{
-  "timestamp": 1234567890,
-  "achievements": [
-    {
-      "id": 1234,
-      "name": "Achievement Name",
-      "requirement": "Do something",
-      "icon": "https://...",
-      "masteryRegion": "Maguuma",
-      "bits": [{ "text": "Step 1" }]
-    },
-    ...
-  ],
-  "categories": [
-    {
-      "id": 1,
-      "name": "Category Name",
-      "description": "...",
-      "order": 1,
-      "achievements": [1234, 5678]
-    },
-    ...
-  ],
-  "groups": [
-    {
-      "id": "A1B2...",
-      "name": "Group Name",
-      "description": "...",
-      "order": 1,
-      "categories": [1, 2]
-    },
-    ...
-  ]
-}
+```
+npm run build:data
 ```
 
-## Benefits
+This re-derives all three files from the API in a single pass — you don't need to know what
+the update changed. Raw achievements and item names are resolved in memory and never written
+to disk. The script then prints a report; pay attention to the ⚠ warnings, which flag the
+hand-maintained inputs a game update can silently invalidate:
 
-By bundling the full database:
+- **Categories that look historical but aren't excluded** — add their IDs to
+  `historicalCategories.json` if they should be hidden.
+- **Unresolved item bits** (shown as `Item N`) — usually transient API gaps.
+- **Public maps with no mastery region** — a new zone may need an entry in `REGION_ZONES`
+  (`src/utils/regionHelpers.ts`), `excludedMapNames`, or the `floorIds` list in
+  `src/database/buildContinentDatabase.ts`.
 
-- Zero initial API calls for achievement details
-- Instant load times
-- Reduced API rate limiting issues
-- Validated data structure at build time
+Unchanged files keep their previous `timestamp`, so a no-op refresh leaves an empty `git diff`.
+Review the diff, sanity-check the warnings, then commit.
+
+> The same build logic powers the in-app **Setup → Build Database** flow, which persists a
+> fresh achievement/continent database to local storage for an instant refresh without a
+> redeploy. Only `npm run build:data` updates the bundled JSON files in this directory.
+
+## Hand-maintained
+
+`historicalCategories.json` (category IDs to exclude), `achievementMetadata.ts`,
+`recommendedMasteryAchievements.ts`, `mountDefinitions.tsx`, `guidesData.tsx`.

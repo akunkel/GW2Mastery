@@ -23,7 +23,9 @@ import {
   getFilterSettings,
   getHiddenAchievements,
   getMapFilterSettings,
+  saveAchievementDatabase,
   saveApiKey,
+  saveContinentDatabase,
   saveDatabaseLanguage,
   saveFilterSettings,
   saveHiddenAchievements,
@@ -310,9 +312,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       // Build achievement database
       const { databaseLanguage } = get();
-      const { db } = await buildAchievementDatabase((current, total) => {
+      const db = await buildAchievementDatabase((current, total) => {
         set({ loadingProgress: { current, total } });
       }, databaseLanguage);
+      await saveAchievementDatabase(db);
       const { accountProgress } = get();
 
       const {
@@ -340,6 +343,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       // Also build continent/map database
       const continentDb = await buildContinentDatabase({ lang: databaseLanguage });
+      await saveContinentDatabase(continentDb);
       set({ continentData: continentDb });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to build database';
