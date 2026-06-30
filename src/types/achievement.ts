@@ -57,6 +57,7 @@ export interface AchievementCategory {
   order: number;
   icon?: string;
   achievements: number[];
+  tomorrow?: number[];
 }
 
 // Subset of RawAchievement, stripping unused fields to reduce json size.

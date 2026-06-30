@@ -9,7 +9,7 @@ export interface GW2Map {
   type: string;
   floors: number[];
   region_id: number;
-  region_name: string;
+  region_name?: string;
   continent_id: number;
   continent_name: string;
   map_rect: [[number, number], [number, number]];
@@ -18,11 +18,11 @@ export interface GW2Map {
 
 export interface PointOfInterest {
   id: number;
-  name: string;
+  name?: string;
   type: string;
   coord: [number, number];
   floor: number;
-  chat_link?: string;
+  chat_link: string;
   icon?: string;
 }
 
@@ -31,8 +31,8 @@ export interface Task {
   objective: string;
   level: number;
   coord: [number, number];
-  bounds?: [number, number][];
-  chat_link?: string;
+  bounds: [number, number][];
+  chat_link: string;
 }
 
 export interface Sector {
@@ -40,8 +40,8 @@ export interface Sector {
   name: string;
   level: number;
   coord: [number, number];
-  bounds?: [number, number][];
-  chat_link?: string;
+  bounds: [number, number][];
+  chat_link: string;
 }
 
 export interface SkillChallenge {
@@ -69,6 +69,7 @@ export interface ContinentMapData {
   max_level: number;
   default_floor: number;
   type?: string; // Map type: "Public", "Instance", "Activity", etc.
+  label_coord?: [number, number];
   masteryRegion?: MasteryRegion;
   map_rect: [[number, number], [number, number]];
   continent_rect: [[number, number], [number, number]];
@@ -89,6 +90,7 @@ export interface ContinentRegion {
 }
 
 export interface ContinentFloor {
+  id?: number;
   texture_dims: [number, number];
   clamped_view?: [[number, number], [number, number]];
   regions: Record<number, ContinentRegion>;

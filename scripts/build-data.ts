@@ -21,8 +21,10 @@ import {
 import { buildContinentDatabase } from '../src/database/buildContinentDatabase';
 import { buildItemNameDatabase } from '../src/database/buildItemNameDatabase';
 import { buildMapAchievements } from '../src/database/buildMapAchievements';
+import { buildNoveltyDatabase } from '../src/database/buildNoveltyDatabase';
 import type { AchievementDatabase } from '../src/types/achievement';
 import type { ContinentDatabase } from '../src/types/map';
+import type { NoveltyDatabase } from '../src/types/novelty';
 
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'data');
 const LANG = 'en';
@@ -92,6 +94,7 @@ async function main(): Promise<void> {
   const oldAchievementDb = loadExisting<AchievementDatabase>('achievementDb.json');
   const oldContinentDb = loadExisting<ContinentDatabase>('continentDb.json');
   const oldMapAchievements = loadExisting<Record<string, number[]>>('mapAchievements.json');
+  const oldNoveltyDb = loadExisting<NoveltyDatabase>('noveltyDb.json');
 
   // 1. Continent database (independent of achievements).
   console.log('Fetching continent data…');
@@ -117,11 +120,17 @@ async function main(): Promise<void> {
   // 5. Map → achievement matches.
   const mapAchievements = buildMapAchievements(continentDb, rawAchievements);
 
+  // 6. Novelty database (cross-references unlock items with achievement rewards).
+  console.log('Fetching novelties…');
+  const noveltyDb = await buildNoveltyDatabase(rawAchievements, LANG);
+  console.log(`  ${noveltyDb.novelties.length} novelties, ${noveltyDb.novelties.filter((n) => n.achievementIds.length > 0).length} with linked achievements`);
+
   // ---- Write outputs (minified; timestamp preserved on no-op) ----
   const changes = {
     'continentDb.json': writeData('continentDb.json', continentDb, oldContinentDb?.timestamp),
     'achievementDb.json': writeData('achievementDb.json', achievementDb, oldAchievementDb?.timestamp),
     'mapAchievements.json': writeData('mapAchievements.json', mapAchievements),
+    'noveltyDb.json': writeData('noveltyDb.json', noveltyDb, oldNoveltyDb?.timestamp),
   };
 
   // ---- Report ----

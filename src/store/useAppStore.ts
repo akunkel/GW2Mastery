@@ -1,12 +1,18 @@
 import { create } from 'zustand';
-import { buildAchievementDatabase } from '../database/buildAchievementDatabase';
+import {
+  fetchAchievementData,
+  toAchievementDatabase,
+} from '../database/buildAchievementDatabase';
 import { buildContinentDatabase } from '../database/buildContinentDatabase';
+import { buildItemNameDatabase } from '../database/buildItemNameDatabase';
+import { buildNoveltyDatabase } from '../database/buildNoveltyDatabase';
 import { getContinentData } from '../database/getContinentData';
 import { getDatabaseStatus } from '../database/getDatabaseStatus';
 import { getDatabaseAchievements } from '../database/getDatabaseAchievements';
 import { queryAccountAchievements } from '../services/accountAchievementsApi';
 import { queryAchievementCategories } from '../services/achievementsApi';
 import { queryAccountMountTypes } from '../services/mountsApi';
+import { queryAccountNovelties } from '../services/noveltiesApi';
 import type {
   AccountAchievement,
   Achievement,
@@ -26,6 +32,7 @@ import {
   saveAchievementDatabase,
   saveApiKey,
   saveContinentDatabase,
+  saveNoveltyDatabase,
   saveDatabaseLanguage,
   saveFilterSettings,
   saveHiddenAchievements,
@@ -48,6 +55,9 @@ interface AppState {
 
   // Mount Data
   unlockedMountTypes: string[];
+
+  // Novelty Data
+  unlockedNoveltyIds: Set<number>;
 
   // Map Completion Data
   continentData: ContinentDatabase | null;
@@ -110,6 +120,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   accountProgress: new Map(),
   groups: [],
   unlockedMountTypes: [],
+  unlockedNoveltyIds: new Set(),
   continentData: null,
   mapLoading: false,
   mapBuildProgress: null,
@@ -289,6 +300,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       apiKey: null,
       accountProgress: new Map(),
       unlockedMountTypes: [],
+      unlockedNoveltyIds: new Set(),
       error: null,
     });
   },
@@ -310,11 +322,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ buildingDatabase: true, loadingProgress: null, databaseError: null });
 
     try {
-      // Build achievement database
       const { databaseLanguage } = get();
-      const db = await buildAchievementDatabase((current, total) => {
-        set({ loadingProgress: { current, total } });
-      }, databaseLanguage);
+
+      // Fetch raw achievements (needed for both achievement DB and novelty cross-ref)
+      const { rawAchievements, categories } = await fetchAchievementData(
+        databaseLanguage,
+        (current, total) => set({ loadingProgress: { current, total } }),
+      );
+      const { names: itemNames } = await buildItemNameDatabase(rawAchievements);
+      const db = toAchievementDatabase(rawAchievements, categories, itemNames);
+
       await saveAchievementDatabase(db);
       const { accountProgress } = get();
 
@@ -341,6 +358,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         databaseTimestamp: db.timestamp,
       });
 
+      // Build novelty database (uses raw achievements for reward cross-referencing)
+      const noveltyDb = await buildNoveltyDatabase(rawAchievements, databaseLanguage);
+      await saveNoveltyDatabase(noveltyDb);
+
       // Also build continent/map database
       const continentDb = await buildContinentDatabase({ lang: databaseLanguage });
       await saveContinentDatabase(continentDb);
@@ -364,9 +385,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const [accountData, mountTypes] = await Promise.all([
+      const [accountData, mountTypes, noveltyIds] = await Promise.all([
         queryAccountAchievements(apiKey),
         (queryAccountMountTypes({ access_token: apiKey }) as Promise<string[]>).catch(() => [] as string[]),
+        queryAccountNovelties(apiKey).catch(() => [] as number[]),
       ]);
 
       // Create a map of account progress for quick lookup
@@ -388,6 +410,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({
         accountProgress: progressMap,
         unlockedMountTypes: mountTypes,
+        unlockedNoveltyIds: new Set(noveltyIds),
         enrichedGroups: eGroups,
         enrichedGroupMap: eGroupMap,
         enrichedCategoryMap: eCategoryMap,

@@ -10,6 +10,7 @@ the live GW2 API; the rest are **hand-maintained**.
 | `achievementDb.json` | Processed achievements + categories (the main database). |
 | `continentDb.json` | Public maps/regions with mastery regions, for the world map. |
 | `mapAchievements.json` | Zone name → achievement IDs (heuristic text match). |
+| `noveltyDb.json` | All novelties with cross-referenced achievement links, for the Toys page. |
 
 ### Refreshing them after a game update
 
