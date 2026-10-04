@@ -58,6 +58,13 @@ export default function AboutModal() {
                             </li>
                         </ul>
                     </div>
+
+                    <p className="border-t border-slate-700/50 pt-4 text-xs text-slate-400">
+                        Your API key is stored only in your browser and is sent only to the official
+                        Guild Wars 2 API. This is a fan-made tool and is not affiliated with or
+                        endorsed by ArenaNet or NCSOFT. Guild Wars 2 and all associated artwork are
+                        the property of ArenaNet, LLC.
+                    </p>
                 </div>
             </DialogContent>
         </Dialog>

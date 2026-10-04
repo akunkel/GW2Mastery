@@ -10,15 +10,15 @@ export async function getContinentData(): Promise<ContinentDatabase | null> {
     // Try to get from IndexedDB first
     const cachedDb = await getContinentDatabase();
     if (cachedDb) {
-      console.log('Using cached continent data from IndexedDB');
+      if (import.meta.env?.DEV) console.log('Using cached continent data from IndexedDB');
       return cachedDb;
     }
 
-    // Try to import bundled data (we'll create this later)
+    // Fall back to the snapshot bundled in src/data
     try {
       const bundledDb = await import('../data/continentDb.json');
       if (bundledDb && bundledDb.default) {
-        console.log('Using bundled continent data');
+        if (import.meta.env?.DEV) console.log('Using bundled continent data');
         return bundledDb.default as unknown as ContinentDatabase;
       }
     } catch {

@@ -258,10 +258,12 @@ export async function buildContinentDatabase({
 
     if (onProgress) onProgress('Complete!');
 
-    console.log('=== Continent Database Build Complete ===');
-    console.log(`Continent ID: ${continentId}, Floors: ${floorIds.join(', ')}`);
-    console.log(`Dimensions: ${continentDims[0]} x ${continentDims[1]}`);
-    console.log(`Public maps: ${totalMaps}`);
+    if (import.meta.env?.DEV) {
+      console.log('=== Continent Database Build Complete ===');
+      console.log(`Continent ID: ${continentId}, Floors: ${floorIds.join(', ')}`);
+      console.log(`Dimensions: ${continentDims[0]} x ${continentDims[1]}`);
+      console.log(`Public maps: ${totalMaps}`);
+    }
 
     return db;
   } catch (error) {

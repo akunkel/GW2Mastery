@@ -103,7 +103,7 @@ export const REGION_ZONES: Record<MasteryRegion, string[]> = {
     // Visions of Eternity
     "Starlit Weald",
     "Shipwreck Strand",
-    "Comosus Isle",
     "Eternity's Garden",
+    "Leyspring Hollows",
   ]
 };

@@ -36,7 +36,7 @@ export default function DatabaseSection({
                     )}
                     {!error && !databaseTimestamp && (
                         <p className="text-sm text-amber-400 font-medium mb-1">
-                            ⚠️ Database not built, click "Build Database" to start.
+                            ⚠️ Database not built, click "Rebuild Database" to start.
                         </p>
                     )}
                     {buildingDatabase && (

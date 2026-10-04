@@ -5,11 +5,9 @@ the live GW2 API; the rest are **hand-maintained**.
 
 ## Generated (do not edit by hand)
 
-| File | Contents |
-| --- | --- |
-| `achievementDb.json` | Processed achievements + categories (the main database). |
-| `continentDb.json` | Public maps/regions with mastery regions, for the world map. |
-| `mapAchievements.json` | Zone name → achievement IDs (heuristic text match). |
+- **`achievementDb.json`** — Processed achievements + categories (the main database).
+- **`continentDb.json`** — Public maps/regions with mastery regions, for the world map.
+- **`mapAchievements.json`** — Zone name → achievement IDs (heuristic text match).
 
 ### Refreshing them after a game update
 
@@ -39,4 +37,4 @@ Review the diff, sanity-check the warnings, then commit.
 ## Hand-maintained
 
 `historicalCategories.json` (category IDs to exclude), `achievementMetadata.ts`,
-`recommendedMasteryAchievements.ts`, `mountDefinitions.tsx`, `guidesData.tsx`.
+`recommendedMasteryAchievements.ts`, `mountDefinitions.tsx`.

@@ -6,4 +6,4 @@
  * production, where that variable is left unset.
  */
 export const SHOW_DEBUG: boolean =
-  import.meta.env.DEV || import.meta.env.VITE_SHOW_DEBUG === 'true';
+  import.meta.env?.DEV || import.meta.env?.VITE_SHOW_DEBUG === 'true';

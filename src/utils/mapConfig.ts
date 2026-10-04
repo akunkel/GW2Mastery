@@ -136,6 +136,8 @@ export const zoneConfigs: Record<string, ZoneConfig> = {
   'Bava Nisos': { explorerAchievementId: 8704, insightAchievementIds: [8734, 8722, 8737, 8754, 8738, 8779] },
   'Shipwreck Strand': { explorerAchievementId: 8885, insightAchievementIds: [9066, 8960, 8899, 8912, 9050, 8972, 8962, 8984, 8997, 8943, 9006, 8975] },
   'Starlit Weald': { explorerAchievementId: 8889, insightAchievementIds: [9012, 8927, 9073, 8993, 8956, 8901, 8913, 9015] },
+  "Eternity's Garden": { explorerAchievementId: 8864, insightAchievementIds: [9335, 9282, 9279, 9333, 9286, 9293, 9260] },
+  'Leyspring Hollows': { explorerAchievementId: 9002, insightAchievementIds: [9376, 9406, 9436, 9391, 9359, 9381, 9364] },
 };
 
 /**

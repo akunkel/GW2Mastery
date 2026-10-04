@@ -14,6 +14,8 @@ export async function queryAccountAchievements(apiKey: string): Promise<AccountA
   if (data.length === 0) {
     throw new Error('Achievements API returned no achievement data. Try using a different API key.');
   }
-  console.log(`Loaded data for ${data.length} achievements, ${data.filter((a) => a.done).length} completed.`);
+  if (import.meta.env?.DEV) {
+    console.log(`Loaded data for ${data.length} achievements, ${data.filter((a) => a.done).length} completed.`);
+  }
   return data;
 }

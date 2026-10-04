@@ -17,17 +17,25 @@ dangling import or unused symbol fails the build.
 
 ## Folder structure (`src/`)
 
-| Folder            | Role |
-| ----------------- | ---- |
-| `pages/`          | Route-level screens, one subfolder per feature (`map/`, `mastery/`, `mounts/`, `guides/`, `debug/`). A feature folder may also hold its own feature-local sub-components co-located with the page. |
-| `components/`      | Shared components. `components/ui/` = generic primitives (shadcn-style: Button, Card, Dialog, Tooltip). `components/common/` = shared GW2-domain components (AchievementCard, MountCard, Header, …). Top-level files = app-shell pieces (Layout, modals). |
-| `services/`        | Low-level GW2 API wrappers (`*Api.ts`) plus small shared service data (`apiConfig.ts`, `languages.ts`). |
-| `database/`        | Higher-level data assembly/retrieval built on `services/` — `build*Database.ts` fetch & transform from the API; `get*` load from localStorage or the bundled JSON. |
-| `data/`            | Bundled/static data: hand-authored config (`*.ts`/`*.tsx`) and generated JSON snapshots (`*.json`, refreshed via the Setup → Build Database flow; see `src/data/README.md`). |
-| `store/`           | Zustand store (`useAppStore.ts`) — app state + orchestration. |
-| `hooks/`           | Reusable React hooks (`use*`). |
-| `utils/`           | Pure, framework-agnostic helpers. |
-| `types/`           | Shared TypeScript types/interfaces. |
+- **`pages/`** — Route-level screens, one subfolder per feature (`map/`, `mastery/`,
+  `mounts/`, `debug/`). A feature folder may also hold its own feature-local sub-components
+  co-located with the page.
+- **`components/`** — Shared components. `components/ui/` = generic primitives
+  (shadcn-style: Button, Card, Dialog, Tooltip). `components/common/` = shared GW2-domain
+  components (AchievementCard, MountCard, Header, …). Top-level files = app-shell pieces
+  (Layout, modals).
+- **`services/`** — Low-level GW2 API wrappers (`*Api.ts`) plus small shared service data
+  (`apiConfig.ts`, `languages.ts`).
+- **`database/`** — Higher-level data assembly/retrieval built on `services/` —
+  `build*Database.ts` fetch & transform from the API; `get*` load from localStorage or the
+  bundled JSON.
+- **`data/`** — Bundled/static data: hand-authored config (`*.ts`/`*.tsx`) and generated
+  JSON snapshots (`*.json`, refreshed via `npm run build:data` or the Setup → Build Database
+  flow; see `src/data/README.md`).
+- **`store/`** — Zustand store (`useAppStore.ts`) — app state + orchestration.
+- **`hooks/`** — Reusable React hooks (`use*`).
+- **`utils/`** — Pure, framework-agnostic helpers.
+- **`types/`** — Shared TypeScript types/interfaces.
 
 ## Naming conventions
 

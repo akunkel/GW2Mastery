@@ -95,7 +95,7 @@ export const REQUIRED_MASTERY_POINTS: Record<MasteryRegion, number> = {
   Jade: 89,
   Sky: 88,
   Wild: 90,
-  Magic: 38,
+  Magic: 67,
 };
 
 /**
